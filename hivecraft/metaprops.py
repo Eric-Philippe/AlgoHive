@@ -3,22 +3,22 @@ import getpass
 import datetime
 
 """
-core.xml is a file that contains the properties of the core of the Alghive file
+meta.xml is a file that contains the properties of the metadata of the Alghive file
 <Properties xmlns="http://www.w3.org/2001/WMLSchema">
     <author>Éric</author>
     <created>2025-03-06T22:00:00Z</created>
     <modified>2025-03-06T22:00:00Z</modified>
-    <title>Core</title>
+    <title>Meta</title>
 </Properties>
 """
-class CoreProps:
+class MetaProps:
     def __init__(self, folder_name: str):
         self.folder_name = folder_name
-        self.file_name = folder_name + "/props/core.xml"
+        self.file_name = folder_name + "/props/meta.xml"
         self.author = getpass.getuser()
         self.created = datetime.datetime.now() 
         self.modified = datetime.datetime.now()
-        self.title = "Core"
+        self.title = "Meta"
         
     def check_file_integrity(self):
         # If the file already exists

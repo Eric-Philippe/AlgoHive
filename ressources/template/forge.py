@@ -15,11 +15,13 @@ class Forge:
         return lines
     
     def generate_line(self, index: int) -> str:
+        # TODO: TO BE IMPLEMENTED
         pass
 
 if __name__ == '__main__':
-    unique_id = sys.argv[1]
-    forge = Forge(unique_id)
+    lines_count = int(sys.argv[1])
+    unique_id = sys.argv[2]
+    forge = Forge(lines_count, unique_id)
     lines = forge.run()
     with open('input.txt', 'w') as f:
         f.write('\n'.join(lines))

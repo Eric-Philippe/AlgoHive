@@ -26,6 +26,8 @@ def reload():
     tags:
       - Themes
     responses:
+      429:
+        description: Cooldown period in effect
       200:
         description: The puzzles have been reloaded
     """

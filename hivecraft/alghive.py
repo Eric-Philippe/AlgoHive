@@ -5,14 +5,15 @@ import zipfile
 import importlib.util
 import sys
 
-from coreprops import CoreProps
+from metaprops import MetaProps
+from descprops import DescProps
 
 class Alghive:
     EXTENSION = '.alghive'
     EXECUTABLES_REQUIRED = ["forge.py", "decrypt.py", "unveil.py"]
     PROMPTS_REQUIRED = ["cipher.html", "obscure.html"]
     PROPS_FOLDER = "props"
-    AUTHORIZED_ELEMENTS = ["__pycache__", "core.xml"]
+    AUTHORIZED_ELEMENTS = ["__pycache__", "meta.xml"]
     
     def __init__(self, folder_name):
         if not os.path.isdir(folder_name):
@@ -41,7 +42,7 @@ class Alghive:
         try:
             self.generate_props()
         except ValueError as e:
-            raise ValueError(f"Folder '{self.folder_name}' does not respect the core constraints: {e}")
+            raise ValueError(f"Folder '{self.folder_name}' does not respect the props constraints: {e}")
         
         
     def check_files(self):        
@@ -176,9 +177,12 @@ class Alghive:
         if not os.path.isdir(f"{self.folder_name}/{self.PROPS_FOLDER}"):
             os.mkdir(f"{self.folder_name}/{self.PROPS_FOLDER}")
         
-        core_props = CoreProps(self.folder_name)
-        core_props.check_file_integrity()
+        meta_props = MetaProps(self.folder_name)
+        meta_props.check_file_integrity()
         
+        desc_props = DescProps(self.folder_name)
+        desc_props.check_file_integrity()
+                
     def run_tests(self, count):
         print(f"Running {count} tests...")
         

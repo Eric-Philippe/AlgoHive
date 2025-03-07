@@ -79,11 +79,12 @@ class PuzzlesLoader:
         if unveil_class is None:
             raise ImportError(f"Le fichier unveil.py de l'énigme {puzzle} ne contient pas de classe 'Unveil'.")
         
-        xmlProps = self._read_file(os.path.join(self.PUZZLES_DIR, theme, puzzle, 'props/core.xml'))
+        xmlMetaProps = self._read_file(os.path.join(self.PUZZLES_DIR, theme, puzzle, 'props/meta.xml'))
+        xmlDescProps = self._read_file(os.path.join(self.PUZZLES_DIR, theme, puzzle, 'props/desc.xml'))
         cipher = self._read_file(os.path.join(self.PUZZLES_DIR, theme, puzzle, 'cipher.html'))
         obscure = self._read_file(os.path.join(self.PUZZLES_DIR, theme, puzzle, 'obscure.html'))
         
-        return Puzzle(os.path.join(self.PUZZLES_DIR, theme, puzzle), cipher, obscure, forge_class, decrypt_class, unveil_class, xmlProps)
+        return Puzzle(os.path.join(self.PUZZLES_DIR, theme, puzzle), cipher, obscure, forge_class, decrypt_class, unveil_class, xmlMetaProps, xmlDescProps)
 
     def _read_file(self, file_path):
         with open(file_path, 'r') as file:

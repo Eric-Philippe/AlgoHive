@@ -88,5 +88,6 @@ def get_description():
         if t.name == theme:
             for p in t.puzzles:
                 if p.get_name() == puzzle:
-                    return jsonify({'cipher': p.cipher, 'obscure': p.obscure})
+                  puzzle_desc = p.get_puzzle_desc()
+                  return jsonify({'cipher': p.cipher, 'obscure': p.obscure, 'difficulty': puzzle_desc.difficulty, 'language': puzzle_desc.language})
     return jsonify({'message': 'Theme or puzzle not found'})
