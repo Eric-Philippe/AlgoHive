@@ -7,3 +7,6 @@ class Puzzle:
         self.Decrypt = Decrypt
         self.Unveil = Unveil
         self.xmlProps = xmlProps
+        
+    def get_name(self):
+        return self.path.split('/')[-1]

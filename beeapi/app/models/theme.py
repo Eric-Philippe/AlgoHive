@@ -1,4 +1,4 @@
-from puzzle import Puzzle
+from app.models.puzzle import Puzzle
 from typing import List
 
 class Theme:

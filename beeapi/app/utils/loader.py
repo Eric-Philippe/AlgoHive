@@ -4,8 +4,8 @@ import zipfile
 import importlib.util
 import sys
 from typing import List
-from theme import Theme
-from puzzle import Puzzle
+from app.models.theme import Theme
+from app.models.puzzle import Puzzle
 
 class PuzzlesLoader:
     PUZZLES_DIR = 'puzzles'
