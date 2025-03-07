@@ -15,7 +15,7 @@ class Forge:
         return lines
     
     def generate_line(self, index: int) -> str:
-        pass
+        return str(random.randint(0, 100))
 
 if __name__ == '__main__':
     lines_count = int(sys.argv[1])
