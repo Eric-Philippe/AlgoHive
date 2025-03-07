@@ -40,6 +40,11 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
