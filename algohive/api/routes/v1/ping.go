@@ -5,7 +5,7 @@ import (
 )
 
 // @Summary Répond avec "pong"
-// @Description Route de test
+// @Description Répond avec "pong"
 // @Tags App
 // @Produce json
 // @Success 200 {object} map[string]string
