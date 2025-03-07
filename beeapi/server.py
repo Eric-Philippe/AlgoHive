@@ -1,7 +1,11 @@
 from flask import Flask, jsonify, request
 from flasgger import Swagger
+import atexit
+
+from loader import PuzzlesLoader
 
 app = Flask(__name__)
+loader = PuzzlesLoader()
 
 swagger_config = {
     "swagger": "2.0",
@@ -49,6 +53,18 @@ def add():
     num1 = float(request.form.get('num1'))
     num2 = float(request.form.get('num2'))
     return jsonify({'sum': num1 + num2})
+  
+def on_exit():
+    loader.unload()
 
 if __name__ == '__main__':
+    loader.extract()
+    loader.load()
+    
+    atexit.register(on_exit)
+    
+    # forge_instance = loader.themes[0].puzzles[1].Forge(lines_count=10, unique_id="test123")
+    # print(forge_instance.run())
+    
     app.run(debug=True)
+    
