@@ -8,7 +8,7 @@ AlgoHive CLI is a command line interface for AlgoHive. It is a tool that allows 
 
 ## Self-Hostable API - BeeAPI
 
-API will be able to load puzzles from .alghive files, verify them using the same algorithm as the CLI.
+API will be able to load puzzles from .alghive files, verify them using the same algorithm as the CLI. (Generate an API-KEY)
 
 ## Self-Hostable Web Platform - AlgoHive
 
