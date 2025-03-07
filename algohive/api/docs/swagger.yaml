@@ -1,0 +1,30 @@
+basePath: /api/v1
+host: localhost:8080
+info:
+  contact:
+    email: ericphlpp@proton.me
+    name: Éric PHILIPPE
+  description: This is the web API for the AlgoHive Web App.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: AlgoHive API
+  version: "1.0"
+paths:
+  /ping:
+    get:
+      description: Route de test
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Répond avec "pong"
+      tags:
+      - App
+swagger: "2.0"
