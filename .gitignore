@@ -1,1 +1,5 @@
 __pycache__/
+
+# Ignore the content of the folder beeapi/puzzles
+B1/
+B2/
