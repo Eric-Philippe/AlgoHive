@@ -10,7 +10,7 @@ import (
 )
 
 // @title AlgoHive API
-// @version 1.0
+// @version 1.0.0
 // @description This is the web API for the AlgoHive Web App.
 //	@termsOfService	http://swagger.io/terms/
 
@@ -23,6 +23,7 @@ import (
 //	@host		localhost:8080
 //	@BasePath	/api/v1
 func main() {
+    gin.SetMode(gin.ReleaseMode)
     r := gin.Default()
     docs.SwaggerInfo.BasePath = "/api/v1"
 

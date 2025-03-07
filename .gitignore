@@ -1,4 +1,5 @@
 __pycache__/
+tmp/
 
 beeapi/puzzles/*
 !beeapi/puzzles/sample
