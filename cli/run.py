@@ -1,6 +1,8 @@
 import argparse
-
+import sys
 from alghive import Alghive
+
+sys.dont_write_bytecode = True
 
 def main():
     parser = argparse.ArgumentParser(description="Zip a folder with .alghive extension.")

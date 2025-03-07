@@ -10,6 +10,7 @@ class Alghive:
     EXECUTABLES_REQUIRED = ["forge.py", "decrypt.py", "unveil.py"]
     PROMPTS_REQUIRED = ["cipher.html", "obscure.html"]
     PROPS_FOLDER = "props"
+    AUTHORIZED_ELEMENTS = ["__pycache__", "core.xml"]
     
     def __init__(self, folder_name):
         if not os.path.isdir(folder_name):
@@ -158,7 +159,8 @@ class Alghive:
         
     def zip_folder(self):
         # Create the zip file name with .alghive extension
-        zip_file_name = f"{self.folder_name}{self.EXTENSION}"
+        file_name = self.folder_name.split("/")[-1]
+        zip_file_name = f"{file_name}{self.EXTENSION}"
 
         # Create a zip file with .alghive extension
         with zipfile.ZipFile(zip_file_name, 'w', zipfile.ZIP_DEFLATED) as zipf:
