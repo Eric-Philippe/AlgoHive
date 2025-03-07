@@ -1,11 +1,11 @@
-name: Build and Deploy BeeAPI Container
+name: Build and Deploy BeeAlgoHive API Container
 
 on:
   push:
     branches:
       - main
     paths:
-      - "beeapi/**"
+      - "algohive/api/**"
 
 jobs:
   build-and-deploy:
@@ -33,4 +33,4 @@ jobs:
         run: |
           cd beeapi
           docker buildx build --push \
-            --tag ghcr.io/eric-philippe/algohive/beeapi:latest .
+            --tag ghcr.io/eric-philippe/algohive/algohive/api:latest .
