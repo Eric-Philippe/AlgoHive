@@ -6,6 +6,8 @@ def puzzles():
     """
     Get the list of puzzles for a theme
     ---
+    tags:
+      - Puzzles
     parameters:
       - name: theme
         in: query
@@ -26,6 +28,8 @@ def run():
     """
     Run a puzzle
     ---
+    tags:
+      - Puzzles
     parameters:
       - name: theme
         in: query
@@ -62,6 +66,8 @@ def get_description():
     """
     Get the description of a puzzle
     ---
+    tags:
+      - Puzzles
     parameters:
       - name: theme
         in: query

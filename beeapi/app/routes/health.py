@@ -6,6 +6,8 @@ def ping():
     """
     Health check endpoint
     ---
+    tags:
+      - App
     responses:
       200:
         description: Pong response
