@@ -10,6 +10,8 @@ AlgoHive is a web, self-hostable plateform that allows developers to create puzz
 
 ## Installation
 
+### Local
+
 To use BeeAPI, you need to have Python 3.6 or higher installed on your system.
 
 Then, you can install the dependencies using the following command:
@@ -35,6 +37,20 @@ Run the API using the following command:
 
 ```bash
 python3 server.py
+```
+
+### Docker
+
+You can also run the API using Docker. To do so, you need to build the Docker image using the following command:
+
+```bash
+docker build -t beeapi .
+```
+
+Then, you can run the Docker container using the following command:
+
+```bash
+docker run -d -p 5000:5000 --name beeapi -v $(pwd)/puzzles:/app/puzzles beeapi
 ```
 
 ## Routes
