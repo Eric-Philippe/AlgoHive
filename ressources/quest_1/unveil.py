@@ -3,7 +3,7 @@ class Unveil:
         self.lines = lines
         
     def run(self):
-        return sum(map(int, self.lines))
+        return sum(map(lambda x: int(x) * 2, self.lines))    
     
 if __name__ == '__main__':
     with open('input.txt') as f:

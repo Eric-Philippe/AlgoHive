@@ -8,7 +8,7 @@ class Forge:
         self.unique_id = unique_id
     
     def run(self) -> list:
-        random.seed(self.unique_key)
+        random.seed(self.unique_id)
         lines = []
         for _ in range(self.lines_count):
             lines.append(self.generate_line(_))

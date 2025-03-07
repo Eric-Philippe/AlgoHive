@@ -1,4 +1,6 @@
 import os
+import random
+import string
 import zipfile
 import importlib.util
 import sys
@@ -18,10 +20,6 @@ class Alghive:
         
         self.folder_name = folder_name.rstrip("/")
         self.zip_file_name = f"{folder_name}{self.EXTENSION}"
-        
-    def run(self):
-        self.check_integrity()
-        self.zip_folder()
         
     def check_integrity(self):
         # If one of the checks fails, raise an exception
@@ -180,6 +178,23 @@ class Alghive:
         
         core_props = CoreProps(self.folder_name)
         core_props.check_file_integrity()
+        
+    def run_tests(self, count):
+        print(f"Running {count} tests...")
+        
+        forge = self.load_module("forge")
+        decrypt = self.load_module("decrypt")
+        unveil = self.load_module("unveil")
+        
+        for _ in range(count):
+            lines = forge.Forge(100, self.generate_random_key()).run()
+            decrypt.Decrypt(lines).run()
+            unveil.Unveil(lines).run()
+            
+        print(f"Tests passed successfully.")
+        
+    def generate_random_key(self):
+        return ''.join(random.choices(string.ascii_lowercase + string.digits, k=16))
 
 
             
