@@ -41,6 +41,7 @@ services:
       - "5001:5000"
     networks:
       - algohive-network
+    user: "${UID}:${GID}"
 
   db:
     container_name: algohive-db

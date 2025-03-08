@@ -6,9 +6,7 @@ COPY . /app
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-RUN mkdir -p /app/puzzles && chown -R 1000:1000 /app/puzzles
-
-USER 1000:1000
+RUN mkdir -p /app/puzzles && chown -R 777 /app/puzzles
 
 EXPOSE 5000
 
