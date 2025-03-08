@@ -1,0 +1,61 @@
+name: algohive
+services:
+  server:
+    image: ghcr.io/eric-philippe/algohive/algohive/api:latest
+    env_file: server.env
+    depends_on:
+      - db
+      - cache
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    networks:
+      - algohive-network
+
+  client:
+    image: ghcr.io/eric-philippe/algohive/algohive/client:latest
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    networks:
+      - algohive-network
+
+  beeapi-server1:
+    image: ghcr.io/eric-philippe/algohive/beeapi:latest
+    restart: unless-stopped
+    volumes:
+      - ./data/beeapi-server1/puzzles:/app/puzzles
+    ports:
+      - "5000:5000"
+    networks:
+      - algohive-network
+
+  beeapi-server2:
+    image: ghcr.io/eric-philippe/algohive/beeapi:latest
+    restart: unless-stopped
+    volumes:
+      - ./data/beeapi-server2/puzzles:/app/puzzles
+    ports:
+      - "5001:5000"
+    networks:
+      - algohive-network
+
+  db:
+    image: postgres:17-alpine
+    env_file: server.env
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    networks:
+      - algohive-network
+
+  cache:
+    image: redis:alpine
+    restart: always
+    networks:
+      - algohive-network
+
+volumes:
+  db-data:
+
+networks:
+  algohive-network:

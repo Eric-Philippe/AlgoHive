@@ -1,40 +1,119 @@
-# AlgoHive
+<p align="center">
+  <img width="150px" src="images/algohive-logo.png" title="Algohive">
+</p>
+
+<h1 align="center">AlgoHive</h1>
+
+<p align="center"><i><b>[Project under "active" development, some features may be unstable or change in the future. A first release version is planned to be packed soon].</b></i></p>
+
+<p align="center">Algohive is a <b>self-hosted coding game platform.</b><br>that allows developers to create puzzles for developers to solve.</p>
 
 > Sweeten your skills, but the competition stings
 
-AlgoHive is a web, self-hostable plateform that allows developers to create puzzles for developers to solve. Each puzzle contains two parts to solve, allowing developers to test their skills in a variety of ways. The puzzles are created using a proprietary file format that is compiled into a single file for distribution.
+Each puzzle contains two parts to solve, allowing developers to test their skills in a variety of ways. The puzzles are created using a proprietary file format that is compiled into a single file for distribution.
 
-## CLI - HiveCraft
+## Why
+
+Algohive is a coding game plateform for developers by developers. It is a self-hosted solution that allows developers, schools to create puzzles for other developers to solve. The platform is designed to be lightweight and easy to use, with a focus on creating and solving puzzles.
+
+## Features Highlights
+
+- A file format created for defining puzzles
+- A command line interface forge for creating, testing, and managing puzzles
+- A self-hostable API for loading and serving puzzles
+- A self-hostable web platform for managing users, competitions, and puzzles
+- [LATER] A web platform for users to interact with the puzzles
+
+## Quick Start
+
+Installing Alghive is pretty straight forward, in order to do so follow these steps:
+
+- Create a folder where you want to place all the Algohive related files.
+- Inside that folder, create a file named docker-compose.yml with this content:
+
+```yaml
+name: algohive
+services:
+  server:
+    image: ghcr.io/eric-philippe/algohive/algohive/api:latest
+    env_file: server.env
+    depends_on:
+      - db
+      - cache
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    networks:
+      - algohive-network
+
+  client:
+    image: ghcr.io/eric-philippe/algohive/algohive/client:latest
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    networks:
+      - algohive-network
+
+  beeapi-server1:
+    image: ghcr.io/eric-philippe/algohive/beeapi:latest
+    restart: unless-stopped
+    volumes:
+      - ./data/beeapi-server1/puzzles:/app/puzzles
+    ports:
+      - "5000:5000"
+    networks:
+      - algohive-network
+
+  beeapi-server2:
+    image: ghcr.io/eric-philippe/algohive/beeapi:latest
+    restart: unless-stopped
+    volumes:
+      - ./data/beeapi-server2/puzzles:/app/puzzles
+    ports:
+      - "5001:5000"
+    networks:
+      - algohive-network
+
+  db:
+    image: postgres:17-alpine
+    env_file: server.env
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    networks:
+      - algohive-network
+
+  cache:
+    image: redis:alpine
+    restart: always
+    networks:
+      - algohive-network
+
+volumes:
+  db-data:
+
+networks:
+  algohive-network:
+```
+
+## Quick Overview
+
+### CLI - HiveCraft
 
 Hivecraft is a command line interface for creating and managing AlgoHive puzzles. It is a tool for developers to create, test, manage and compile puzzles for the AlgoHive platform. AlgoHive works by using a proprietary file format to define puzzles, and Hivecraft is a tool to help developers create these files.
 
-## Self-Hostable API - BeeAPI
+### Self-Hostable API - BeeAPI
 
 API will be able to load puzzles from .alghive files, verify them using the same algorithm as the CLI. (Generate an API-KEY)
 
-## Self-Hostable Web Platform - AlgoHive
+### Self-Hostable Web Platform - AlgoHive
 
 The self-hostable web platform will contains an API for the User and Competition management, and a front-end for the users to interact with the platform. The Web Plateform will be completely usable with the Puzzle API.
 
-### Account types
-
-> Each users under Admin will be linked to an environment. For example, a self-hosted solutions wil have two BeeAPI and one AlgoHive environment. The Algohive web instance will allow for a lightweigth management. And by this plateform the super admin will be able to associate the users with the right API.
-
-| Account Type | Description                                                            | Features                                       |
-| ------------ | ---------------------------------------------------------------------- | ---------------------------------------------- |
-| Admin        | Admins have access to all the environments                             |
-| Queen        | Admins have access to all features of the platform                     | CRUD operations on all resources               |
-| Architect    | Architects can manage puzzles, and reload API puzzles                  | CRUD operations on puzzles                     |
-| Host         | Hosts can manage competitions, select puzzles, and manage participants | CRUD operations on competitions                |
-| Worker       | Workers can solve puzzles, and participate in competitions             | Solve puzzles, and participate in competitions |
-
-## Website
-
-## AlgoHive file format
+### AlgoHive file format
 
 The AlgoHive file format is a concealing ZIP file that contains multiple files and directories to define a puzzle. The extension of the file is `.alghive`.
 
-### Contents of the file
+#### Contents of the file
 
 The file contains the following directories and files:
 
@@ -49,7 +128,7 @@ The file contains the following directories and files:
 | `props/meta.xml` | This XML file contains the meta properties of the file                                                       |
 | `props/desc.xml` | This markdown file contains the description of the puzzle.                                                   |
 
-#### `forge.py`
+##### `forge.py`
 
 This file is an executable python file that will generate a unique input for a given seed for the puzzle. The file should contain a class called `Forge` that has a method constructor `__init__` that takes a lines_count and a seed as arguments. The class should have a method called `run` that returns a list of strings that will be the input for the puzzle. The implementation should be inside the `generate_line` method that contains an index as an argument and returns a string. The python file should be executable and should generate the input file `input.txt` for debugging purposes.
 
@@ -85,7 +164,7 @@ if __name__ == '__main__':
 
 > Using this template will allow to just focus on the `generate_line` method to generate the input for the puzzle.
 
-#### `decrypt.py`
+##### `decrypt.py`
 
 This file is an executable python file that will decrypt the input and output the solution for the first part of the puzzle. The file should contain a class called `Decrypt` that has a method constructor `__init__` that takes a list of lines as arguments. The class should have a method called `run` that, given the previously setup lines, return a string or a number that is the solution for the first part of the puzzle. The python file should be executable.
 
@@ -106,7 +185,7 @@ if __name__ == '__main__':
     print(solution)
 ```
 
-#### `unveil.py`
+##### `unveil.py`
 
 This file is an executable python file that will decrypt the input and output the solution for the second part of the puzzle. The file should contain a class called `Unveil` that has a method constructor `__init__` that takes a list of lines as arguments. The class should have
 a method called `run` that, given the previously setup lines, return a string or a number that is the solution for the second part of the puzzle. The python file should be executable.
@@ -128,7 +207,7 @@ if __name__ == '__main__':
     print(solution)
 ```
 
-#### `cipher.html`
+##### `cipher.html`
 
 This file is an HTML file that contains the puzzle's first part text and example input/output. The file must contain a `<article>` surrounding the content. The content can be written using `<p>` tags for paragraphs and `<pre>` or `<code>` tags for code blocks. This file should contain basic examples of the input and output of the puzzle.
 
@@ -146,7 +225,7 @@ This file is an HTML file that contains the puzzle's first part text and example
 </article>
 ```
 
-#### `unveil.html`
+##### `unveil.html`
 
 This file is an HTML file that contains the puzzle's second part text and example input/output. The file must contain a `<article>` surrounding the content. The content can be written using `<p>` tags for paragraphs and `<pre>` or `<code>` tags for code blocks. This file should contain basic examples of the input and output of the puzzle.
 
@@ -164,7 +243,7 @@ This file is an HTML file that contains the puzzle's second part text and exampl
 </article>
 ```
 
-#### `props/meta.xml`
+##### `props/meta.xml`
 
 This file is an XML file that contains the meta properties of the file. The file should contain the following properties:
 
@@ -179,7 +258,7 @@ This file is an XML file that contains the meta properties of the file. The file
 
 > This file will allow to be able to define the author, the creation date and the modification date of the puzzle.
 
-#### `props/desc.xml`
+##### `props/desc.xml`
 
 This file is an XML file that contains the description of the puzzle. The file should contain the following properties:
 
