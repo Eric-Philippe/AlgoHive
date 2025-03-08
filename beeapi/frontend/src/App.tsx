@@ -14,7 +14,7 @@ function App() {
     fetchThemes();
   });
 
-  return <></>;
+  return <>BeeAPI - Interface</>;
 }
 
 export default App;
