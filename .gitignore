@@ -5,3 +5,5 @@ beeapi/puzzles/*
 !beeapi/puzzles/sample
 
 server.env
+
+data/
