@@ -95,6 +95,26 @@ networks:
   algohive-network:
 ```
 
+- Create a file named server.env with this content:
+
+```env
+
+```
+
+- Start the services by running the following command:
+
+```bash
+docker-compose up -d --build
+```
+
+- Authorize access to the BeeAPI folder(s) for every instance of the BeeAPI server:
+
+> This will allow you to put puzzles in the folder and have them available in the API.
+
+````bash
+sudo chown -R $USER:$USER ./data/beeapi-server1/puzzles
+```
+
 ## Quick Overview
 
 ### CLI - HiveCraft
@@ -160,7 +180,7 @@ if __name__ == '__main__':
     lines = forge.run()
     with open('input.txt', 'w') as f:
         f.write('\n'.join(lines))
-```
+````
 
 > Using this template will allow to just focus on the `generate_line` method to generate the input for the puzzle.
 
