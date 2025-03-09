@@ -1,28 +1,20 @@
 package main
 
 import (
+	"api/database"
 	docs "api/docs"
 	v1 "api/routes/v1"
+	"os"
+
+	"log"
 
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// @title AlgoHive API
-// @version 1.0.0
-// @description This is the web API for the AlgoHive Web App.
-//	@termsOfService	http://swagger.io/terms/
-
-//	@contact.name	Éric PHILIPPE
-//	@contact.email	ericphlpp@proton.me
-
-//	@license.name	Apache 2.0
-//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
-
-//	@host		localhost:8080
-//	@BasePath	/api/v1
 func main() {
+    database.InitDB()
     gin.SetMode(gin.ReleaseMode)
     r := gin.Default()
     docs.SwaggerInfo.BasePath = "/api/v1"
@@ -33,5 +25,8 @@ func main() {
     }
 
     r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-    r.Run(":8080")
+
+    port := os.Getenv("API_PORT")
+    log.Println("Server is running on port: ", port)
+    r.Run(":" + port)
 }

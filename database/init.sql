@@ -2,7 +2,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE Users(
-   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
    firstname VARCHAR(50) NOT NULL,
    lastname VARCHAR(50) NOT NULL,
    email VARCHAR(255) NOT NULL UNIQUE,
@@ -12,12 +12,12 @@ CREATE TABLE Users(
 );
 
 CREATE TABLE Roles(
-   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
    name VARCHAR(50) NOT NULL UNIQUE
 );
 
 CREATE TABLE Inputs(
-   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
    puzzle_id VARCHAR(50) NOT NULL,
    content TEXT NOT NULL,
    solution_one VARCHAR(255) NOT NULL,
@@ -27,20 +27,20 @@ CREATE TABLE Inputs(
 );
 
 CREATE TABLE APIEnvironments(
-   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
    address VARCHAR(255) NOT NULL,
    name VARCHAR(100) NOT NULL UNIQUE
 );
 
 CREATE TABLE Scopes(
-   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
    name VARCHAR(50) NOT NULL UNIQUE,
    role_id UUID,
    FOREIGN KEY(role_id) REFERENCES Roles(id) ON DELETE CASCADE
 );
 
 CREATE TABLE Groups(
-   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
    name VARCHAR(50) NOT NULL UNIQUE,
    description VARCHAR(255),
    scope_id UUID NOT NULL,
@@ -48,7 +48,7 @@ CREATE TABLE Groups(
 );
 
 CREATE TABLE Competitions(
-   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
    title VARCHAR(100) NOT NULL UNIQUE,
    description TEXT NOT NULL,
    finished BOOLEAN NOT NULL,
@@ -59,7 +59,7 @@ CREATE TABLE Competitions(
 );
 
 CREATE TABLE Tries(
-   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
    puzzle_id VARCHAR(50) NOT NULL,
    puzzle_index INTEGER NOT NULL,
    puzzle_lvl VARCHAR(50) NOT NULL,
