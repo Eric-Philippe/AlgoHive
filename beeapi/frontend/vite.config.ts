@@ -7,6 +7,16 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
+      "/puzzle/upload": {
+        target: "http://localhost:5000",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/puzzle": {
+        target: "http://localhost:5000",
+        changeOrigin: true,
+        secure: false,
+      },
       "/themes": {
         target: "http://localhost:5000",
         changeOrigin: true,

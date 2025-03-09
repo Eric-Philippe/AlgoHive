@@ -1,0 +1,25 @@
+.empty-template {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.item-template {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.item-template i {
+  margin-right: 1rem;
+}
+
+.item-template .file-details {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.item-template .p-button {
+  margin-left: auto;
+}

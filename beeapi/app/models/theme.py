@@ -6,3 +6,9 @@ class Theme:
         self.name: str = name
         self.path: str = path
         self.puzzles: List[Puzzle] = puzzles
+        
+    def get_name(self):
+        return self.name
+    
+    def get_path(self):
+        return self.path

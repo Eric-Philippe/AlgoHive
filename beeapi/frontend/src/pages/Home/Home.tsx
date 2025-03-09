@@ -1,12 +1,17 @@
-import useFetch from "../hooks/useFetch";
-import { Theme } from "../types/Theme";
+import useFetch from "../../hooks/useFetch";
+import { Theme } from "../../types/Theme";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Dialog } from "primereact/dialog";
 import { useEffect, useState } from "react";
+import { convertBytes } from "../../utils/utils";
 
-export default function Home() {
+interface HomeProps {
+  setSelectedMenu: (menu: string) => void;
+}
+
+export default function HomePage({ setSelectedMenu }: HomeProps) {
   const { data, loading, error } = useFetch<Theme[]>("/themes");
   const [themes, setThemes] = useState<Theme[] | null>(data);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -30,6 +35,11 @@ export default function Home() {
         setErrorMsg("An error occurred while reloading the data");
       }
     });
+
+    setTimeout(() => {
+      setSuccessMsg(null);
+      setErrorMsg(null);
+    }, 5000);
   };
 
   const handleDeleteTheme = (theme: Theme) => {
@@ -43,6 +53,11 @@ export default function Home() {
         setErrorMsg("An error occurred while deleting the theme");
       }
     });
+
+    setTimeout(() => {
+      setSuccessMsg(null);
+      setErrorMsg(null);
+    }, 5000);
   };
 
   const handleCreateTheme = () => {
@@ -61,6 +76,11 @@ export default function Home() {
         setErrorMsg("An error occurred while creating the theme");
       }
     });
+
+    setTimeout(() => {
+      setSuccessMsg(null);
+      setErrorMsg(null);
+    }, 5000);
   };
 
   const reloadData = () => {
@@ -74,6 +94,11 @@ export default function Home() {
       .catch(() => {
         setErrorMsg("An error occurred while fetching the data");
       });
+
+    setTimeout(() => {
+      setSuccessMsg(null);
+      setErrorMsg(null);
+    }, 5000);
   };
 
   if (loading) {
@@ -86,6 +111,8 @@ export default function Home() {
 
   return (
     <div>
+      <h2 className="text-2xl mb-6">Home</h2>
+
       <h3>Welcome to the Home Page</h3>
 
       {errorMsg && (
@@ -121,7 +148,6 @@ export default function Home() {
           className="p-button-raised"
           severity="info"
           onClick={() => {
-            // Get the current URL and redirect to the API docs
             window.location.href = window.location.origin + "/apidocs/";
           }}
         />
@@ -172,6 +198,7 @@ export default function Home() {
                       label="Consult"
                       icon="pi pi-check"
                       style={{ marginRight: "10px" }}
+                      onClick={() => setSelectedMenu("Theme/" + theme.name)}
                     />
                     <Button
                       label="Delete"
@@ -181,7 +208,11 @@ export default function Home() {
                     />
                   </>
                   className="md:w-25rem"
-                ></Card>
+                >
+                  <p>
+                    <strong>Size:</strong> {convertBytes(theme.size)}
+                  </p>
+                </Card>
               </div>
             ))}
         </div>

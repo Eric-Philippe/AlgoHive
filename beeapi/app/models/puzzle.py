@@ -17,6 +17,18 @@ class Puzzle:
     def get_puzzle_desc(self):
         return DescProps(self.xmlDescProps)
     
+    def get_difficulty(self):
+        return self.get_puzzle_desc().difficulty
+    
+    def get_language(self):
+        return self.get_puzzle_desc().language
+    
+    def get_cipher(self):
+        return self.cipher
+    
+    def get_obscure(self):
+        return self.obscure
+    
 """
 <Properties xmlns="http://www.w3.org/2001/WMLSchema">
     <difficulty>EASY</difficulty>

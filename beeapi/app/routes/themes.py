@@ -1,9 +1,10 @@
 from flask import jsonify, request, abort
 import time
 from .. import app, loader
+from ..utils.utils import get_theme_info
 
 last_reload_time = {}
-COOLDOWN_PERIOD = 60 # 1 minute
+COOLDOWN_PERIOD = 10 # 10 seconds
 
 @app.route('/themes', methods=['GET'])
 def themes():
@@ -16,7 +17,45 @@ def themes():
       200:
         description: The list of themes
     """
-    return jsonify([{'name': theme.name, 'enigmes_count': len(theme.puzzles)} for theme in loader.themes])
+    loaded_themes = [get_theme_info(theme) for theme in loader.themes]
+    return jsonify(loaded_themes)
+  
+@app.route('/themes/names', methods=['GET'])
+def themes_names():
+    """
+    Get the list of themes names
+    ---
+    tags:
+      - Themes
+    responses:
+      200:
+        description: The list of themes names
+    """
+    loaded_themes = [theme.name for theme in loader.themes]
+    return jsonify(loaded_themes)
+  
+@app.route('/theme', methods=['GET'])
+def theme():
+    """
+    Get a theme
+    ---
+    tags:
+      - Themes
+    parameters:
+      - name: name
+        in: query
+        type: string
+        required: true
+        description: The name of the theme
+    responses:
+      200:
+        description: The theme
+    """
+    name = request.args.get('name')
+    theme = loader.get_theme(name)
+    if theme is None:
+        abort(404, description="Theme not found")
+    return jsonify(get_theme_info(theme))
   
 # Create theme
 @app.route('/theme', methods=['POST'])

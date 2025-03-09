@@ -30,7 +30,7 @@ class PuzzlesLoader:
         """Reload all the puzzles from the puzzles directory"""
         self.unload()
         self.extract()
-        self.load
+        self.load()
 
     def _process_themes(self, process_function):
         for root, dirs, _ in os.walk(self.PUZZLES_DIR):
@@ -105,5 +105,44 @@ class PuzzlesLoader:
         shutil.rmtree(os.path.join(self.PUZZLES_DIR, name))
         self.themes = [theme for theme in self.themes if theme.name != name]
         
+    def get_theme(self, name):
+        return next((theme for theme in self.themes if theme.name == name), None)
+        
     def has_theme(self, name):
         return name in [theme.name for theme in self.themes]
+    
+    def has_puzzle(self, theme, puzzle_name):
+        if puzzle_name.endswith('.alghive'):
+            puzzle_name = puzzle_name[:-8]
+        return puzzle_name in [puzzle.get_name() for puzzle in theme.puzzles]
+    
+    def get_puzzle_sizes(self, theme, puzzle):
+        """
+        Get the puzzle .alghive file size and the puzzle directory size in bytes
+        """
+        alghive_size = os.path.getsize(os.path.join(self.PUZZLES_DIR, theme, puzzle + '.alghive'))
+        puzzle_size = self.get_dir_size(os.path.join(self.PUZZLES_DIR, theme, puzzle))
+        return alghive_size, puzzle_size
+    
+    def get_dir_size(self, path='.'):
+        total = 0
+        with os.scandir(path) as it:
+            for entry in it:
+                if entry.is_file():
+                    total += entry.stat().st_size
+                elif entry.is_dir():
+                    total += self.get_dir_size(entry.path)
+        return total
+    
+    def upload_puzzle(self, theme: Theme, alghive_archive):
+        theme_dir = os.path.join(self.PUZZLES_DIR, theme.get_name())
+        alghive_archive.save(os.path.join(theme_dir, alghive_archive.filename))
+        
+    def delete_puzzle(self, theme: Theme, puzzle_name):
+        if puzzle_name.endswith('.alghive'):
+            puzzle_name = puzzle_name[:-8]
+        shutil.rmtree(os.path.join(self.PUZZLES_DIR, theme.get_name(), puzzle_name))
+        os.remove(os.path.join(self.PUZZLES_DIR, theme.get_name(), puzzle_name + '.alghive'))
+        theme.puzzles = [puzzle for puzzle in theme.puzzles if puzzle.get_name() != puzzle_name]
+        
+

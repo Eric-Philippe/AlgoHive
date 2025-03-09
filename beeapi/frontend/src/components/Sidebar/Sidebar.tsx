@@ -11,45 +11,43 @@ export default function Sidebar({
   selectedMenu,
   setSelectedMenu,
 }: SidebarProps) {
-  const handleMenuClick = (menu: string) => {
-    setSelectedMenu(menu);
-  };
-
   const items = [
     {
       label: "Home",
       icon: "pi pi-home",
-      command: () => handleMenuClick("Home"),
+      command: () => setSelectedMenu("Home"),
       className: classNames({ "active-menu-item": selectedMenu === "Home" }),
     },
     {
-      label: "Themes",
+      label: "Theme",
       icon: "pi pi-folder",
-      command: () => handleMenuClick("Themes"),
-      className: classNames({ "active-menu-item": selectedMenu === "Themes" }),
+      command: () => {},
+      className: classNames({
+        "active-menu-item": selectedMenu.startsWith("Theme"),
+      }),
     },
     {
       label: "Puzzles",
       icon: "pi pi-trophy",
-      command: () => handleMenuClick("Puzzles"),
+      command: () => setSelectedMenu("Puzzles"),
       className: classNames({ "active-menu-item": selectedMenu === "Puzzles" }),
     },
     {
       label: "Team",
       icon: "pi pi-users",
-      command: () => handleMenuClick("Team"),
+      command: () => setSelectedMenu("Team"),
       className: classNames({ "active-menu-item": selectedMenu === "Team" }),
     },
     {
       label: "Forge",
       icon: "pi pi-wrench",
-      command: () => handleMenuClick("Forge"),
+      command: () => setSelectedMenu("Forge"),
       className: classNames({ "active-menu-item": selectedMenu === "Forge" }),
     },
     {
       label: "Settings",
       icon: "pi pi-cog",
-      command: () => handleMenuClick("Settings"),
+      command: () => setSelectedMenu("Settings"),
       className: classNames({
         "active-menu-item": selectedMenu === "Settings",
       }),
