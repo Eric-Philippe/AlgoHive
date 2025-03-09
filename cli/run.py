@@ -1,6 +1,6 @@
 import argparse
 import sys
-from alghive import Alghive
+from hivecraft.alghive import Alghive
 
 sys.dont_write_bytecode = True
 

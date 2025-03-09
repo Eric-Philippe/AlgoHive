@@ -1,0 +1,36 @@
+name: Build and Deploy HiveCraft Pip Package
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "hivecraft/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          cd hivecraft
+          pip install build
+
+      - name: Upload package as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hivecraft-package
+          path: dist/*.whl

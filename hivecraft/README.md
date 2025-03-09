@@ -1,6 +1,6 @@
 # Hivecraft - CLI
 
-Hivecraft is a command line interface for creating and managing AlgoHive puzzles. It is a tool for developers to create, test, manage and compile puzzles for the AlgoHive platform. AlgoHive works by using a proprietary file format to define puzzles, and Hivecraft is a tool to help developers create these files.
+Hivecraft is a python module for creating and managing AlgoHive puzzles. It is a tool for developers to create, test, manage and compile puzzles for the AlgoHive platform. AlgoHive works by using a proprietary file format to define puzzles, and Hivecraft is a tool to help developers create these files.
 
 ## AlgoHive
 
@@ -30,10 +30,16 @@ AlgoHive is a web, self-hostable plateform that allows developers to create puzz
 ## Installation
 
 To use Hivecraft, you need to have Python 3.6 or higher installed on your system.
+Install the package using pip:
 
 ```bash
-python3 run.py
-usage: run.py [-h] [--test] [--test-count TEST_COUNT] folder
+pip install git+https://github.com/Eric-Philippe/AlgoHive.git#subdirectory=hivecraft
+```
+
+### Updating the package
+
+```bash
+pip install --upgrade --force-reinstall git+https://github.com/ton-utilisateur/AlgoHive.git#subdirectory=hivecraft
 ```
 
 > The `--test` flag will run random tests on the puzzles in the folder. The `--test-count` flag will specify the number of tests to run.
