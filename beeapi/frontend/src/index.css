@@ -28,3 +28,13 @@
 .alert-success {
   color: #04c717;
 }
+
+.app-container {
+  display: flex;
+}
+
+.content-container {
+  flex-grow: 1;
+  margin-top: 1.5rem;
+  margin-left: 140px;
+}

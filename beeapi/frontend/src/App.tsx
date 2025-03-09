@@ -25,16 +25,14 @@ function App() {
     }
   };
 
-  console.log();
-
   return (
-    <>
+    <div className="app-container">
       <AppSidebar
         selectedMenu={selectedMenu}
         setSelectedMenu={setSelectedMenu}
       />
 
-      <div className="container mx-auto p-4">
+      <div className="content-container">
         <h1 className="text-3xl font-bold text-center">{`BeeAPI - Interface - ${data?.name}`}</h1>
         <div className="flex justify-center mt-8">
           <div className="">
@@ -43,7 +41,7 @@ function App() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
