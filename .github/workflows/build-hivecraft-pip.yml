@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "hivecraft/**"
+      - "hivecraft/setup.py"
 
 jobs:
   build:
@@ -33,16 +33,6 @@ jobs:
         run: |
           cd hivecraft
           python -m build
-      - name: Rename wheel file
-        run: |
-          cd hivecraft/dist
-          for file in *.whl; do
-            mv "$file" "${file/none/${GITHUB_RUN_NUMBER}}"
-          done
-
-          for file in *.tar.gz; do
-            mv "$file" "${file/none/${GITHUB_RUN_NUMBER}}"
-          done
 
       - name: Upload package as artifact
         uses: actions/upload-artifact@v4
