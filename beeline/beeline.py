@@ -12,7 +12,7 @@ def main():
 
     args = parser.parse_args()
     alghive = Alghive(args.folder)
-    alghive.check_integrity()
+    alghive.check_integrity(True)
             
     if args.test:
         alghive.run_tests(args.test_count)
