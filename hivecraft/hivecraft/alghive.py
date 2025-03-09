@@ -22,7 +22,7 @@ class Alghive:
         self.folder_name = folder_name.rstrip("/")
         self.zip_file_name = f"{folder_name}{self.EXTENSION}"
         
-    def check_integrity(self):
+    def check_integrity(self, update: bool = False):
         # If one of the checks fails, raise an exception
         if not self.check_files():
             raise ValueError(f"Folder '{self.folder_name}' does not respect the file constraints.")
@@ -40,7 +40,7 @@ class Alghive:
             raise ValueError(f"Folder '{self.folder_name}' does not respect the html constraints.")
         
         try:
-            self.generate_props()
+            self.generate_props(update)
         except ValueError as e:
             raise ValueError(f"Folder '{self.folder_name}' does not respect the props constraints: {e}")
         
@@ -172,13 +172,13 @@ class Alghive:
         print(f"Folder '{self.folder_name}' has been zipped as '{zip_file_name}'.")
                     
         
-    def generate_props(self):
+    def generate_props(self, update: bool = False):
         # Ensure the props folder exists
         if not os.path.isdir(f"{self.folder_name}/{self.PROPS_FOLDER}"):
             os.mkdir(f"{self.folder_name}/{self.PROPS_FOLDER}")
         
         meta_props = MetaProps(self.folder_name)
-        meta_props.check_file_integrity()
+        meta_props.check_file_integrity(update)
         
         desc_props = DescProps(self.folder_name)
         desc_props.check_file_integrity()
