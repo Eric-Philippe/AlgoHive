@@ -29,8 +29,13 @@ jobs:
           cd hivecraft
           pip install build
 
+      - name: Build package
+        run: |
+          cd hivecraft
+          python -m build
+
       - name: Upload package as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: hivecraft-package
-          path: dist/*.whl
+          name: hivecraft
+          path: hivecraft/dist/*
