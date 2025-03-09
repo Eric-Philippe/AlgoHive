@@ -20,7 +20,9 @@ function App() {
       case "Team" === selectedMenu:
         return <p className="text-center">Manage users</p>;
       case "Forge" === selectedMenu:
-        return <p className="text-center">Use the Forge</p>;
+        return (
+          <p className="text-center">Compile and Extract .alghive files</p>
+        );
       case "Settings" === selectedMenu:
         return <p className="text-center">Access Settings</p>;
     }

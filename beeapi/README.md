@@ -1,6 +1,6 @@
 # BeeAPI - Self-Hostable API
 
-BeepAPI is a self-hostable API that will be able to load puzzles from `.alghive` files, under themes and serve them to the AlgoHive platform independently.
+BeepAPI is a self-hostable API that will be able to load puzzles from `.alghive` files, under themes and serve them to the AlgoHive platform independently. It comes with a Swagger UI to test the API endpoints and a simple web interface to manage the puzzles.
 
 ![Swagger](img/swagger.png)
 
@@ -20,7 +20,7 @@ Then, you can install the dependencies using the following command:
 pip install -r requirements.txt
 ```
 
-Feed the `puzzles` directory with themes folders containing `.alghive` files.
+Feed the `puzzles` directory with themes folders containing `.alghive` files or by simply using the Web interface to manage the puzzles for the BeeAPI instance.
 
 ```
 beeapi/
@@ -52,5 +52,3 @@ Then, you can run the Docker container using the following command:
 ```bash
 docker run -d -p 5000:5000 --name beeapi -v $(pwd)/puzzles:/app/puzzles beeapi
 ```
-
-## Routes

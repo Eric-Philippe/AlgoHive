@@ -1,4 +1,4 @@
-# Hivecraft - CLI
+# Hivecraft - AlgoHive file forge
 
 Hivecraft is a python module for creating and managing AlgoHive puzzles. It is a tool for developers to create, test, manage and compile puzzles for the AlgoHive platform. AlgoHive works by using a proprietary file format to define puzzles, and Hivecraft is a tool to help developers create these files.
 
@@ -8,7 +8,7 @@ AlgoHive is a web, self-hostable plateform that allows developers to create puzz
 
 ## Table of contents
 
-- [Hivecraft - CLI](#hivecraft---cli)
+- [Hivecraft- AlgoHive file forge](#hivecraft---algohive-file-forge)
   - [AlgoHive](#algohive)
   - [Table of contents](#table-of-contents)
   - [Installation](#installation)
