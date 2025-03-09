@@ -194,6 +194,7 @@ This file is an XML file that contains the meta properties of the file. The file
     <created>$CREATED</created>
     <modified>$MODIFIED</modified>
     <title>Meta</title>
+    <id>$UNIQUE_ID</id>
 </Properties>
 ```
 
