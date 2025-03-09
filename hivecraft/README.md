@@ -203,3 +203,7 @@ This file is an XML file that contains the description of the puzzle. The file s
     <language>$LANGUAGE</language>
 </Properties>
 ```
+
+# License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
