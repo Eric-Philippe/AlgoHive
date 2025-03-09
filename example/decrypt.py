@@ -3,8 +3,7 @@ class Decrypt:
         self.lines = lines
         
     def run(self):
-        # TODO: TO BE IMPLEMENTED
-        pass
+        return len(self.lines)
     
 if __name__ == '__main__':
     with open('input.txt') as f:
