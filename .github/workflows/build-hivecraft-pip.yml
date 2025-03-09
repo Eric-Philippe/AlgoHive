@@ -28,20 +28,14 @@ jobs:
         run: |
           cd hivecraft
           pip install build
-          pip install twine
 
       - name: Build package
         run: |
           cd hivecraft
           python -m build
 
-      - name: Publish package to GitHub Packages
-        run: |
-          cd hivecraft
-          # Set up authentication for GitHub Packages
-          echo "__token__:${{ secrets.GITHUB_TOKEN }}" > ~/.pypirc
-          # Publish to GitHub Packages
-          twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
-        env:
-          TWINE_USERNAME: "__token__"
-          TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload package as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hivecraft
+          path: hivecraft/dist/*
