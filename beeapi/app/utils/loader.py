@@ -25,6 +25,12 @@ class PuzzlesLoader:
         """Unload all the puzzles from the puzzles directory"""
         self._process_themes(self._unload_theme)
         self.themes = []
+        
+    def reload(self):
+        """Reload all the puzzles from the puzzles directory"""
+        self.unload()
+        self.extract()
+        self.load
 
     def _process_themes(self, process_function):
         for root, dirs, _ in os.walk(self.PUZZLES_DIR):
@@ -89,3 +95,15 @@ class PuzzlesLoader:
     def _read_file(self, file_path):
         with open(file_path, 'r') as file:
             return file.read()
+        
+    def create_theme(self, name):
+        os.makedirs(os.path.join(self.PUZZLES_DIR, name))
+        self.themes.append(Theme(name, os.path.join(self.PUZZLES_DIR, name), []))
+        
+    def delete_theme(self, name):
+        self._unload_theme(name)
+        shutil.rmtree(os.path.join(self.PUZZLES_DIR, name))
+        self.themes = [theme for theme in self.themes if theme.name != name]
+        
+    def has_theme(self, name):
+        return name in [theme.name for theme in self.themes]

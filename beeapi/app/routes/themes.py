@@ -16,7 +16,53 @@ def themes():
       200:
         description: The list of themes
     """
-    return jsonify([theme.name for theme in loader.themes])
+    return jsonify([{'name': theme.name, 'enigmes_count': len(theme.puzzles)} for theme in loader.themes])
+  
+# Create theme
+@app.route('/theme', methods=['POST'])
+def create_theme():
+    """
+    Create a theme
+    ---
+    tags:
+      - Themes
+    parameters:
+      - name: name
+        in: query
+        type: string
+        required: true
+        description: The name of the theme
+    responses:
+      200:
+        description: The theme has been created
+    """
+    name = request.args.get('name')
+    loader.create_theme(name)
+    return jsonify({'message': 'Theme created'})
+  
+# Delete theme
+@app.route('/theme', methods=['DELETE'])
+def delete_theme():
+    """
+    Delete a theme
+    ---
+    tags:
+      - Themes
+    parameters:
+      - name: name
+        in: query
+        type: string
+        required: true
+        description: The name of the theme
+    responses:
+      200:
+        description: The theme has been deleted
+    """
+    name = request.args.get('name')
+    if not loader.has_theme(name):
+        abort(404, description="Theme not found")
+    loader.delete_theme(name)
+    return jsonify({'message': 'Theme deleted'})
 
 @app.route('/theme/reload', methods=['POST'])
 def reload():

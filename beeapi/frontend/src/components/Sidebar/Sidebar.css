@@ -1,0 +1,72 @@
+nav {
+  background: #1e1e1e;
+  width: 6rem !important;
+  overflow: hidden;
+  position: fixed;
+  height: 100%;
+}
+
+nav .menu {
+  width: 100%;
+}
+
+nav .menu .menuitem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+nav .menu .menuitem a {
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+}
+
+nav .menu .menuitem-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.3rem;
+}
+
+nav .menu .menuitem-text {
+  font-size: 0.8rem;
+}
+
+nav .menu .active-menu-item {
+  background: #ff6600;
+  border-radius: 10px;
+}
+
+nav .menu .menuitem:hover {
+  background: #333;
+  border-radius: 10px;
+}
+
+nav .menu .menuitem.active {
+  background: #ff6600;
+}
+
+nav .menu .menuitem a:hover {
+  color: #ff6600;
+}
+
+/* Logo en haut */
+.sidebar-logo {
+  background: #ff6600;
+  padding: 1rem;
+  text-align: center;
+}
+
+.sidebar-logo i {
+  font-size: 2rem;
+  color: white;
+}
+
+.sb-icon {
+  font-size: 1.5rem;
+}
