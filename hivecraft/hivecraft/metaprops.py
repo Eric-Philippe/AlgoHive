@@ -24,7 +24,7 @@ class MetaProps:
         self.id = self.generate_uuid()
         
     def generate_uuid(self):
-        self.id = uuid.uuid4()
+        self.id = str(uuid.uuid4())
         
     def check_file_integrity(self, update: bool = False):
         # If the file already exists
