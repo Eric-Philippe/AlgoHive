@@ -28,6 +28,7 @@ jobs:
         run: |
           cd hivecraft
           pip install build
+          pip install twine
 
       - name: Build package
         run: |
