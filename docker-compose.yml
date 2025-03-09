@@ -30,6 +30,8 @@ services:
       - "5000:5000"
     networks:
       - algohive-network
+    environment:
+      - SERVER_NAME=Ynov-Toulouse
 
   beeapi-server2:
     container_name: beeapi-server-mpl
@@ -41,6 +43,8 @@ services:
       - "5001:5000"
     networks:
       - algohive-network
+    environment:
+      - SERVER_NAME=Ynov-Montpellier
 
   db:
     container_name: algohive-db

@@ -1,8 +1,11 @@
 import { useState } from "react";
 import AppSidebar from "./components/Sidebar/Sidebar";
 import Home from "./pages/Home";
+import useFetch from "./hooks/useFetch";
+import { ServerName } from "./types/ServerName";
 
 function App() {
+  const { data } = useFetch<ServerName>("/name");
   const [selectedMenu, setSelectedMenu] = useState("Home");
 
   const renderContent = () => {
@@ -22,6 +25,8 @@ function App() {
     }
   };
 
+  console.log();
+
   return (
     <>
       <AppSidebar
@@ -30,7 +35,7 @@ function App() {
       />
 
       <div className="container mx-auto p-4">
-        <h1 className="text-3xl font-bold text-center">Bee API - Interface</h1>
+        <h1 className="text-3xl font-bold text-center">{`BeeAPI - Interface - ${data?.name}`}</h1>
         <div className="flex justify-center mt-8">
           <div className="">
             <h2 className="text-2xl text-center">{selectedMenu}</h2>
