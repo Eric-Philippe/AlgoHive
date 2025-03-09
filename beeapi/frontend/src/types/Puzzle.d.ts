@@ -6,4 +6,8 @@ export interface Puzzle {
   uncompressedSize: number | string;
   cipher: string;
   obscure: string;
+  id: string;
+  author: string;
+  createdAt: string;
+  updatedAt: string;
 }

@@ -1,1 +1,1 @@
-hivecraft==0.3.1
+hivecraft==0.3.2

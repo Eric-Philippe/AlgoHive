@@ -29,6 +29,7 @@ export default function ThemePage({ selectedMenu }: ThemeProps) {
             puzzle.uncompressedSize as number
           );
         });
+
         setTheme(data);
       });
   }, [selectedTheme, refreshTheme]);
@@ -54,11 +55,19 @@ export default function ThemePage({ selectedMenu }: ThemeProps) {
     });
   };
 
+  const createAtTemplate = (rowData: Puzzle) => {
+    return rowData.createdAt.slice(0, 16);
+  };
+
+  const updatedAtTemplate = (rowData: Puzzle) => {
+    return rowData.updatedAt.slice(0, 16);
+  };
+
   const deleteButtonTemplate = (rowData: Puzzle) => {
     return (
       <Button
         label="Delete"
-        icon="pi pi-times"
+        icon="pi pi-trash"
         className="p-button-danger"
         onClick={() => handleDeletePuzzle(rowData)}
       />
@@ -71,11 +80,14 @@ export default function ThemePage({ selectedMenu }: ThemeProps) {
     { field: "language", header: "Language" },
     { field: "compressedSize", header: "Zip Size" },
     { field: "uncompressedSize", header: "Unzip Size" },
+    { field: "createdAt", header: "Created", body: createAtTemplate },
+    { field: "updatedAt", header: "Updated", body: updatedAtTemplate },
+    { field: "author", header: "Author" },
     { field: "delete", header: "Delete", body: deleteButtonTemplate },
   ];
 
   return (
-    <div>
+    <div className="container" style={{ maxWidth: "90%" }}>
       <Toast ref={toast} />
 
       <h2 className="text-2xl mb-6">Selected theme: {selectedTheme}</h2>
@@ -88,13 +100,7 @@ export default function ThemePage({ selectedMenu }: ThemeProps) {
       >
         {columns.map(({ field, header, body }) => {
           return (
-            <Column
-              key={field}
-              field={field}
-              header={header}
-              body={body}
-              style={{ width: "15%" }}
-            />
+            <Column key={field} field={field} header={header} body={body} />
           );
         })}
       </DataTable>

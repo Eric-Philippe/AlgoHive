@@ -37,11 +37,7 @@ function App() {
 
       <div className="content-container">
         <h1 className="text-3xl font-bold text-center">{`BeeAPI - Interface - ${data?.name}`}</h1>
-        <div className="flex mt-2">
-          <div className="">
-            <div className="mt-6">{renderContent()}</div>
-          </div>
-        </div>
+        <div className="mt-8">{renderContent()}</div>
       </div>
     </div>
   );

@@ -11,7 +11,11 @@ def get_puzzle_info(theme_name, puzzle: Puzzle):
         'difficulty': puzzle.get_difficulty(),
         'language': puzzle.get_language(),
         'cipher': puzzle.get_cipher(),
-        'obscure': puzzle.get_obscure()
+        'obscure': puzzle.get_obscure(),
+        'id': puzzle.get_id(),
+        'author': puzzle.get_author(),
+        'createdAt': puzzle.get_created(),
+        'updatedAt': puzzle.get_modified(),
     }
 
 def get_theme_info(theme):
