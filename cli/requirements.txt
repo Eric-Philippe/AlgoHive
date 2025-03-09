@@ -1,1 +1,1 @@
-git+https://github.com/Eric-Philippe/AlgoHive.git#subdirectory=hivecraft
+hivecraft==0.1.0
