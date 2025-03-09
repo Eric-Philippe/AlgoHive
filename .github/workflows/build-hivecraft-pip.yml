@@ -39,3 +39,12 @@ jobs:
         with:
           name: hivecraft
           path: hivecraft/dist/*
+
+      - name: Publish package to GitHub Packages
+        run: |
+          cd hivecraft
+          python -m pip install --upgrade twine
+          python -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
+        env:
+          PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
