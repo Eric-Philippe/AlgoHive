@@ -1,4 +1,10 @@
-# AlgoHive
+<p align="center">
+  <img width="150px" src="../images/algohive-logo.png" title="Algohive">
+</p>
+
+<h1 align="center">AlgoHive</h1>
+
+## Main WebPlateform for AlgoHive
 
 ### Account types
 

@@ -1,4 +1,10 @@
-# BeeAPI - Self-Hostable API
+<p align="center">
+  <img width="150px" src="../images/beeapi-logo.png" title="Algohive">
+</p>
+
+<h1 align="center">BeeAPI</h1>
+
+## Self-Hostable API for AlgoHive
 
 BeepAPI is a self-hostable API that will be able to load puzzles from `.alghive` files, under themes and serve them to the AlgoHive platform independently. It comes with a Swagger UI to test the API endpoints and a simple web interface to manage the puzzles.
 

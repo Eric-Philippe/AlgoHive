@@ -1,4 +1,10 @@
-# Beeline - CLI for AlgoHive puzzles files management
+<p align="center">
+  <img width="150px" src="../images/beeline-logo.png" title="Algohive">
+</p>
+
+<h1 align="center">BeeLine</h1>
+
+## Beeline - CLI for AlgoHive puzzles files management
 
 Beeline is a command line interface for managing AlgoHive puzzles files. It allows you to create, test and manage puzzles files (`.algohive`) for the Algohive platform.
 
