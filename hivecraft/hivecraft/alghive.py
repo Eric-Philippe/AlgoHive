@@ -5,8 +5,8 @@ import zipfile
 import importlib.util
 import sys
 
-from metaprops import MetaProps
-from descprops import DescProps
+from hivecraft.descprops import DescProps
+from hivecraft.metaprops import MetaProps
 
 class Alghive:
     EXTENSION = '.alghive'
