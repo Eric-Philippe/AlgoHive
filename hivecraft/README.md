@@ -36,7 +36,7 @@ Install the package using pip:
 pip install git+https://github.com/Eric-Philippe/AlgoHive.git#subdirectory=hivecraft
 ```
 
-### Updating the package -
+### Updating the package
 
 ```bash
 pip install --upgrade --force-reinstall git+https://github.com/ton-utilisateur/AlgoHive.git#subdirectory=hivecraft
