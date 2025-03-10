@@ -4,4 +4,5 @@ type Role struct {
     ID   string    `gorm:"type:uuid;default:gen_random_uuid();primary_key"`
     Name string    `gorm:"type:varchar(50);unique;not null"`
     Permissions int `gorm:"not null;default:0"`
+    Users       []*User `gorm:"many2many:user_roles;"`
 }

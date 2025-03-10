@@ -194,7 +194,7 @@ func Logout(c *gin.Context) {
 
 // @Summary Get User Profile
 // @Description Get the profile information of the authenticated user
-// @Tags user
+// @Tags Users
 // @Security BearerAuth
 // @Success 200 {object} models.User
 // @Failure 404 {object} map[string]string
@@ -208,7 +208,7 @@ func GetUserProfile(c *gin.Context) {
     }
     
     var user models.User
-    result := database.DB.Where("id = ?", userID).First(&user)
+    result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
     if result.Error != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
         return

@@ -38,16 +38,12 @@ func InitDB() {
     err = DB.AutoMigrate(
         &models.User{},
         &models.Role{},
-        &models.Input{},
+        // &models.Input{},
         &models.APIEnvironment{},
         &models.Scope{},
         &models.Group{},
         &models.Competition{},
         &models.Try{},
-        &models.ScopeAPIAccess{},
-        &models.CompetitionAccessibleTo{},
-        &models.UserGroup{},
-        &models.UserRole{},
     )
 
     Populate()
@@ -87,17 +83,10 @@ func Populate() {
             Lastname:  "Admin",
             Password: password,
             LastConnected: nil,
+            Roles: []*models.Role{&adminRole},
         }
         DB.Create(&user)
         log.Println("Default user admin created")
-
-        // Assign the default admin role to the default admin user
-        userRole := models.UserRole{
-            UserID: user.ID,
-            RoleID: adminRole.ID,
-        }
-        DB.Create(&userRole)
-        log.Println("Default admin role assigned to admin user")
     }
 
     // Check if there is no API Environment in the database

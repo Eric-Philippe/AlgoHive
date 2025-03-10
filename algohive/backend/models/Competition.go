@@ -8,4 +8,5 @@ type Competition struct {
     Show             bool      `gorm:"not null"`
     APITheme         string    `gorm:"type:varchar(50);not null"`
     APIEnvironmentID string `gorm:"type:uuid;not null"`
+    Groups           []*Group   `gorm:"many2many:competition_groups;"`
 }

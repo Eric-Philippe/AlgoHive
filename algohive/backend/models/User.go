@@ -12,4 +12,6 @@ type User struct {
     Password      string    `gorm:"type:varchar(255);not null"`
     LastConnected *time.Time `gorm:"type:timestamp"`
     Blocked       bool      `gorm:"not null;default:false"`
+    Groups        []*Group   `gorm:"many2many:user_groups;"`
+    Roles         []*Role    `gorm:"many2many:user_roles;"`
 }
