@@ -9,4 +9,5 @@ func Register(r *gin.Engine) {
     v1 := r.Group("/api/v1")
 
 	RegisterPingRoutes(v1)
+	RegisterAuth(v1)
 }

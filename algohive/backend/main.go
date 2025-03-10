@@ -24,6 +24,11 @@ import (
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
 // @BasePath /api/v1
+
+// @securityDefinitions.apikey Bearer
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 func main() {
     config.LoadConfig()
     log.Println("Config loaded")
@@ -35,7 +40,7 @@ func main() {
     log.Println("Redis connected")
 
     gin.SetMode(gin.ReleaseMode)
-    r := gin.New()
+    r := gin.Default()
     docs.SwaggerInfo.BasePath = "/api/v1"
 
     v1.Register(r)

@@ -1,4 +1,58 @@
 basePath: /api/v1
+definitions:
+  models.User:
+    properties:
+      blocked:
+        type: boolean
+      email:
+        type: string
+      firstname:
+        type: string
+      id:
+        type: string
+      lastConnected:
+        type: string
+      lastname:
+        type: string
+      password:
+        type: string
+    type: object
+  v1.AuthResponse:
+    properties:
+      email:
+        type: string
+      token:
+        type: string
+      user_id:
+        type: string
+    type: object
+  v1.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  v1.RegisterRequest:
+    properties:
+      email:
+        type: string
+      firstname:
+        type: string
+      lastname:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - firstname
+    - lastname
+    - password
+    type: object
 info:
   contact:
     email: ericphlpp@proton.me
@@ -10,6 +64,95 @@ info:
   title: Swagger AlgoHive API
   version: 1.0.0
 paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a user and return a JWT token
+      parameters:
+      - description: Login Credentials
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/v1.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: User Login
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      description: Logout a user by invalidating their token
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: User Logout
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user
+      parameters:
+      - description: Registration Details
+        in: body
+        name: register
+        required: true
+        schema:
+          $ref: '#/definitions/v1.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: User Register
+      tags:
+      - auth
   /ping:
     get:
       description: Répond avec "pong"
@@ -25,4 +168,30 @@ paths:
       summary: Répond avec "pong"
       tags:
       - App
+  /user/profile:
+    get:
+      description: Get the profile information of the authenticated user
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      - Bearer: []
+      summary: Get User Profile
+      tags:
+      - user
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
