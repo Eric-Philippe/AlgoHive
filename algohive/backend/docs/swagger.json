@@ -1,11 +1,10 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is the web API for the AlgoHive Web App.",
-        "title": "AlgoHive API",
-        "termsOfService": "http://swagger.io/terms/",
+        "description": "This is the API documentation for the AlgoHive API",
+        "title": "Swagger AlgoHive API",
         "contact": {
-            "name": "Éric PHILIPPE",
+            "name": "AlgoHive Support",
             "email": "ericphlpp@proton.me"
         },
         "license": {
@@ -14,7 +13,6 @@
         },
         "version": "1.0.0"
     },
-    "host": "localhost:8080",
     "basePath": "/api/v1",
     "paths": {
         "/ping": {

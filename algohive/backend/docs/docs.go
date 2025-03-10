@@ -9,9 +9,8 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "http://swagger.io/terms/",
         "contact": {
-            "name": "Éric PHILIPPE",
+            "name": "AlgoHive Support",
             "email": "ericphlpp@proton.me"
         },
         "license": {
@@ -52,11 +51,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0.0",
-	Host:             "localhost:8080",
+	Host:             "",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "AlgoHive API",
-	Description:      "This is the web API for the AlgoHive Web App.",
+	Title:            "Swagger AlgoHive API",
+	Description:      "This is the API documentation for the AlgoHive API",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

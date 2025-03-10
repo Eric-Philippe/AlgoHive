@@ -13,20 +13,33 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// @title Swagger AlgoHive API
+// @version 1.0.0
+// @description This is the API documentation for the AlgoHive API
+
+// @contact.name AlgoHive Support
+// @contact.email ericphlpp@proton.me
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @BasePath /api/v1
 func main() {
     database.InitDB()
+    log.Println("Database connected")
+
+    database.InitRedis()
+    log.Println("Redis connected")
+
     gin.SetMode(gin.ReleaseMode)
-    r := gin.Default()
+    r := gin.New()
     docs.SwaggerInfo.BasePath = "/api/v1"
 
-    v1Group := r.Group("/api/v1")
-    {
-        v1.RegisterRoutes(v1Group)
-    }
-
+    v1.Register(r)
     r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
     port := os.Getenv("API_PORT")
     log.Println("Server is running on port: ", port)
+    log.Println("Swagger is running on http://localhost:" + port + "/swagger/index.html")
     r.Run(":" + port)
 }
