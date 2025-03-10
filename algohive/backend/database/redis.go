@@ -1,11 +1,9 @@
 package database
 
 import (
+	"api/config"
 	"context"
 	"fmt"
-	"os"
-
-	"strconv"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -14,14 +12,10 @@ var REDIS *redis.Client
 
 // InitRedis initializes the Redis client
 func InitRedis() {   
-	addr := os.Getenv("CACHE_HOST")
-	port := os.Getenv("CACHE_PORT")
-	password := os.Getenv("CACHE_PASSWORD")
-	dbStr := os.Getenv("CACHE_DB")
-	db, err := strconv.Atoi(dbStr)
-	if err != nil {
-		panic(fmt.Sprintf("Invalid CACHE_DB value: %s", dbStr))
-	}
+	addr := config.RedisHost
+	port := config.RedisPort
+	password := config.RedisPassword
+	db := config.RedisDB
 	
 	REDIS = redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", addr, port), // Redis address
@@ -30,6 +24,7 @@ func InitRedis() {
 		Protocol: 2,  // Connection protocol
 	})
 }
+
 // RedisSet sets a key value pair in Redis
 func RedisSet(key string, value interface{}) {
 	ctx := context.Background()

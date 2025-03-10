@@ -1,10 +1,10 @@
 package main
 
 import (
+	"api/config"
 	"api/database"
 	docs "api/docs"
 	v1 "api/routes/v1"
-	"os"
 
 	"log"
 
@@ -25,6 +25,9 @@ import (
 
 // @BasePath /api/v1
 func main() {
+    config.LoadConfig()
+    log.Println("Config loaded")
+
     database.InitDB()
     log.Println("Database connected")
 
@@ -38,7 +41,7 @@ func main() {
     v1.Register(r)
     r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-    port := os.Getenv("API_PORT")
+    port := config.ApiPort
     log.Println("Server is running on port: ", port)
     log.Println("Swagger is running on http://localhost:" + port + "/swagger/index.html")
     r.Run(":" + port)

@@ -16,7 +16,6 @@ func pong(c *gin.Context) {
     })
 }
 
-// RegisterPingRoutes enregistre les routes de test pour la version 1
 func RegisterPingRoutes(r *gin.RouterGroup) {
     r.GET("/ping", pong)
 }

@@ -6,9 +6,9 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 
+	"api/config"
 	"api/models"
 	"api/utils"
 
@@ -29,13 +29,7 @@ func InitDB() {
         log.Fatal("Error loading .env file")
     }
 
-    host := os.Getenv("POSTGRES_HOST")
-    port := os.Getenv("POSTGRES_PORT")
-    dbname := os.Getenv("POSTGRES_DB")
-    user := os.Getenv("POSTGRES_USER")
-    password := os.Getenv("POSTGRES_PASSWORD")
-
-    dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable TimeZone=Europe/Paris", host, port, user, dbname, password)
+    dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable TimeZone=Europe/Paris", config.PostgresHost, config.PostgresPort, config.PostgresUser, config.PostgresDB, config.PostgresPassword)
     DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
     if err != nil {
         log.Fatal("failed to connect database: ", err)
@@ -78,8 +72,8 @@ func Populate() {
 
         // Create default user admin with a default hashed password either from the .env file or the DefaultPassword constant
         password := DefaultPassword
-        if os.Getenv("DEFAULT_PASSWORD") != "" {
-            password = os.Getenv("DEFAULT_PASSWORD")
+        if config.DefaultPassword != "" {
+            password = config.DefaultPassword
         }
 
         password, err := utils.HashPassword(password)
@@ -109,7 +103,7 @@ func Populate() {
     // Check if there is no API Environment in the database
     var apiEnvCount int64
     DB.Model(&models.APIEnvironment{}).Count(&apiEnvCount)
-    apiEnvs := os.Getenv("BEE_APIS")
+    apiEnvs := config.BeeApis
     if apiEnvCount == 0 && apiEnvs != "" {
         apiEnvsList := strings.Split(apiEnvs, ",")
         for _, apiEnv := range apiEnvsList {
