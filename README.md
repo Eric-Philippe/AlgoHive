@@ -8,9 +8,19 @@
 
 <p align="center">Algohive is a <b>self-hosted coding game platform.</b><br>that allows developers to create puzzles for developers to solve.</p>
 
-> Sweeten your skills, but the competition stings
+---
 
 Each puzzle contains two parts to solve, allowing developers to test their skills in a variety of ways. The puzzles are created using a proprietary file format that is compiled into a single file for distribution.
+
+> Sweeten your skills, but the competition stings
+
+---
+
+<p align="center">
+<img src="https://skillicons.dev/icons?i=react,vite,ts,py,go,postgres,redis,docker,swagger">
+</p>
+
+---
 
 ## Why
 

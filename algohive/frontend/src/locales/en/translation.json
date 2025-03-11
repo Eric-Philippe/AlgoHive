@@ -1,0 +1,16 @@
+{
+  "staff": {
+    "menu": {
+      "terminal": "Terminal",
+      "users": "User Management",
+      "roles": "Role Management",
+      "scopes": "Scope Management",
+      "groups": "Group Management",
+      "competitions": "Competition Management",
+      "apis": "Puzzle Catalog"
+    }
+  },
+  "login": {
+    "title": "Sign In"
+  }
+}

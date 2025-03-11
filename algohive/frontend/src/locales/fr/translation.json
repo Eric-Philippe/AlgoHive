@@ -1,0 +1,16 @@
+{
+  "staff": {
+    "menu": {
+      "terminal": "Terminal",
+      "users": "Gestion des utilisateurs",
+      "roles": "Gestion des rôles",
+      "scopes": "Gestion des scopes",
+      "groups": "Gestion des groupes",
+      "competitions": "Gestion des compétitions",
+      "apis": "Catalogue des énigmes"
+    }
+  },
+  "login": {
+    "title": "Se connecter"
+  }
+}
