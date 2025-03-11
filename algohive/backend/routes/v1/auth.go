@@ -35,7 +35,7 @@ type AuthResponse struct {
 
 // @Summary User Login
 // @Description Authenticate a user and return a JWT token
-// @Tags auth
+// @Tags Auth
 // @Accept json
 // @Produce json
 // @Param login body LoginRequest true "Login Credentials"
@@ -91,7 +91,7 @@ func Login(c *gin.Context) {
 
 // @Summary User Register
 // @Description Register a new user
-// @Tags auth
+// @Tags Auth
 // @Accept json
 // @Produce json
 // @Param register body RegisterRequest true "Registration Details"
@@ -152,11 +152,11 @@ func RegisterUser(c *gin.Context) {
 
 // @Summary User Logout
 // @Description Logout a user by invalidating their token
-// @Tags auth
-// @Security BearerAuth
+// @Tags Auth
 // @Success 200 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /auth/logout [post]
+// @Security Bearer
 func Logout(c *gin.Context) {
     // Get the token from the request
     token := c.GetHeader("Authorization")
@@ -195,7 +195,6 @@ func Logout(c *gin.Context) {
 // @Summary Get User Profile
 // @Description Get the profile information of the authenticated user
 // @Tags Users
-// @Security BearerAuth
 // @Success 200 {object} models.User
 // @Failure 404 {object} map[string]string
 // @Router /user/profile [get]

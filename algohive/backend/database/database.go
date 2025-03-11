@@ -11,6 +11,7 @@ import (
 	"api/config"
 	"api/models"
 	"api/utils"
+	"api/utils/permissions"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -62,7 +63,7 @@ func Populate() {
     DB.Model(&models.User{}).Count(&countUser)
     if countRole == 0 && countUser == 0 {
         // Create default role admin
-        adminRole = models.Role{Name: AdminRole, Permissions: utils.GetAdminPermissions()}
+        adminRole = models.Role{Name: AdminRole, Permissions: permissions.GetAdminPermissions()}
         DB.Create(&adminRole)
         log.Println("Default role admin created")
 

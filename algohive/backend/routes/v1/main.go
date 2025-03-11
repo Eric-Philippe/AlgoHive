@@ -10,4 +10,6 @@ func Register(r *gin.Engine) {
 
 	RegisterPingRoutes(v1)
 	RegisterAuth(v1)
+	RegisterScopes(v1)
+	RegisterApis(v1)
 }

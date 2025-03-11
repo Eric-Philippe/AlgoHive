@@ -1,4 +1,6 @@
-package utils
+package permissions
+
+import "api/models"
 
 // Permissions allow a specific role to override the default permissions
 const (
@@ -26,4 +28,13 @@ func RemovePermission(rolePermissions, permission int) int {
 // Function to get the default permissions for an admin
 func GetAdminPermissions() int {
 	return SCOPES | API_ENV | GROUPS | COMPETITIONS
+}
+
+func RolesHavePermission(roles []*models.Role, permission int) bool {
+    for _, role := range roles {
+        if HasPermission(role.Permissions, permission) {
+            return true
+        }
+    }
+    return false
 }

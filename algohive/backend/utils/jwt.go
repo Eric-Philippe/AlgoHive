@@ -3,6 +3,7 @@ package utils
 import (
 	"api/config"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -41,6 +42,8 @@ func GenerateJWT(userID, email string) (string, error) {
 // ValidateToken validates the JWT token
 func ValidateToken(tokenString string) (*Claims, error) {
     claims := &Claims{}
+
+    tokenString = strings.TrimSpace(tokenString)
     
     token, err := jwt.ParseWithClaims(
         tokenString,

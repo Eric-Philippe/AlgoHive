@@ -1,5 +1,88 @@
 basePath: /api/v1
 definitions:
+  models.APIEnvironment:
+    properties:
+      address:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      scopes:
+        items:
+          $ref: '#/definitions/models.Scope'
+        type: array
+    type: object
+  models.Competition:
+    properties:
+      apienvironmentID:
+        type: string
+      apitheme:
+        type: string
+      description:
+        type: string
+      finished:
+        type: boolean
+      groups:
+        items:
+          $ref: '#/definitions/models.Group'
+        type: array
+      id:
+        type: string
+      show:
+        type: boolean
+      title:
+        type: string
+    type: object
+  models.Group:
+    properties:
+      competitions:
+        items:
+          $ref: '#/definitions/models.Competition'
+        type: array
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      scopeID:
+        type: string
+      users:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+    type: object
+  models.Role:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      permissions:
+        type: integer
+      scopes:
+        items:
+          $ref: '#/definitions/models.Scope'
+        type: array
+      users:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+    type: object
+  models.Scope:
+    properties:
+      apienvironments:
+        items:
+          $ref: '#/definitions/models.APIEnvironment'
+        type: array
+      id:
+        type: string
+      name:
+        type: string
+      role:
+        $ref: '#/definitions/models.Role'
+    type: object
   models.User:
     properties:
       blocked:
@@ -8,6 +91,10 @@ definitions:
         type: string
       firstname:
         type: string
+      groups:
+        items:
+          $ref: '#/definitions/models.Group'
+        type: array
       id:
         type: string
       lastConnected:
@@ -16,6 +103,10 @@ definitions:
         type: string
       password:
         type: string
+      roles:
+        items:
+          $ref: '#/definitions/models.Role'
+        type: array
     type: object
   v1.AuthResponse:
     properties:
@@ -25,6 +116,18 @@ definitions:
         type: string
       user_id:
         type: string
+    type: object
+  v1.CreateScopeRequest:
+    properties:
+      api_ids:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+    required:
+    - api_ids
+    - name
     type: object
   v1.LoginRequest:
     properties:
@@ -64,6 +167,31 @@ info:
   title: Swagger AlgoHive API
   version: 1.0.0
 paths:
+  /apis:
+    get:
+      consumes:
+      - application/json
+      description: Get all APIs, only accessible to users with the API_ENV permission
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.APIEnvironment'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Get all APIs Catalog
+      tags:
+      - APIs
   /auth/login:
     post:
       consumes:
@@ -97,7 +225,7 @@ paths:
             type: object
       summary: User Login
       tags:
-      - auth
+      - Auth
   /auth/logout:
     post:
       description: Logout a user by invalidating their token
@@ -115,10 +243,10 @@ paths:
               type: string
             type: object
       security:
-      - BearerAuth: []
+      - Bearer: []
       summary: User Logout
       tags:
-      - auth
+      - Auth
   /auth/register:
     post:
       consumes:
@@ -152,7 +280,7 @@ paths:
             type: object
       summary: User Register
       tags:
-      - auth
+      - Auth
   /ping:
     get:
       description: Répond avec "pong"
@@ -168,6 +296,66 @@ paths:
       summary: Répond avec "pong"
       tags:
       - App
+  /scopes:
+    get:
+      consumes:
+      - application/json
+      description: Get all scopes, only accessible to users with the SCOPES permission
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Scope'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Get all scopes
+      tags:
+      - Scopes
+    post:
+      consumes:
+      - application/json
+      description: Create a scope, only accessible to users with the SCOPES permission
+      parameters:
+      - description: Scope Details
+        in: body
+        name: createScope
+        required: true
+        schema:
+          $ref: '#/definitions/v1.CreateScopeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Scope'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Create a scope
+      tags:
+      - Scopes
   /user/profile:
     get:
       description: Get the profile information of the authenticated user
@@ -183,11 +371,10 @@ paths:
               type: string
             type: object
       security:
-      - BearerAuth: []
       - Bearer: []
       summary: Get User Profile
       tags:
-      - user
+      - Users
 securityDefinitions:
   Bearer:
     description: Type "Bearer" followed by a space and JWT token.
