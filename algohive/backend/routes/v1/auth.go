@@ -192,46 +192,13 @@ func Logout(c *gin.Context) {
     c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
 }
 
-// @Summary Get User Profile
-// @Description Get the profile information of the authenticated user
-// @Tags Users
-// @Success 200 {object} models.User
-// @Failure 404 {object} map[string]string
-// @Router /user/profile [get]
-// @Security Bearer
-func GetUserProfile(c *gin.Context) {
-    userID, exists := c.Get("userID")
-    if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-        return
-    }
-    
-    var user models.User
-    result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-    if result.Error != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-        return
-    }
-    
-    // Hide password from response
-    user.Password = ""
-    
-    c.JSON(http.StatusOK, user)
-}
-
 // Register the endpoints for the v1 API
-func RegisterAuth(r *gin.RouterGroup) {    
+func RegisterAuthRoutes(r *gin.RouterGroup) {    
     // Auth routes
     auth := r.Group("/auth")
     {
         auth.POST("/login", Login)
         auth.POST("/register", RegisterUser)
         auth.POST("/logout", middleware.AuthMiddleware(), Logout)
-    }
-    
-    user := r.Group("/user")
-    user.Use(middleware.AuthMiddleware())
-    {
-        user.GET("/profile", GetUserProfile)
     }
 }

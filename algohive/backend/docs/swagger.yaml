@@ -76,6 +76,12 @@ definitions:
         items:
           $ref: '#/definitions/models.APIEnvironment'
         type: array
+      description:
+        type: string
+      groups:
+        items:
+          $ref: '#/definitions/models.Group'
+        type: array
       id:
         type: string
       name:
@@ -178,6 +184,15 @@ definitions:
         type: string
       name:
         type: string
+    type: object
+  v1.UserWithRoles:
+    properties:
+      roles:
+        items:
+          type: string
+        type: array
+      user:
+        $ref: '#/definitions/models.User'
     type: object
 info:
   contact:
@@ -364,6 +379,111 @@ paths:
       summary: Create a group
       tags:
       - Groups
+  /groups/{group_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a group and cascade delete all users and competitions associated
+        with the group
+      parameters:
+      - description: Group ID
+        in: path
+        name: group_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Delete a group and cascade delete all users and competitions associated
+        with the group
+      tags:
+      - Groups
+    get:
+      consumes:
+      - application/json
+      description: Get a group
+      parameters:
+      - description: Group ID
+        in: path
+        name: group_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Group'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Get a group
+      tags:
+      - Groups
+    put:
+      consumes:
+      - application/json
+      description: Update a group name and description
+      parameters:
+      - description: Group ID
+        in: path
+        name: group_id
+        required: true
+        type: string
+      - description: Group to update
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UpdateGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Update a group name and description
+      tags:
+      - Groups
   /groups/{group_id}/users/{user_id}:
     delete:
       consumes:
@@ -443,111 +563,6 @@ paths:
       summary: Add a user to a group
       tags:
       - Groups
-  /groups/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a group and cascade delete all users and competitions associated
-        with the group
-      parameters:
-      - description: Group ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - Bearer: []
-      summary: Delete a group and cascade delete all users and competitions associated
-        with the group
-      tags:
-      - Groups
-    get:
-      consumes:
-      - application/json
-      description: Get a group
-      parameters:
-      - description: Group ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Group'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - Bearer: []
-      summary: Get a group
-      tags:
-      - Groups
-    put:
-      consumes:
-      - application/json
-      description: Update a group name and description
-      parameters:
-      - description: Group ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Group to update
-        in: body
-        name: group
-        required: true
-        schema:
-          $ref: '#/definitions/v1.UpdateGroupRequest'
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - Bearer: []
-      summary: Update a group name and description
-      tags:
-      - Groups
   /ping:
     get:
       description: Répond avec "pong"
@@ -563,6 +578,123 @@ paths:
       summary: Répond avec "pong"
       tags:
       - App
+  /roles:
+    get:
+      consumes:
+      - application/json
+      description: Get all Roles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Role'
+            type: array
+      security:
+      - Bearer: []
+      summary: Get all Roles
+      tags:
+      - Roles
+    post:
+      consumes:
+      - application/json
+      description: Create a new Role
+      parameters:
+      - description: Role Profile
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/models.Role'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Role'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Create a new Role
+      tags:
+      - Roles
+  /roles/{role_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a Role by ID
+      parameters:
+      - description: Role ID
+        in: path
+        name: role_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Role'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Get a Role by ID
+      tags:
+      - Roles
+    put:
+      consumes:
+      - application/json
+      description: Update a Role by ID
+      parameters:
+      - description: Role ID
+        in: path
+        name: role_id
+        required: true
+        type: string
+      - description: Role Profile
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/models.Role'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Role'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Update a Role by ID
+      tags:
+      - Roles
   /scopes:
     get:
       consumes:
@@ -631,7 +763,7 @@ paths:
       parameters:
       - description: Scope ID
         in: path
-        name: id
+        name: scope_id
         required: true
         type: string
       produces:
@@ -665,7 +797,7 @@ paths:
       parameters:
       - description: Scope ID
         in: path
-        name: id
+        name: scope_id
         required: true
         type: string
       produces:
@@ -699,7 +831,7 @@ paths:
       parameters:
       - description: Scope ID
         in: path
-        name: id
+        name: scope_id
         required: true
         type: string
       - description: Scope Details
@@ -732,6 +864,226 @@ paths:
       summary: Update a scope
       tags:
       - Scopes
+  /scopes/{scope_id}/roles/{role_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Detach the scope from a role, only accessible to users with the
+        SCOPES permission
+      parameters:
+      - description: Scope ID
+        in: path
+        name: scope_id
+        required: true
+        type: string
+      - description: Role ID
+        in: path
+        name: role_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Scope'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Detach the scope from a role
+      tags:
+      - Scopes
+    post:
+      consumes:
+      - application/json
+      description: Attach the scope to a role, only accessible to users with the SCOPES
+        permission
+      parameters:
+      - description: Scope ID
+        in: path
+        name: scope_id
+        required: true
+        type: string
+      - description: Role ID
+        in: path
+        name: role_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Scope'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Attach the scope to a role
+      tags:
+      - Scopes
+  /user/{user_id}/role/{role_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Detach a Role from a User
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Role ID
+        in: path
+        name: role_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Detach a Role from a User
+      tags:
+      - Roles
+    post:
+      consumes:
+      - application/json
+      description: Attach a Role to a User
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Role ID
+        in: path
+        name: role_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Attach a Role to a User
+      tags:
+      - Roles
+  /user/group/{group_id}:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user and attach a group to it
+      parameters:
+      - description: User Profile
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      - description: Group ID
+        in: path
+        name: group_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Create User and attach a Group
+      tags:
+      - Users
+  /user/group/{group_id}/bulk:
+    post:
+      consumes:
+      - application/json
+      description: Create multiple new users and attach a group to them
+      parameters:
+      - description: Users Profiles
+        in: body
+        name: users
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/models.User'
+          type: array
+      - description: Group ID
+        in: path
+        name: group_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Create Bulk Users and attach a Group
+      tags:
+      - Users
   /user/profile:
     get:
       description: Get the profile information of the authenticated user
@@ -749,6 +1101,71 @@ paths:
       security:
       - Bearer: []
       summary: Get User Profile
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Update the profile information of the authenticated user
+      parameters:
+      - description: User Profile
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Update User Profile
+      tags:
+      - Users
+  /user/roles:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user and attach roles to it
+      parameters:
+      - description: User and Roles
+        in: body
+        name: userWithRoles
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UserWithRoles'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Create a new user and attach roles
       tags:
       - Users
 securityDefinitions:

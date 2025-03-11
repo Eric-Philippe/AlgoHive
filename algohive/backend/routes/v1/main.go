@@ -9,7 +9,10 @@ func Register(r *gin.Engine) {
     v1 := r.Group("/api/v1")
 
 	RegisterPingRoutes(v1)
-	RegisterAuth(v1)
-	RegisterScopes(v1)
-	RegisterApis(v1)
+	RegisterAuthRoutes(v1)
+	RegisterScopesRoutes(v1)
+	RegisterApisRoutes(v1)
+	RegisterUserRoutes(v1)
+	RegisterGroupsRoutes(v1)
+	RegisterRolesRoutes(v1)
 }

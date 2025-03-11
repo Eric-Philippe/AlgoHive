@@ -47,7 +47,6 @@ func GetAllScopes(c *gin.Context) {
     var scopes []models.Scope
         database.DB.Find(&scopes)
         c.JSON(http.StatusOK, scopes)
-        return
 }
 
 // @Summary Get a scope
@@ -55,7 +54,7 @@ func GetAllScopes(c *gin.Context) {
 // @Tags Scopes
 // @Accept json
 // @Produce json
-// @Param id path string true "Scope ID"
+// @Param scope_id path string true "Scope ID"
 // @Success 200 {object} models.Scope
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
@@ -80,7 +79,7 @@ func GetScope(c *gin.Context) {
         return
     }
 
-    scopeID := c.Param("id")
+    scopeID := c.Param("scope_id")
     var scope models.Scope
     result = database.DB.Where("id = ?", scopeID).Preload("APIEnvironments").Preload("Roles").First(&scope)
     if result.Error != nil {
@@ -89,7 +88,6 @@ func GetScope(c *gin.Context) {
     }
 
     c.JSON(http.StatusOK, scope)
-    return
 }
 
 // @Summary Create a scope
@@ -153,7 +151,6 @@ func CreateScope(c *gin.Context) {
     }
 
     c.JSON(http.StatusCreated, scope)
-    return
 }
 
 // @Summary Delete a scope
@@ -161,7 +158,7 @@ func CreateScope(c *gin.Context) {
 // @Tags Scopes
 // @Accept json
 // @Produce json
-// @Param id path string true "Scope ID"
+// @Param scope_id path string true "Scope ID"
 // @Success 204 {object} string
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
@@ -186,7 +183,7 @@ func DeleteScope(c *gin.Context) {
         return
     }
 
-    scopeID := c.Param("id")
+    scopeID := c.Param("scope_id")
     var scope models.Scope
     result = database.DB.Where("id = ?", scopeID).First(&scope)
     if result.Error != nil {
@@ -206,7 +203,6 @@ func DeleteScope(c *gin.Context) {
     }
 
     c.JSON(http.StatusNoContent, nil)
-    return
 }
 
 // @Summary Update a scope
@@ -214,7 +210,7 @@ func DeleteScope(c *gin.Context) {
 // @Tags Scopes
 // @Accept json
 // @Produce json
-// @Param id path string true "Scope ID"
+// @Param scope_id path string true "Scope ID"
 // @Param updateScope body CreateScopeRequest true "Scope Details"
 // @Success 200 {object} models.Scope
 // @Failure 400 {object} map[string]string
@@ -240,7 +236,7 @@ func UpdateScope(c *gin.Context) {
         return
     }
 
-    scopeID := c.Param("id")
+    scopeID := c.Param("scope_id")
     var scope models.Scope
     result = database.DB.Where("id = ?", scopeID).First(&scope)
     if result.Error != nil {
@@ -275,17 +271,129 @@ func UpdateScope(c *gin.Context) {
     }
 
     c.JSON(http.StatusOK, scope)
-    return
 }
 
-func RegisterScopes(r *gin.RouterGroup) {
+// @Summary Attach the scope to a role
+// @Description Attach the scope to a role, only accessible to users with the SCOPES permission
+// @Tags Scopes
+// @Accept json
+// @Produce json
+// @Param scope_id path string true "Scope ID"
+// @Param role_id path string true "Role ID"
+// @Success 200 {object} models.Scope
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /scopes/{scope_id}/roles/{role_id} [post]
+// @Security Bearer
+func AttachScopeToRole(c *gin.Context) {
+    userID, exists := c.Get("userID")
+    if !exists {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+        return
+    }
+
+    var user models.User
+    result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
+    if result.Error != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+        return
+    }
+
+    if !permissions.RolesHavePermission(user.Roles, permissions.SCOPES) {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to attach scopes to roles"})
+        return
+    }
+
+    scopeID := c.Param("scope_id")
+    var scope models.Scope
+    result = database.DB.Where("id = ?", scopeID).First(&scope)
+    if result.Error != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "Scope not found"})
+        return
+    }
+
+    roleID := c.Param("role_id")
+    var role models.Role
+    result = database.DB.Where("id = ?", roleID).First(&role)
+    if result.Error != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
+        return
+    }
+
+    if err := database.DB.Model(&scope).Association("Roles").Append(&role); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to attach scope to role: " + err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, scope)
+}
+
+// @Summary Detach the scope from a role
+// @Description Detach the scope from a role, only accessible to users with the SCOPES permission
+// @Tags Scopes
+// @Accept json
+// @Produce json
+// @Param scope_id path string true "Scope ID"
+// @Param role_id path string true "Role ID"
+// @Success 200 {object} models.Scope
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /scopes/{scope_id}/roles/{role_id} [delete]
+// @Security Bearer
+func DetachScopeFromRole(c *gin.Context) {
+    userID, exists := c.Get("userID")
+    if !exists {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+        return
+    }
+
+    var user models.User
+    result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
+    if result.Error != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+        return
+    }
+
+    if !permissions.RolesHavePermission(user.Roles, permissions.SCOPES) {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to detach scopes from roles"})
+        return
+    }
+
+    scopeID := c.Param("scope_id")
+    var scope models.Scope
+    result = database.DB.Where("id = ?", scopeID).First(&scope)
+    if result.Error != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "Scope not found"})
+        return
+    }
+
+    roleID := c.Param("role_id")
+    var role models.Role
+    result = database.DB.Where("id = ?", roleID).First(&role)
+    if result.Error != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
+        return
+    }
+
+    if err := database.DB.Model(&scope).Association("Roles").Delete(&role); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to detach scope from role: " + err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, scope)
+}
+
+// RegisterScopes registers the scope routes
+func RegisterScopesRoutes(r *gin.RouterGroup) {
     scopes := r.Group("/scopes")
     scopes.Use(middleware.AuthMiddleware())
     {
         scopes.POST("/", CreateScope)
         scopes.GET("/", GetAllScopes)
-        scopes.GET("/:id", GetScope)
-        scopes.PUT("/:id", UpdateScope)
-        scopes.DELETE("/:id", DeleteScope)
+        scopes.GET("/:scope_id", GetScope)
+        scopes.PUT("/:scope_id", UpdateScope)
+        scopes.POST("/:scope_id/roles/:role_id", AttachScopeToRole)
+        scopes.DELETE("/:scope_id/roles/:role_id", DetachScopeFromRole)
+        scopes.DELETE("/:scope_id", DeleteScope)
     }
 }

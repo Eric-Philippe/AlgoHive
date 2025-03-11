@@ -23,7 +23,6 @@ func GetAllApis(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	if !exists {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-        return
     }
 
 	var user models.User
@@ -41,10 +40,9 @@ func GetAllApis(c *gin.Context) {
 	var apis []models.APIEnvironment
 	database.DB.Find(&apis)
 	c.JSON(http.StatusOK, apis)
-	return
 };
 
-func RegisterApis(r *gin.RouterGroup) {
+func RegisterApisRoutes(r *gin.RouterGroup) {
 	apis := r.Group("/apis")
 	apis.Use(middleware.AuthMiddleware())
 	{

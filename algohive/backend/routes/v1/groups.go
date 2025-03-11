@@ -74,7 +74,6 @@ func GetAllGroups(c *gin.Context) {
 	var groups []models.Group
 	database.DB.Find(&groups)
 	c.JSON(http.StatusOK, groups)
-	return
 }
 
 // @Summary Get a group
@@ -82,10 +81,10 @@ func GetAllGroups(c *gin.Context) {
 // @Tags Groups
 // @Accept json
 // @Produce json
-// @Param id path string true "Group ID"
+// @Param group_id path string true "Group ID"
 // @Success 200 {object} models.Group
 // @Failure 400 {object} map[string]string
-// @Router /groups/{id} [get]
+// @Router /groups/{group_id} [get]
 // @Security Bearer
 func GetGroup(c *gin.Context) {
 	userID, exists := c.Get("userID")
@@ -101,7 +100,7 @@ func GetGroup(c *gin.Context) {
 		return
 	}
 
-	groupID := c.Param("id")
+	groupID := c.Param("group_id")
 	var group models.Group
 	result = database.DB.Where("id = ?", groupID).Preload("Users").Preload("Competitions").First(&group)
 	if result.Error != nil {
@@ -115,7 +114,6 @@ func GetGroup(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, group)
-	return
 }
 
 // @Summary Create a group
@@ -168,7 +166,6 @@ func CreateGroup(c *gin.Context) {
 	database.DB.Create(&group)
 	database.DB.Model(&group).Association("Scopes").Append(scopes)
 	c.JSON(http.StatusCreated, group)
-	return
 }
 
 // @Summary Delete a group and cascade delete all users and competitions associated with the group
@@ -176,11 +173,11 @@ func CreateGroup(c *gin.Context) {
 // @Tags Groups
 // @Accept json
 // @Produce json
-// @Param id path string true "Group ID"
+// @Param group_id path string true "Group ID"
 // @Success 204 {object} string
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
-// @Router /groups/{id} [delete]
+// @Router /groups/{group_id} [delete]
 // @Security Bearer
 func DeleteGroup(c *gin.Context) {
 	userID, exists := c.Get("userID")
@@ -196,7 +193,7 @@ func DeleteGroup(c *gin.Context) {
 		return
 	}
 
-	groupID := c.Param("id")
+	groupID := c.Param("group_id")
 	var group models.Group
 	result = database.DB.Where("id = ?", groupID).Preload("Users").Preload("Competitions").First(&group)
 	if result.Error != nil {
@@ -211,7 +208,6 @@ func DeleteGroup(c *gin.Context) {
 
 	database.DB.Delete(&group)
 	c.JSON(http.StatusNoContent, nil)
-	return
 }
 
 // @Summary Add a user to a group
@@ -241,6 +237,11 @@ func AddUserToGroup(c *gin.Context) {
 	}
 
 	groupID := c.Param("group_id")
+	if !UserOwnsGroup(userID.(string), groupID) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to add users to this group"})
+		return
+	}
+
 	var group models.Group
 	result = database.DB.Where("id = ?", groupID).Preload("Users").First(&group)
 	if result.Error != nil {
@@ -263,7 +264,6 @@ func AddUserToGroup(c *gin.Context) {
 
 	database.DB.Model(&group).Association("Users").Append(&user)
 	c.JSON(http.StatusNoContent, nil)
-	return
 }
 
 // @Summary Remove a user from a group
@@ -292,12 +292,12 @@ func RemoveUserFromGroup(c *gin.Context) {
 		return
 	}
 
-	if !permissions.RolesHavePermission(user.Roles, permissions.GROUPS) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to remove users from groups"})
+	groupID := c.Param("group_id")
+	if !UserOwnsGroup(userID.(string), groupID) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to add users to this group"})
 		return
 	}
 
-	groupID := c.Param("group_id")
 	var group models.Group
 	result = database.DB.Where("id = ?", groupID).Preload("Users").First(&group)
 	if result.Error != nil {
@@ -320,7 +320,6 @@ func RemoveUserFromGroup(c *gin.Context) {
 
 	database.DB.Model(&group).Association("Users").Delete(&user)
 	c.JSON(http.StatusNoContent, nil)
-	return
 }
 
 // @Summary Update a group name and description
@@ -328,12 +327,12 @@ func RemoveUserFromGroup(c *gin.Context) {
 // @Tags Groups
 // @Accept json
 // @Produce json
-// @Param id path string true "Group ID"
+// @Param group_id path string true "Group ID"
 // @Param group body UpdateGroupRequest true "Group to update"
 // @Success 204 {object} string
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
-// @Router /groups/{id} [put]
+// @Router /groups/{group_id} [put]
 // @Security Bearer
 func UpdateGroup(c *gin.Context) {
 	userID, exists := c.Get("userID")
@@ -349,7 +348,7 @@ func UpdateGroup(c *gin.Context) {
 		return
 	}
 
-	groupID := c.Param("id")
+	groupID := c.Param("group_id")
 	var group models.Group
 	result = database.DB.Where("id = ?", groupID).First(&group)
 	if result.Error != nil {
@@ -373,20 +372,19 @@ func UpdateGroup(c *gin.Context) {
 		Description: req.Description,
 	})
 	c.JSON(http.StatusNoContent, nil)
-	return
 }
 
 // RegisterGroups registers the group routes
-func RegisterGroups(r *gin.RouterGroup) {
+func RegisterGroupsRoutes(r *gin.RouterGroup) {
 	groups := r.Group("/groups")
 	groups.Use(middleware.AuthMiddleware())
 	{
 		groups.GET("/", GetAllGroups)
-		groups.GET("/:id", GetGroup)
-		groups.PUT("/:id", UpdateGroup)
+		groups.GET("/:group_id", GetGroup)
+		groups.PUT("/:group_id", UpdateGroup)
 		groups.POST("/:group_id/users/:user_id", AddUserToGroup)
 		groups.DELETE("/:group_id/users/:user_id", RemoveUserFromGroup)
 		groups.POST("/", CreateGroup)
-		groups.DELETE("/:id", DeleteGroup)
+		groups.DELETE("/:group_id", DeleteGroup)
 	}
 }
