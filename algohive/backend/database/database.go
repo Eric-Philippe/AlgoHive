@@ -13,7 +13,6 @@ import (
 	"api/utils"
 	"api/utils/permissions"
 
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -25,13 +24,8 @@ var DefaultPassword = "admin"
 
 // InitDB initializes the database connection and migrates the models and populates the database with default values if needed
 func InitDB() {
-    err := godotenv.Load()
-    if err != nil {
-        log.Fatal("Error loading .env file")
-    }
-
     dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable TimeZone=Europe/Paris", config.PostgresHost, config.PostgresPort, config.PostgresUser, config.PostgresDB, config.PostgresPassword)
-    DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+    DB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
     if err != nil {
         log.Fatal("failed to connect database: ", err)
     }
