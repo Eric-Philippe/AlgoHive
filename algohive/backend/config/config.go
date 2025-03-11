@@ -45,10 +45,12 @@ func LoadConfig() {
     JWTSecret = getEnv("JWT_SECRET", "your_secret_key")
     JWTExpiration = getEnvAsInt("JWT_EXPIRATION", 86400)
 
-    if err != nil && getEnv("API_PORT", "") == "" {
-        log.Fatal("Error loading .env file")
+    // Only log a warning if .env file couldn't be loaded
+    if err != nil {
+        log.Println("Warning: .env file not found, using environment variables or defaults")
     }
-
+    
+    log.Println("Config loaded") 
 }
 
 func getEnv(key string, defaultValue string) string {
