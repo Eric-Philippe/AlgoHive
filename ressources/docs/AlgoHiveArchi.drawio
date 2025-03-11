@@ -1,0 +1,87 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.5 Chrome/126.0.6478.183 Electron/31.3.0 Safari/537.36" version="24.7.5">
+  <diagram name="Page-1" id="nKXxd76Z5EsbQX3ytEs9">
+    <mxGraphModel dx="1091" dy="638" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-23" value="Exposed to the Internet" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="400" width="350" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-1" value="Hivecraft&lt;br&gt;.alghive Forge&lt;br&gt;(Python)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="670" y="55" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-2" value="PiP&lt;div&gt;Host the Hivecraft&lt;br&gt;forge module&lt;/div&gt;" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="30" width="170" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.875;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="wGMtKWV8aK7X_svwV9Cu-1" target="wGMtKWV8aK7X_svwV9Cu-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-4" value="is hosted" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="wGMtKWV8aK7X_svwV9Cu-3">
+          <mxGeometry x="0.0412" y="-3" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-5" value="BeeLine&lt;br&gt;(Command Line Interface)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="490" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.55;entryY=0.95;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="wGMtKWV8aK7X_svwV9Cu-5" target="wGMtKWV8aK7X_svwV9Cu-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-7" value="BeeAPI | Web Interface&lt;br&gt;(Python | React)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="280" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.55;entryY=0.95;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="wGMtKWV8aK7X_svwV9Cu-7" target="wGMtKWV8aK7X_svwV9Cu-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="wGMtKWV8aK7X_svwV9Cu-9" target="wGMtKWV8aK7X_svwV9Cu-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-12" value="access the puzzles&lt;br&gt;depending on the environement" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="wGMtKWV8aK7X_svwV9Cu-11">
+          <mxGeometry x="-0.0082" relative="1" as="geometry">
+            <mxPoint y="17" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="wGMtKWV8aK7X_svwV9Cu-9" target="wGMtKWV8aK7X_svwV9Cu-15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="wGMtKWV8aK7X_svwV9Cu-9" target="wGMtKWV8aK7X_svwV9Cu-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" edge="1" parent="1" source="wGMtKWV8aK7X_svwV9Cu-9" target="wGMtKWV8aK7X_svwV9Cu-20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-9" value="AlgoHive Server" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="280" y="441" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-13" value="BeeAPI | Web Interface&lt;br&gt;(Python | React)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="130" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.55;entryY=0.95;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="wGMtKWV8aK7X_svwV9Cu-13" target="wGMtKWV8aK7X_svwV9Cu-2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="190" y="180" />
+              <mxPoint x="454" y="180" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-18" value="Use the forge to produce&lt;br&gt;&amp;nbsp;.alghive files" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="wGMtKWV8aK7X_svwV9Cu-14">
+          <mxGeometry x="0.7326" y="1" relative="1" as="geometry">
+            <mxPoint x="-5" y="4" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-15" value="Database (Users / Competitions)&lt;br&gt;(Postgresql)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="441" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="wGMtKWV8aK7X_svwV9Cu-19" target="wGMtKWV8aK7X_svwV9Cu-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-19" value="AlgoHive WebPage" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="90" y="441" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wGMtKWV8aK7X_svwV9Cu-20" value="InMemory DB&lt;br&gt;(Sessions/cache)&lt;br&gt;(Redis)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="531" width="120" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

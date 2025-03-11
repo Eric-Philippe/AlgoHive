@@ -1,6 +1,7 @@
 name: algohive
 services:
   server:
+    container_name: algohive-server
     image: ghcr.io/eric-philippe/algohive/algohive/api:latest
     env_file: server.env
     depends_on:
