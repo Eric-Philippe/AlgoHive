@@ -28,9 +28,6 @@ var (
 
 func LoadConfig() {
     err := godotenv.Load()
-    if err != nil {
-        log.Fatal("Error loading .env file")
-    }
 
     ApiPort = getEnv("API_PORT", "8080")
     AllowedOrigins = getEnv("ALLOWED_ORIGINS", "*")
@@ -47,6 +44,11 @@ func LoadConfig() {
     RedisDB = getEnvAsInt("CACHE_DB", 0)
     JWTSecret = getEnv("JWT_SECRET", "your_secret_key")
     JWTExpiration = getEnvAsInt("JWT_EXPIRATION", 86400)
+
+    if err != nil && getEnv("API_PORT", "") == "" {
+        log.Fatal("Error loading .env file")
+    }
+
 }
 
 func getEnv(key string, defaultValue string) string {

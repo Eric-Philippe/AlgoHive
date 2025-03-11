@@ -1,16 +1,16 @@
 name: algohive
 services:
-  # server:
-  #   image: ghcr.io/eric-philippe/algohive/algohive/api:latest
-  #   env_file: server.env
-  #   depends_on:
-  #     - db
-  #     - cache
-  #   restart: unless-stopped
-  #   ports:
-  #     - "8080:8080"
-  #   networks:
-  #     - algohive-network
+  server:
+    image: ghcr.io/eric-philippe/algohive/algohive/api:latest
+    env_file: server.env
+    depends_on:
+      - db
+      - cache
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - algohive-network
 
   # client:
   #   image: ghcr.io/eric-philippe/algohive/algohive/client:latest
