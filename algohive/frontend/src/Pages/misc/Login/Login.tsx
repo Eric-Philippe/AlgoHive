@@ -2,5 +2,9 @@ import { useTranslation } from "react-i18next";
 
 export default function LoginPage() {
   const { t } = useTranslation();
-  return <div>{t("login.title")}</div>;
+  return (
+    <>
+      <h1>{t("loginPage.title")}</h1>
+    </>
+  );
 }

@@ -1,18 +1,14 @@
-import LayoutTopBar from "./components/ui/layouts/LayoutTopbar/LayoutTopBar";
+import { Route, Routes } from "react-router-dom";
+import HomePage from "./Pages/staff/Home/Home";
+import LoginPage from "./Pages/misc/Login/Login";
 
-import "./App.css";
-import LayoutContent from "./components/ui/layouts/LayoutContent/LayoutContent";
-import AppDock from "./components/ui/Dock/Dock";
-
-function App() {
+const App = () => {
   return (
-    <div className="layout-wrapper layout-dark">
-      <LayoutTopBar />
-      <LayoutContent>
-        <AppDock />
-      </LayoutContent>
-    </div>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<LoginPage />} />
+    </Routes>
   );
-}
+};
 
 export default App;

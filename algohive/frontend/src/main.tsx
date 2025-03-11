@@ -7,11 +7,14 @@ import "primeicons/primeicons.css";
 // primereact/resources/themes/arya-orange/theme.css
 import "primereact/resources/themes/lara-dark-amber/theme.css";
 import App from "./App.tsx";
+import { BrowserRouter } from "react-router-dom";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <PrimeReactProvider value={{ ripple: true }}>
-      <App />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
     </PrimeReactProvider>
   </StrictMode>
 );
