@@ -27,4 +27,5 @@ def name():
         description: The name of the app
     """
     server_name = os.getenv('SERVER_NAME', 'Local')
-    return jsonify({'name': server_name})
+    server_description = os.getenv('SERVER_DESCRIPTION', 'Description not set')
+    return jsonify({'name': server_name, 'description': server_description})

@@ -33,6 +33,7 @@ services:
       - algohive-network
     environment:
       - SERVER_NAME=Ynov-Toulouse
+      - SERVER_DESCRIPTION=This is the server containing puzzles for all the students in Ynov Toulouse
 
   beeapi-server2:
     container_name: beeapi-server-mpl
@@ -46,6 +47,7 @@ services:
       - algohive-network
     environment:
       - SERVER_NAME=Ynov-Montpellier
+      - SERVER_DESCRIPTION=This is the server containing puzzles for all the students in Ynov Montpellier
 
   db:
     container_name: algohive-db

@@ -119,13 +119,14 @@ func Populate() {
                 log.Println("Error while unmarshalling the apiEnv name: ", err)
                 continue
             }
-            apiEnvName, ok := result["name"]
-            if !ok {
-                log.Println("Error while getting the apiEnv name: ", "name not found")
+            apiEnvName, nameOk := result["name"]
+            apiEnvDescription, descOk := result["description"]
+            if !nameOk || !descOk {
+                log.Println("Error while getting the apiEnv name or description: key not found")
                 continue
             }
 
-            apiEnvironment := models.APIEnvironment{Name: apiEnvName, Address: apiEnv}
+            apiEnvironment := models.APIEnvironment{Name: apiEnvName, Description: apiEnvDescription, Address: apiEnv}
             DB.Create(&apiEnvironment)
             log.Println("API Environment created: ", apiEnvName)
         }

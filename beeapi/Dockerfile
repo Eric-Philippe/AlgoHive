@@ -24,6 +24,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN mkdir -p /app/puzzles && chown -R 777 /app/puzzles
 
 ENV SERVER_NAME="Local"
+ENV SERVER_DESCRIPTION="Local Dev Server"
 
 EXPOSE 5000
 
