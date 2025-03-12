@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import { Dock } from "primereact/dock";
 import { Dialog } from "primereact/dialog";
 import { Terminal } from "primereact/terminal";
@@ -8,149 +8,66 @@ import "./Dock.css";
 import { Tooltip } from "primereact/tooltip";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../../contexts/AuthContext";
+import { getStaffMenuItems } from "../../../config/StaffMenuItem";
 
-export default function AppDock() {
+interface AppDockProps {
+  setPage: Dispatch<SetStateAction<string>>;
+}
+
+export default function AppDock({ setPage }: AppDockProps) {
   const { t } = useTranslation();
   const { logout } = useAuth();
   const [displayTerminal, setDisplayTerminal] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  const StaffMenuItems = getStaffMenuItems(t);
+
+  // Calculate sizes based on screen width
+  const iconSize = windowWidth < 768 ? 45 : windowWidth < 1024 ? 55 : 65;
+  const fontSize =
+    windowWidth < 768 ? "1.5rem" : windowWidth < 1024 ? "1.75rem" : "2rem";
+
+  // Listen for window resize
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Function to create icon containers with responsive sizes
+  const createIconContainer = (iconClass: string, iconColor: string) => (
+    <div
+      style={{
+        width: `${iconSize}px`,
+        height: `${iconSize}px`,
+        borderRadius: "50%",
+        backgroundColor: iconColor,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <i className={iconClass} style={{ fontSize: fontSize }}></i>
+    </div>
+  );
 
   const dockItems = [
     {
       label: t("staff.menu.terminal"),
-      icon: () => (
-        <div
-          style={{
-            width: "65px",
-            height: "65px",
-            borderRadius: "50%",
-            backgroundColor: "#262626",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <i className="pi pi-wrench" style={{ fontSize: "2rem" }}></i>
-        </div>
-      ),
+      icon: () => createIconContainer("pi pi-angle-right", "#262626"),
       command: () => {
         setDisplayTerminal(true);
       },
     },
-    {
-      label: t("staff.menu.users"),
-      icon: () => (
-        <div
-          style={{
-            width: "65px",
-            height: "65px",
-            borderRadius: "50%",
-            backgroundColor: "#262626",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <i className="pi pi-user" style={{ fontSize: "2rem" }}></i>
-        </div>
-      ),
-      command: () => {},
-    },
-    {
-      label: t("staff.menu.roles"),
-      icon: () => (
-        <div
-          style={{
-            width: "65px",
-            height: "65px",
-            borderRadius: "50%",
-            backgroundColor: "#262626",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <i className="pi pi-id-card" style={{ fontSize: "2rem" }}></i>
-        </div>
-      ),
-      command: () => {},
-    },
-    {
-      label: t("staff.menu.scopes"),
-      icon: () => (
-        <div
-          style={{
-            width: "65px",
-            height: "65px",
-            borderRadius: "50%",
-            backgroundColor: "#262626",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <i className="pi pi-building" style={{ fontSize: "2rem" }}></i>
-        </div>
-      ),
-      command: () => {},
-    },
-    {
-      label: t("staff.menu.groups"),
-      icon: () => (
-        <div
-          style={{
-            width: "65px",
-            height: "65px",
-            borderRadius: "50%",
-            backgroundColor: "#262626",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <i className="pi pi-users" style={{ fontSize: "2rem" }}></i>
-        </div>
-      ),
-      command: () => {},
-    },
-    {
-      label: t("staff.menu.competitions"),
-      icon: () => (
-        <div
-          style={{
-            width: "65px",
-            height: "65px",
-            borderRadius: "50%",
-            backgroundColor: "#262626",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <i className="pi pi-graduation-cap" style={{ fontSize: "2rem" }}></i>
-        </div>
-      ),
-    },
-    {
-      label: t("staff.menu.apis"),
-      icon: () => (
-        <div
-          title="Trash"
-          style={{
-            width: "65px",
-            height: "65px",
-            borderRadius: "50%",
-            backgroundColor: "#262626",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <i className="pi pi-server" style={{ fontSize: "2rem" }}></i>
-        </div>
-      ),
-      command: () => {},
-    },
   ];
+
+  StaffMenuItems.forEach((item) => {
+    dockItems.push({
+      label: item.label,
+      icon: () => createIconContainer(item.icon, item.color),
+      command: () => setPage(item.id),
+    });
+  });
 
   const commandHandler = (text: string) => {
     let response;
@@ -207,11 +124,15 @@ export default function AppDock() {
         at="center top"
         showDelay={150}
       />
-      <Dock model={dockItems} />
+      <Dock
+        model={dockItems}
+        position={windowWidth < 768 ? "bottom" : "bottom"}
+        className={windowWidth < 768 ? "p-dock-mobile" : ""}
+      />
       <Dialog
         visible={displayTerminal}
-        breakpoints={{ "960px": "50vw", "600px": "75vw" }}
-        style={{ width: "30vw" }}
+        breakpoints={{ "960px": "75vw", "600px": "90vw" }}
+        style={{ width: windowWidth < 768 ? "90vw" : "30vw" }}
         onHide={() => setDisplayTerminal(false)}
         maximizable
         blockScroll={false}

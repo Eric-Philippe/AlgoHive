@@ -4,11 +4,12 @@ import { useAuth } from "../contexts/AuthContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  target: "staff" | "participant";
   allowedRoles?: string[];
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated, isLoading, checkAuth } = useAuth();
+const ProtectedRoute = ({ children, target }: ProtectedRouteProps) => {
+  const { isAuthenticated, isLoading, checkAuth, user } = useAuth();
   const [initialCheckDone, setInitialCheckDone] = useState(false);
   const location = useLocation();
 
@@ -33,10 +34,21 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
-  // // Role-based access control if needed later
-  // if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-  //   return <Navigate to="/unauthorized" replace />;
-  // }
+  // Redirect if user is not staff
+  if (
+    target == "staff" &&
+    user &&
+    user.groups &&
+    user.groups.length > 0 &&
+    (user.roles == null || user.roles.length == 0)
+  ) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  // // Redirect if user is not a participant
+  if (target == "participant" && user && user.roles && user.roles.length > 0) {
+    return <Navigate to="/unauthorized" replace />;
+  }
 
   return <>{children}</>;
 };

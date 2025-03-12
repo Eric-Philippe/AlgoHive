@@ -85,3 +85,28 @@
 .dark-tooltip .p-tooltip .p-tooltip-text {
   background-color: var(--surface-900);
 }
+
+/* Responsive styling for the dock */
+@media screen and (max-width: 768px) {
+  .p-dock-mobile.p-dock {
+    height: auto;
+    width: 100%;
+    padding: 0.5rem;
+  }
+
+  .p-dock-mobile .p-dock-list {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .p-dock-mobile .p-dock-item {
+    margin: 0 0.25rem;
+  }
+}
+
+/* Improve tooltip visibility on mobile */
+@media screen and (max-width: 768px) {
+  .dark-tooltip {
+    font-size: 0.8rem;
+  }
+}

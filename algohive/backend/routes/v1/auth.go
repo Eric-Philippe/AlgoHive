@@ -19,6 +19,24 @@ type LoginRequest struct {
     Password string `json:"password" binding:"required"`
 }
 
+// convertRoles converts []*models.Role to []models.Role
+func convertRoles(roles []*models.Role) []models.Role {
+    var result []models.Role
+    for _, role := range roles {
+        result = append(result, *role)
+    }
+    return result
+}
+
+// convertGroups converts []*models.Group to []models.Group
+func convertGroups(groups []*models.Group) []models.Group {
+    var result []models.Group
+    for _, group := range groups {
+        result = append(result, *group)
+    }
+    return result
+}
+
 // RegisterRequest model for registration
 type RegisterRequest struct {
     Email     string `json:"email" binding:"required,email"`
@@ -29,13 +47,15 @@ type RegisterRequest struct {
 
 // AuthResponse model for authentication responses
 type AuthResponse struct {
-    Token  string `json:"token"`
-    UserID string `json:"user_id"`
-    Email  string `json:"email"`
-    Firstname string `json:"firstname"`
-    Lastname string `json:"lastname"`
+    Token         string `json:"token"`
+    UserID        string `json:"user_id"`
+    Email         string `json:"email"`
+    Firstname     string `json:"firstname"`
+    Lastname      string `json:"lastname"`
     LastConnected *time.Time `json:"last_connected"`
-    Permissions int `json:"permissions"`
+    Permissions   int `json:"permissions"`
+    Roles        []models.Role `json:"roles"`
+    Groups       []models.Group `json:"groups"`
 }
 
 // setCookieToken sets the authentication token as an HTTP-only secure cookie
@@ -74,7 +94,7 @@ func Login(c *gin.Context) {
     }
     
     var user models.User
-    result := database.DB.Where("email = ?", loginReq.Email).Preload("Roles").First(&user)
+    result := database.DB.Where("email = ?", loginReq.Email).Preload("Roles").Preload("Groups").First(&user)
     if result.Error != nil {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
         return
@@ -106,7 +126,6 @@ func Login(c *gin.Context) {
     now := time.Now()
     user.LastConnected = &now
     database.DB.Save(&user)
-    
     c.JSON(http.StatusOK, AuthResponse{
         Token:  token,
         UserID: user.ID,
@@ -115,6 +134,8 @@ func Login(c *gin.Context) {
         Lastname: user.Lastname,
         LastConnected: user.LastConnected,
         Permissions: permissions.MergeRolePermissions(user.Roles),
+        Roles: convertRoles(user.Roles),
+        Groups: convertGroups(user.Groups),
     })
 }
 
@@ -182,6 +203,9 @@ func RegisterUser(c *gin.Context) {
         Firstname: user.Firstname,
         Lastname: user.Lastname,
         LastConnected: user.LastConnected,
+        Permissions: permissions.MergeRolePermissions(user.Roles),
+        Roles: convertRoles(user.Roles),
+        Groups: convertGroups(user.Groups),
     })
 }
 
@@ -269,7 +293,7 @@ func CheckAuth(c *gin.Context) {
 
         // Get user data
         var user models.User
-        result := database.DB.Where("id = ?", claims.UserID).Preload("Roles").First(&user)
+        result := database.DB.Where("id = ?", claims.UserID).Preload("Roles").Preload("Groups").First(&user)
         if result.Error != nil {
             c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
             return
@@ -282,6 +306,8 @@ func CheckAuth(c *gin.Context) {
             Lastname: user.Lastname,
             LastConnected: user.LastConnected,
             Permissions: permissions.MergeRolePermissions(user.Roles),
+            Roles: convertRoles(user.Roles),
+            Groups: convertGroups(user.Groups),
         })
 }
 

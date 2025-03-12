@@ -4,4 +4,6 @@ export interface User {
   firstname: string;
   lastname: string;
   permissions: number;
+  roles: Role[];
+  groups: Group[];
 }

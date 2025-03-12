@@ -57,6 +57,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         firstname: response.data.firstname,
         lastname: response.data.lastname,
         permissions: response.data.permissions,
+        roles: response.data.roles,
+        groups: response.data.groups,
       });
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -100,6 +102,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         firstname: response.data.firstname,
         lastname: response.data.lastname,
         permissions: response.data.permissions,
+        roles: response.data.roles,
+        groups: response.data.groups,
       });
       return true;
     } catch (error) {

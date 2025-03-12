@@ -7,6 +7,7 @@
   "staff": {
     "menu": {
       "terminal": "Terminal",
+      "home": "Accueil",
       "users": "Gestion des utilisateurs",
       "roles": "Gestion des rôles",
       "scopes": "Gestion des scopes",
