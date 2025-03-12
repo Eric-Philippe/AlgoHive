@@ -1,4 +1,9 @@
 {
+  "app": {
+    "name": "AlgoHive",
+    "description": "Algorithmic challenges platform",
+    "footer": "AlgoHive © 2025"
+  },
   "staff": {
     "menu": {
       "terminal": "Terminal",
@@ -11,6 +16,35 @@
     }
   },
   "login": {
-    "title": "Sign In"
+    "welcome": "Welcome to",
+    "description": "Log in to access the platform",
+    "title": "Log in",
+    "email": "Email address",
+    "password": "Password",
+    "remember": "Remember me",
+    "forgot": "Forgot your password?",
+    "submit": "Log in",
+    "noAccount": "Don't have an account yet?",
+    "askAdmin": "Ask your administrator",
+    "tagline": "Sweeten your coding skills, but the competition stings",
+    "feature1": {
+      "title": "Self-Hosted Coding Platform",
+      "desc": "A lightweight platform designed for developers to create and solve coding puzzles"
+    },
+    "feature2": {
+      "title": "Dual-Challenge Puzzles",
+      "desc": "Each puzzle contains two parts to solve, testing different coding skills"
+    },
+    "feature3": {
+      "title": "Competitive Learning",
+      "desc": "Create competitions for teams, schools, or organizations"
+    },
+    "feature4": {
+      "title": "Multilingual Support",
+      "desc": "Access AlgoHive in your preferred language: "
+    },
+    "error": "Login error.",
+    "invalidCredentials": "Invalid credentials.",
+    "invalidEmailOrPassword": "Invalid email or password."
   }
 }

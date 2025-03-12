@@ -40,24 +40,40 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const login = async (email: string, password: string) => {
     try {
-      axios
-        .post(API_ENDPOINT + "/auth/login", {
+      const response = await axios.post(
+        API_ENDPOINT + "/auth/login",
+        {
           email,
           password,
-        })
-        .then((response) => {
-          setUser({ id: response.data.user_id, email: response.data.email });
-        });
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      setUser({
+        id: response.data.user_id,
+        email: response.data.email,
+        firstname: response.data.firstname,
+        lastname: response.data.lastname,
+        permissions: response.data.permissions,
+      });
     } catch (error) {
-      console.error("Login failed", error);
-      throw error;
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        throw new Error("Identifiants invalides");
+      } else {
+        console.error("Erreur de connexion", error);
+        throw new Error("Erreur lors de la tentative de connexion");
+      }
     }
   };
 
   const logout = async () => {
     try {
       // Appeler l'API pour supprimer le cookie
-      await axios.post(API_ENDPOINT + "/auth/logout");
+      await axios.post(API_ENDPOINT + "/auth/logout", null, {
+        withCredentials: true,
+      });
       setUser(null);
     } catch (error) {
       console.error("Logout error", error);
@@ -66,13 +82,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const checkAuth = async () => {
     try {
+      if (location.pathname != "/login" && user != null) {
+        return true;
+      }
+
       setIsLoading(true);
       // Le cookie sera envoyé automatiquement avec la requête
       const response = await axios.get(API_ENDPOINT + "/auth/check", {
         withCredentials: true,
       });
 
-      setUser({ id: response.data.user_id, email: response.data.email });
+      console.log("User is authenticated", response.data);
+
+      setUser({
+        id: response.data.user_id,
+        email: response.data.email,
+        firstname: response.data.firstname,
+        lastname: response.data.lastname,
+        permissions: response.data.permissions,
+      });
       return true;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status !== 401) {
@@ -86,8 +114,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   useEffect(() => {
-    // Vérifier l'authentification au chargement
-    checkAuth();
+    if (location.pathname != "/login") {
+      checkAuth();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const value = {

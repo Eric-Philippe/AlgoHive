@@ -5,6 +5,7 @@ import (
 	"api/middleware"
 	"api/models"
 	"api/utils"
+	"api/utils/permissions"
 	"context"
 	"net/http"
 	"time"
@@ -31,6 +32,10 @@ type AuthResponse struct {
     Token  string `json:"token"`
     UserID string `json:"user_id"`
     Email  string `json:"email"`
+    Firstname string `json:"firstname"`
+    Lastname string `json:"lastname"`
+    LastConnected *time.Time `json:"last_connected"`
+    Permissions int `json:"permissions"`
 }
 
 // setCookieToken sets the authentication token as an HTTP-only secure cookie
@@ -69,7 +74,7 @@ func Login(c *gin.Context) {
     }
     
     var user models.User
-    result := database.DB.Where("email = ?", loginReq.Email).First(&user)
+    result := database.DB.Where("email = ?", loginReq.Email).Preload("Roles").First(&user)
     if result.Error != nil {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
         return
@@ -106,6 +111,10 @@ func Login(c *gin.Context) {
         Token:  token,
         UserID: user.ID,
         Email:  user.Email,
+        Firstname: user.Firstname,
+        Lastname: user.Lastname,
+        LastConnected: user.LastConnected,
+        Permissions: permissions.MergeRolePermissions(user.Roles),
     })
 }
 
@@ -170,6 +179,9 @@ func RegisterUser(c *gin.Context) {
         Token:  token,
         UserID: user.ID,
         Email:  user.Email,
+        Firstname: user.Firstname,
+        Lastname: user.Lastname,
+        LastConnected: user.LastConnected,
     })
 }
 
@@ -257,7 +269,7 @@ func CheckAuth(c *gin.Context) {
 
         // Get user data
         var user models.User
-        result := database.DB.Where("id = ?", claims.UserID).First(&user)
+        result := database.DB.Where("id = ?", claims.UserID).Preload("Roles").First(&user)
         if result.Error != nil {
             c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
             return
@@ -266,6 +278,10 @@ func CheckAuth(c *gin.Context) {
         c.JSON(http.StatusOK, AuthResponse{
             UserID: user.ID,
             Email:  user.Email,
+            Firstname: user.Firstname,
+            Lastname: user.Lastname,
+            LastConnected: user.LastConnected,
+            Permissions: permissions.MergeRolePermissions(user.Roles),
         })
 }
 

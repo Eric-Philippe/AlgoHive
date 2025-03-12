@@ -1,4 +1,9 @@
 {
+  "app": {
+    "name": "AlgoHive",
+    "description": "Plateforme de challenges algorithmiques",
+    "footer": "AlgoHive © 2025"
+  },
   "staff": {
     "menu": {
       "terminal": "Terminal",
@@ -11,6 +16,35 @@
     }
   },
   "login": {
-    "title": "Se connecter"
+    "welcome": "Bienvenue sur",
+    "description": "Connectez-vous pour accéder à la plateforme",
+    "title": "Connexion",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "remember": "Se souvenir de moi",
+    "forgot": "Mot de passe oublié ?",
+    "submit": "Se connecter",
+    "noAccount": "Pas encore de compte ?",
+    "askAdmin": "Demandez à votre administrateur",
+    "tagline": "Sweeten your coding skills, but the competition stings",
+    "feature1": {
+      "title": "Plateforme de Programmation Auto-Hébergée",
+      "desc": "Une plateforme légère conçue pour créer et résoudre des énigmes de programmation"
+    },
+    "feature2": {
+      "title": "Énigmes à Double Défi",
+      "desc": "Chaque énigme contient deux parties à résoudre, testant différentes compétences de programmation"
+    },
+    "feature3": {
+      "title": "Apprentissage Compétitif",
+      "desc": "Créez des compétitions pour équipes, écoles ou organisations"
+    },
+    "feature4": {
+      "title": "Support Multilingue",
+      "desc": "Accédez à AlgoHive dans votre langue préférée : "
+    },
+    "error": "Erreur de connexion.",
+    "invalidCredentials": "Identifiants invalides.",
+    "invalidEmailOrPassword": "E-mail ou mot de passe invalide."
   }
 }

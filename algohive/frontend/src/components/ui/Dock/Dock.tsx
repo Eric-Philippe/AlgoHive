@@ -7,9 +7,11 @@ import { TerminalService } from "primereact/terminalservice";
 import "./Dock.css";
 import { Tooltip } from "primereact/tooltip";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../../contexts/AuthContext";
 
 export default function AppDock() {
   const { t } = useTranslation();
+  const { logout } = useAuth();
   const [displayTerminal, setDisplayTerminal] = useState(false);
 
   const dockItems = [
@@ -172,6 +174,9 @@ export default function AppDock() {
         response = null;
         break;
 
+      case "logout":
+        logout();
+        break;
       default:
         response = "Unknown command: " + command;
         break;
@@ -190,6 +195,7 @@ export default function AppDock() {
     return () => {
       TerminalService.off("command", commandHandler);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

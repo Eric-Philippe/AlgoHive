@@ -39,3 +39,12 @@ func RolesHavePermission(roles []*models.Role, permission int) bool {
     }
     return false
 }
+
+// Function to merge the permissions of multiple roles
+func MergeRolePermissions(roles []*models.Role) int {
+    permissions := 0
+    for _, role := range roles {
+        permissions = AddPermission(permissions, role.Permissions)
+    }
+    return permissions
+}

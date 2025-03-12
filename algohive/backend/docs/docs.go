@@ -1746,6 +1746,18 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
+                "firstname": {
+                    "type": "string"
+                },
+                "last_connected": {
+                    "type": "string"
+                },
+                "lastname": {
+                    "type": "string"
+                },
+                "permissions": {
+                    "type": "integer"
+                },
                 "token": {
                     "type": "string"
                 },
