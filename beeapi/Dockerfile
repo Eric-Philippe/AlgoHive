@@ -40,8 +40,7 @@ COPY app/ ./app/
 COPY --from=frontend-build /app/frontend/dist /app/frontend/dist
 
 # Créer le dossier puzzles avec les permissions appropriées
-COPY puzzles/ ./puzzles/
-RUN chmod 777 /app/puzzles
+RUN mkdir -p /app/puzzles && chmod 777 /app/puzzles
 
 ENV SERVER_NAME="Local"
 EXPOSE 5000
