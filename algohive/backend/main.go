@@ -7,7 +7,9 @@ import (
 	v1 "api/routes/v1"
 
 	"log"
+	"strings"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -41,6 +43,16 @@ func main() {
 
     gin.SetMode(gin.ReleaseMode)
     r := gin.Default()
+
+    // Configure CORS
+    corsConfig := cors.DefaultConfig()
+    origins := strings.Split(config.AllowedOrigins, ",")
+    corsConfig.AllowOrigins = origins
+    corsConfig.AllowCredentials = true
+    corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+    corsConfig.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
+    r.Use(cors.New(corsConfig))
+
     docs.SwaggerInfo.BasePath = "/api/v1"
 
     v1.Register(r)

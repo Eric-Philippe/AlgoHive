@@ -33,6 +33,23 @@ type AuthResponse struct {
     Email  string `json:"email"`
 }
 
+// setCookieToken sets the authentication token as an HTTP-only secure cookie
+func setCookieToken(c *gin.Context, token string) {
+    // Set expiration time to match JWT validity (typically 24 hours)
+    cookieMaxAge := 24 * 3600 // 24 hours in seconds
+    
+    c.SetSameSite(http.SameSiteLaxMode)
+    c.SetCookie(
+        "auth_token",   // name
+        token,          // value
+        cookieMaxAge,   // max age
+        "/",            // path
+        "",             // domain
+        true,           // secure (HTTPS only)
+        true,           // httpOnly (not accessible via JavaScript)
+    )
+}
+
 // @Summary User Login
 // @Description Authenticate a user and return a JWT token
 // @Tags Auth
@@ -76,6 +93,9 @@ func Login(c *gin.Context) {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
         return
     }
+    
+    // Set the token as an HTTP-only cookie
+    setCookieToken(c, token)
     
     // Update last connected time
     now := time.Now()
@@ -143,6 +163,9 @@ func RegisterUser(c *gin.Context) {
         return
     }
     
+    // Set the token as an HTTP-only cookie
+    setCookieToken(c, token)
+    
     c.JSON(http.StatusCreated, AuthResponse{
         Token:  token,
         UserID: user.ID,
@@ -158,15 +181,20 @@ func RegisterUser(c *gin.Context) {
 // @Router /auth/logout [post]
 // @Security Bearer
 func Logout(c *gin.Context) {
-    // Get the token from the request
-    token := c.GetHeader("Authorization")
-    if token == "" {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "No token provided"})
-        return
-    }
+    // Get the token from the cookie first
+    token, err := c.Cookie("auth_token")
     
-    // Extract the actual token from "Bearer token"
-    token = token[7:] // Remove "Bearer " prefix
+    // If no cookie, try to get from Authorization header
+    if err != nil {
+        authHeader := c.GetHeader("Authorization")
+        if authHeader == "" {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "No token provided"})
+            return
+        }
+        
+        // Extract the actual token from "Bearer token"
+        token = authHeader[7:] // Remove "Bearer " prefix
+    }
     
     // Add token to blacklist in Redis with expiration matching the token's expiration
     // Parse token to get expiration time
@@ -189,7 +217,56 @@ func Logout(c *gin.Context) {
         return
     }
     
+    // Clear the auth cookie
+    c.SetCookie("auth_token", "", -1, "/", "", true, true)
+    
     c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
+}
+
+// @Summary Check if the sent cookie token session is still valid and return user data
+// @Description Check if the sent cookie token session is still valid and return user data
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} AuthResponse
+// @Failure 401 {object} map[string]string
+// @Router /auth/check [get]
+// @Security Bearer
+func CheckAuth(c *gin.Context) {
+        // Get the token from the cookie first
+        token, err := c.Cookie("auth_token")
+    
+        // If no cookie, try to get from Authorization header
+        if err != nil {
+            authHeader := c.GetHeader("Authorization")
+            if authHeader == "" {
+                c.JSON(http.StatusUnauthorized, gin.H{"error": "No token provided"})
+                return
+            }
+            
+            // Extract the actual token from "Bearer token"
+            token = authHeader[7:] // Remove "Bearer " prefix
+        }
+
+        // Validate the token
+        claims, err := utils.ValidateToken(token)
+        if err != nil {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+            return
+        }
+
+        // Get user data
+        var user models.User
+        result := database.DB.Where("id = ?", claims.UserID).First(&user)
+        if result.Error != nil {
+            c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+            return
+        }
+
+        c.JSON(http.StatusOK, AuthResponse{
+            UserID: user.ID,
+            Email:  user.Email,
+        })
 }
 
 // Register the endpoints for the v1 API
@@ -200,5 +277,6 @@ func RegisterAuthRoutes(r *gin.RouterGroup) {
         auth.POST("/login", Login)
         auth.POST("/register", RegisterUser)
         auth.POST("/logout", middleware.AuthMiddleware(), Logout)
+        auth.GET("/check", middleware.AuthMiddleware(), CheckAuth)
     }
 }

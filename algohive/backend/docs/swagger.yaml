@@ -230,6 +230,31 @@ paths:
       summary: Get all APIs Catalog
       tags:
       - APIs
+  /auth/check:
+    get:
+      consumes:
+      - application/json
+      description: Check if the sent cookie token session is still valid and return
+        user data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.AuthResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Check if the sent cookie token session is still valid and return user
+        data
+      tags:
+      - Auth
   /auth/login:
     post:
       consumes:

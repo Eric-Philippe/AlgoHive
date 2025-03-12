@@ -25,7 +25,6 @@ var DefaultPassword = "admin"
 // InitDB initializes the database connection and migrates the models and populates the database with default values if needed
 func InitDB() {
     dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable TimeZone=Europe/Paris", config.PostgresHost, config.PostgresPort, config.PostgresUser, config.PostgresDB, config.PostgresPassword)
-    log.Println("Connecting to database: ", dsn)
     
     var err error
     DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})

@@ -50,6 +50,7 @@ services:
   db:
     container_name: algohive-db
     image: postgres:17-alpine
+    restart: unless-stopped
     env_file: server.env
     volumes:
       - ./data/db-data:/var/lib/postgresql/data
