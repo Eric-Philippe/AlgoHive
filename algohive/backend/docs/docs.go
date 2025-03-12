@@ -46,7 +46,56 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.APIEnvironment"
+                                "$ref": "#/definitions/v1.APIEnvironmentResponse"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/apis/{apiID}/themes": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all the themes from a single API from it's ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "APIs"
+                ],
+                "summary": "Get all the themes from a single API from it's ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API ID",
+                        "name": "apiID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v1.ThemeResponse"
                             }
                         }
                     },
@@ -1569,6 +1618,9 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
+                "description": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -1740,6 +1792,29 @@ const docTemplate = `{
                 }
             }
         },
+        "v1.APIEnvironmentResponse": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "scopes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Scope"
+                    }
+                }
+            }
+        },
         "v1.AuthResponse": {
             "type": "object",
             "properties": {
@@ -1749,6 +1824,12 @@ const docTemplate = `{
                 "firstname": {
                     "type": "string"
                 },
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Group"
+                    }
+                },
                 "last_connected": {
                     "type": "string"
                 },
@@ -1757,6 +1838,12 @@ const docTemplate = `{
                 },
                 "permissions": {
                     "type": "integer"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Role"
+                    }
                 },
                 "token": {
                     "type": "string"
@@ -1820,6 +1907,44 @@ const docTemplate = `{
                 }
             }
         },
+        "v1.PuzzleResponse": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "cipher": {
+                    "type": "string"
+                },
+                "compressedSize": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "difficulty": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "obscure": {
+                    "type": "string"
+                },
+                "uncompressedSize": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "v1.RegisterRequest": {
             "type": "object",
             "required": [
@@ -1841,6 +1966,26 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "minLength": 8
+                }
+            }
+        },
+        "v1.ThemeResponse": {
+            "type": "object",
+            "properties": {
+                "enigmes_count": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "puzzles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1.PuzzleResponse"
+                    }
+                },
+                "size": {
+                    "type": "integer"
                 }
             }
         },

@@ -116,7 +116,7 @@ export default function AppDock({ setPage }: AppDockProps) {
   }, []);
 
   return (
-    <div className="dock-window dock-advanced">
+    <div className="dock-window dock-advanced app-dock">
       <Tooltip
         className="dark-tooltip"
         target=".dock-advanced .p-dock-action"

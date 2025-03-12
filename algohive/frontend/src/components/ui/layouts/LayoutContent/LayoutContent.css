@@ -1,4 +1,15 @@
 .layout-content {
   padding: 6rem 4rem 0;
-  display: flex;
+}
+
+@media screen and (max-width: 768px) {
+  .layout-content {
+    padding: 3rem 1.5rem 0;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .layout-content {
+    padding: 2rem 1rem 0;
+  }
 }

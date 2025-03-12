@@ -22,13 +22,13 @@ export default function StaffDashboard() {
     <div className="layout-wrapper layout-dark">
       <LayoutTopBar />
       <LayoutContent>
-        <AppDock setPage={setActivePage} />
-        <div className="content-area">
+        <div className="">
           <Suspense fallback={<div className="loading">Loading...</div>}>
             {ActiveComponent != null ? <ActiveComponent /> : <></>}
           </Suspense>
         </div>
       </LayoutContent>
+      <AppDock setPage={setActivePage} />
     </div>
   );
 }

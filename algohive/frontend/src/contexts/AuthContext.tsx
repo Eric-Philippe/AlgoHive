@@ -7,8 +7,7 @@ import {
 } from "react";
 import axios from "axios";
 import { User } from "../models/User";
-
-const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT;
+import { ApiClient } from "../config/ApiClient";
 
 interface AuthContextType {
   user: User | null;
@@ -40,16 +39,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post(
-        API_ENDPOINT + "/auth/login",
-        {
-          email,
-          password,
-        },
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await ApiClient.post("/auth/login", {
+        email,
+        password,
+      });
 
       setUser({
         id: response.data.user_id,
@@ -73,9 +66,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = async () => {
     try {
       // Appeler l'API pour supprimer le cookie
-      await axios.post(API_ENDPOINT + "/auth/logout", null, {
-        withCredentials: true,
-      });
+      await ApiClient.post("/auth/logout");
       setUser(null);
     } catch (error) {
       console.error("Logout error", error);
@@ -90,11 +81,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       setIsLoading(true);
       // Le cookie sera envoyé automatiquement avec la requête
-      const response = await axios.get(API_ENDPOINT + "/auth/check", {
-        withCredentials: true,
-      });
-
-      console.log("User is authenticated", response.data);
+      const response = await ApiClient.get("/auth/check");
 
       setUser({
         id: response.data.user_id,
