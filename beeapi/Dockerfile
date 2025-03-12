@@ -32,14 +32,16 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Copier uniquement les fichiers Python nécessaires
 COPY server.py .
-COPY *.py ./
-COPY modules/ ./modules/
+COPY app/ ./app/
+# Retirer la ligne qui cause l'erreur
+# COPY modules/ ./modules/
 
 # Copier les fichiers compilés du frontend
 COPY --from=frontend-build /app/frontend/dist /app/frontend/dist
 
 # Créer le dossier puzzles avec les permissions appropriées
-RUN mkdir -p /app/puzzles && chmod 777 /app/puzzles
+COPY puzzles/ ./puzzles/
+RUN chmod 777 /app/puzzles
 
 ENV SERVER_NAME="Local"
 EXPOSE 5000
