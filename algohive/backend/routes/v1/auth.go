@@ -19,24 +19,6 @@ type LoginRequest struct {
     Password string `json:"password" binding:"required"`
 }
 
-// convertRoles converts []*models.Role to []models.Role
-func convertRoles(roles []*models.Role) []models.Role {
-    var result []models.Role
-    for _, role := range roles {
-        result = append(result, *role)
-    }
-    return result
-}
-
-// convertGroups converts []*models.Group to []models.Group
-func convertGroups(groups []*models.Group) []models.Group {
-    var result []models.Group
-    for _, group := range groups {
-        result = append(result, *group)
-    }
-    return result
-}
-
 // RegisterRequest model for registration
 type RegisterRequest struct {
     Email     string `json:"email" binding:"required,email"`
@@ -134,8 +116,8 @@ func Login(c *gin.Context) {
         Lastname: user.Lastname,
         LastConnected: user.LastConnected,
         Permissions: permissions.MergeRolePermissions(user.Roles),
-        Roles: convertRoles(user.Roles),
-        Groups: convertGroups(user.Groups),
+        Roles: utils.ConvertRoles(user.Roles),
+        Groups: utils.ConvertGroups(user.Groups),
     })
 }
 
@@ -204,8 +186,8 @@ func RegisterUser(c *gin.Context) {
         Lastname: user.Lastname,
         LastConnected: user.LastConnected,
         Permissions: permissions.MergeRolePermissions(user.Roles),
-        Roles: convertRoles(user.Roles),
-        Groups: convertGroups(user.Groups),
+        Roles: utils.ConvertRoles(user.Roles),
+        Groups: utils.ConvertGroups(user.Groups),
     })
 }
 
@@ -306,8 +288,8 @@ func CheckAuth(c *gin.Context) {
             Lastname: user.Lastname,
             LastConnected: user.LastConnected,
             Permissions: permissions.MergeRolePermissions(user.Roles),
-            Roles: convertRoles(user.Roles),
-            Groups: convertGroups(user.Groups),
+            Roles: utils.ConvertRoles(user.Roles),
+            Groups: utils.ConvertGroups(user.Groups),
         })
 }
 

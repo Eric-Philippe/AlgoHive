@@ -7,6 +7,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import { Message } from "primereact/message";
 
 import "./Catalogs.css";
+import { t } from "i18next";
 
 export default function CatalogsPage() {
   const [catalogs, setCatalogs] = useState<Catalog[]>([]);
@@ -67,7 +68,7 @@ export default function CatalogsPage() {
 
             <div className="mt-auto">
               <Button
-                label="More details"
+                label={t("staff.catalogs.viewDetails")}
                 icon="pi pi-arrow-right"
                 iconPos="right"
                 className="p-button-rounded p-button-outlined w-full"
@@ -81,12 +82,7 @@ export default function CatalogsPage() {
   };
 
   return (
-    <div className="catalogs-page p-4 min-h-screen mb-28">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-white mb-2">Catalogues</h1>
-        <div className="w-20 h-1 bg-amber-500 rounded"></div>
-      </div>
-
+    <div className="p-4 min-h-screen mb-28">
       {loading && (
         <div className="flex flex-col items-center justify-center p-6">
           <ProgressSpinner style={{ width: "50px", height: "50px" }} />

@@ -14,6 +14,20 @@
       "groups": "Group Management",
       "competitions": "Competition Management",
       "apis": "Puzzle Catalog"
+    },
+    "scopes": {
+      "new": "Create a new scope",
+      "name": "Name",
+      "scopeName": "Scope Name",
+      "description": "Description",
+      "scopeDescription": "Scope Description",
+      "catalogs": "Catalogs",
+      "selectCatalogs": "Select catalogs",
+      "create": "Create",
+      "viewDetails": "More details"
+    },
+    "catalogs": {
+      "viewDetails": "More details"
     }
   },
   "login": {

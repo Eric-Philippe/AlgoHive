@@ -15,7 +15,8 @@ interface AppDockProps {
 }
 
 export default function AppDock({ setPage }: AppDockProps) {
-  const { t } = useTranslation();
+  const { user } = useAuth();
+  const { i18n, t } = useTranslation();
   const { logout } = useAuth();
   const [displayTerminal, setDisplayTerminal] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -61,16 +62,26 @@ export default function AppDock({ setPage }: AppDockProps) {
     },
   ];
 
-  StaffMenuItems.forEach((item) => {
+  // StaffMenuItems.forEach((item) => {
+  //   dockItems.push({
+  //     label: item.label,
+  //     icon: () => createIconContainer(item.icon, item.color),
+  //     command: () => setPage(item.id),
+  //   });
+  // });
+
+  for (const item of StaffMenuItems) {
+    if (item.showInMenu && user && !item.showInMenu(user)) continue;
     dockItems.push({
       label: item.label,
       icon: () => createIconContainer(item.icon, item.color),
       command: () => setPage(item.id),
     });
-  });
+  }
 
   const commandHandler = (text: string) => {
     let response;
+    const lang = i18n.language === "en" ? "fr" : "en";
     const argsIndex = text.indexOf(" ");
     const command = argsIndex !== -1 ? text.substring(0, argsIndex) : text;
 
@@ -93,6 +104,11 @@ export default function AppDock({ setPage }: AppDockProps) {
 
       case "logout":
         logout();
+        break;
+
+      case "lang":
+        i18n.changeLanguage(lang);
+        response = "Language switched to " + lang;
         break;
       default:
         response = "Unknown command: " + command;
@@ -132,7 +148,7 @@ export default function AppDock({ setPage }: AppDockProps) {
       <Dialog
         visible={displayTerminal}
         breakpoints={{ "960px": "75vw", "600px": "90vw" }}
-        style={{ width: windowWidth < 768 ? "90vw" : "30vw" }}
+        style={{ width: windowWidth < 768 ? "120vw" : "30vw" }}
         onHide={() => setDisplayTerminal(false)}
         maximizable
         blockScroll={false}

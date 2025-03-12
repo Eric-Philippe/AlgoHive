@@ -14,6 +14,20 @@
       "groups": "Gestion des groupes",
       "competitions": "Gestion des compétitions",
       "apis": "Catalogue des énigmes"
+    },
+    "scopes": {
+      "new": "Créer un nouveau scope",
+      "name": "Nom",
+      "scopeName": "Nom du scope",
+      "description": "Description",
+      "scopeDescription": "Description du scope",
+      "catalogs": "Catalogues",
+      "selectCatalogs": "Sélectionner les catalogues",
+      "create": "Créer",
+      "viewDetails": "Plus de détails"
+    },
+    "catalogs": {
+      "viewDetails": "Plus de détails"
     }
   },
   "login": {

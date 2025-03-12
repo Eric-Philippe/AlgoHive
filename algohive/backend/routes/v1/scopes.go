@@ -4,7 +4,9 @@ import (
 	"api/database"
 	"api/middleware"
 	"api/models"
+	"api/utils"
 	"api/utils/permissions"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +15,17 @@ import (
 // CreateScopeRequest model for creating a scope
 type CreateScopeRequest struct {
     Name string `json:"name" binding:"required"`
+    Description string `json:"description"`
     ApiIds []string `json:"api_ids" binding:"required"`
+}
+
+// ScopeResponse model for returning a scope
+type ScopeResponse struct {
+    ID string `json:"id"`
+    Name string `json:"name"`
+    Description string `json:"description"`
+    APIEnvironments []models.APIEnvironment `json:"catalogs"`
+    Roles []models.Role `json:"roles"`
 }
 
 // @Summary Get all scopes
@@ -21,7 +33,7 @@ type CreateScopeRequest struct {
 // @Tags Scopes
 // @Accept json
 // @Produce json
-// @Success 200 {array} models.Scope
+// @Success 200 {array} ScopeResponse
 // @Failure 401 {object} map[string]string
 // @Router /scopes [get]
 // @Security Bearer
@@ -46,7 +58,69 @@ func GetAllScopes(c *gin.Context) {
 
     var scopes []models.Scope
         database.DB.Find(&scopes)
-        c.JSON(http.StatusOK, scopes)
+        var scopeResponses []ScopeResponse
+        for _, scope := range scopes {
+            scopeResponses = append(scopeResponses, ScopeResponse{
+                ID: scope.ID,
+                Name: scope.Name,
+                Description: scope.Description,
+                APIEnvironments: utils.ConvertAPIEnvironments(scope.APIEnvironments),
+                Roles: utils.ConvertRoles(scope.Roles),
+            })
+        }
+
+        c.JSON(http.StatusOK, scopeResponses)
+}
+
+// @Summary Get all scopes that the user has access to
+// @Description Get all scopes that the user has access to (based on roles) if the user has the SCOPES permission we return all scopes
+// @Tags Scopes
+// @Accept json
+// @Produce json
+// @Success 200 {array} ScopeResponse
+// @Failure 401 {object} map[string]string
+// @Router /scopes/user [get]
+// @Security Bearer
+func GetUserScopes(c *gin.Context) {
+    userID, exists := c.Get("userID")
+    if !exists {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+        return
+    }
+
+    var user models.User
+    result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
+    if result.Error != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+        return
+    }
+
+    var scopes []models.Scope
+    if permissions.RolesHavePermission(user.Roles, permissions.SCOPES) {
+        database.DB.Preload("APIEnvironments").Preload("Roles").Find(&scopes)
+    } else {
+        database.DB.Model(&user).Preload("Roles").Preload("Roles.Scopes").First(&user)
+        for _, role := range user.Roles {
+            for _, scope := range role.Scopes {
+                if !utils.ContainsScope(scopes, scope.ID) {
+                    scopes = append(scopes, *scope)
+                }
+            }
+        }
+    }
+
+    var scopeResponses []ScopeResponse
+    for _, scope := range scopes {
+        scopeResponses = append(scopeResponses, ScopeResponse{
+            ID: scope.ID,
+            Name: scope.Name,
+            Description: scope.Description,
+            APIEnvironments: utils.ConvertAPIEnvironments(scope.APIEnvironments),
+            Roles: utils.ConvertRoles(scope.Roles),
+        })
+    }
+
+    c.JSON(http.StatusOK, scopeResponses)
 }
 
 // @Summary Get a scope
@@ -55,7 +129,7 @@ func GetAllScopes(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param scope_id path string true "Scope ID"
-// @Success 200 {object} models.Scope
+// @Success 200 
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /scopes/{id} [get]
@@ -87,7 +161,16 @@ func GetScope(c *gin.Context) {
         return
     }
 
-    c.JSON(http.StatusOK, scope)
+    // Parse the found scope into a response
+    scopeResponse := ScopeResponse{
+        ID: scope.ID,
+        Name: scope.Name,
+        Description: scope.Description,
+        APIEnvironments: utils.ConvertAPIEnvironments(scope.APIEnvironments),
+        Roles: utils.ConvertRoles(scope.Roles),
+    }
+
+    c.JSON(http.StatusOK, scopeResponse)
 }
 
 // @Summary Create a scope
@@ -126,6 +209,7 @@ func CreateScope(c *gin.Context) {
         return
     }
 
+    log.Println(createScopeReq.ApiIds)
     var apiEnv[]*models.APIEnvironment
     database.DB.Where("id IN (?)", createScopeReq.ApiIds).Find(&apiEnv)
 
@@ -136,6 +220,7 @@ func CreateScope(c *gin.Context) {
 
     scope := models.Scope{
         Name: createScopeReq.Name,
+        Description: createScopeReq.Description,
     }
 
     if err := database.DB.Create(&scope).Error; err != nil {
@@ -390,6 +475,7 @@ func RegisterScopesRoutes(r *gin.RouterGroup) {
     {
         scopes.POST("/", CreateScope)
         scopes.GET("/", GetAllScopes)
+        scopes.GET("/user", GetUserScopes)
         scopes.GET("/:scope_id", GetScope)
         scopes.PUT("/:scope_id", UpdateScope)
         scopes.POST("/:scope_id/roles/:role_id", AttachScopeToRole)

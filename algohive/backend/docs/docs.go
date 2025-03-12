@@ -896,7 +896,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Scope"
+                                "$ref": "#/definitions/v1.ScopeResponse"
                             }
                         }
                     },
@@ -967,6 +967,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/scopes/user": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all scopes that the user has access to (based on roles) if the user has the SCOPES permission we return all scopes",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Scopes"
+                ],
+                "summary": "Get all scopes that the user has access to",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v1.ScopeResponse"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/scopes/{id}": {
             "get": {
                 "security": [
@@ -996,10 +1036,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Scope"
-                        }
+                        "description": "OK"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -1887,6 +1924,9 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "description": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 }
@@ -1966,6 +2006,32 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "minLength": 8
+                }
+            }
+        },
+        "v1.ScopeResponse": {
+            "type": "object",
+            "properties": {
+                "catalogs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.APIEnvironment"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Role"
+                    }
                 }
             }
         },

@@ -178,6 +178,8 @@ definitions:
         items:
           type: string
         type: array
+      description:
+        type: string
       name:
         type: string
     required:
@@ -235,6 +237,23 @@ definitions:
     - firstname
     - lastname
     - password
+    type: object
+  v1.ScopeResponse:
+    properties:
+      catalogs:
+        items:
+          $ref: '#/definitions/models.APIEnvironment'
+        type: array
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      roles:
+        items:
+          $ref: '#/definitions/models.Role'
+        type: array
     type: object
   v1.ThemeResponse:
     properties:
@@ -834,7 +853,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Scope'
+              $ref: '#/definitions/v1.ScopeResponse'
             type: array
         "401":
           description: Unauthorized
@@ -932,8 +951,6 @@ paths:
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/models.Scope'
         "400":
           description: Bad Request
           schema:
@@ -1070,6 +1087,32 @@ paths:
       security:
       - Bearer: []
       summary: Attach the scope to a role
+      tags:
+      - Scopes
+  /scopes/user:
+    get:
+      consumes:
+      - application/json
+      description: Get all scopes that the user has access to (based on roles) if
+        the user has the SCOPES permission we return all scopes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v1.ScopeResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Get all scopes that the user has access to
       tags:
       - Scopes
   /user/{user_id}/role/{role_id}:

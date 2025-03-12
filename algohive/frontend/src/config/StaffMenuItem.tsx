@@ -1,5 +1,7 @@
 import { JSX, lazy } from "react";
 import { TFunction } from "i18next";
+import { User } from "../models/User";
+import { Permission, rolesHavePermission } from "../utils/permissions";
 
 // Lazy load components
 const HomePage = lazy(() => import("../Pages/staff/Home/Home"));
@@ -19,6 +21,7 @@ export interface MenuItem {
   color: string;
   Component: React.LazyExoticComponent<() => JSX.Element>;
   permissions?: string[];
+  showInMenu?: (user: User) => boolean;
 }
 
 // Function that returns translated menu items
@@ -50,6 +53,8 @@ export const getStaffMenuItems = (t: TFunction): MenuItem[] => [
     icon: "pi pi-building",
     color: "#44174E",
     Component: ScopesPage,
+    showInMenu: (user: User) =>
+      rolesHavePermission(user.roles, Permission.SCOPES),
   },
   {
     id: "groups",
