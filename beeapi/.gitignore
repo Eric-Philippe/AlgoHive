@@ -1,0 +1,6 @@
+#
+# BeeAPI - Server
+#
+puzzles/*
+!puzzles/sample
+__pycache__/

@@ -1,32 +1,4 @@
 #
-# HiveCraft - Forge
-#
-__pycache__/
-tmp/
-
-#
-# BeeAPI - Server
-#
-beeapi/puzzles/*
-!beeapi/puzzles/sample
-
-#
-# BeeAPI - Frontend
-#
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-node_modules
-dist
-dist-ssr
-*.local
-
-#
 # Deployments
 #
 server.env
