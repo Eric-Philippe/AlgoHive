@@ -2,6 +2,11 @@ package utils
 
 import (
 	"api/models"
+	"bytes"
+	"io"
+	"log"
+
+	"github.com/gin-gonic/gin"
 )
 
 // convertRoles converts []*models.Role to []models.Role
@@ -22,6 +27,15 @@ func ConvertGroups(groups []*models.Group) []models.Group {
     return result
 }
 
+// convertScopes converts []*models.Scope to []models.Scope
+func ConvertScopes(scopes []*models.Scope) []models.Scope {
+	var result []models.Scope
+	for _, scope := range scopes {
+		result = append(result, *scope)
+	}
+	return result
+}
+
 // convertAPIEnvironments converts []*models.APIEnvironment to []models.APIEnvironment
 func ConvertAPIEnvironments(environments []*models.APIEnvironment) []models.APIEnvironment {
 	var result []models.APIEnvironment
@@ -38,4 +52,12 @@ func ContainsScope(scopes []models.Scope, scopeId string) bool {
 		}
 	}
 	return false
+}
+
+func DisplayBodyContent(c *gin.Context) {
+	// Print the body
+	bodyData, _ := io.ReadAll(c.Request.Body)
+	log.Printf("Incoming request body: %s", string(bodyData))
+	// We need to restore the body for binding
+	c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyData))
 }

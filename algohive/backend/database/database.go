@@ -19,7 +19,7 @@ import (
 
 var DB *gorm.DB
 
-var AdminRole = "admin"
+var AdminRole = "Owner"
 var DefaultPassword = "admin"
 
 // InitDB initializes the database connection and migrates the models and populates the database with default values if needed

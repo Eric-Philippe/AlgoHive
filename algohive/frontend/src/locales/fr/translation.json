@@ -15,6 +15,36 @@
       "competitions": "Gestion des compétitions",
       "apis": "Catalogue des énigmes"
     },
+    "roles": {
+      "new": "Créer un nouveau rôle",
+      "name": "Nom",
+      "roleName": "Nom du rôle",
+      "permissionsTitle": "Permissions",
+      "scopes": "Scopes",
+      "selectScopes": "Scopes accessibles",
+      "create": "Créer",
+      "viewDetails": "Plus de détails",
+      "usersTitle": "Nombre d'utilisateurs ayant ce rôle",
+      "loading": "Chargement des rôles...",
+      "errorFetchingRoles": "Une erreur est survenue lors de la récupération des rôles.",
+      "errorDeletingRole": "Une erreur est survenue lors de la suppression du rôle.",
+      "roleDeleted": "Rôle supprimé avec succès.",
+      "noRoles": "Aucun rôle trouvé.",
+      "errorNameRequired": "Le nom du rôle est requis.",
+      "roleCreated": "Rôle créé avec succès.",
+      "errorCreatingRole": "Une erreur est survenue lors de la création du rôle.",
+      "noScopes": "Aucun",
+      "noUsers": "Aucun",
+      "delete": "Supprimer",
+      "permissions": {
+        "users": "Utilisateurs",
+        "roles": "Rôles",
+        "scopes": "Scopes",
+        "groups": "Groupes",
+        "competitions": "Compétitions",
+        "catalogs": "Catalogues"
+      }
+    },
     "scopes": {
       "new": "Créer un nouveau scope",
       "name": "Nom",
@@ -24,10 +54,19 @@
       "catalogs": "Catalogues",
       "selectCatalogs": "Sélectionner les catalogues",
       "create": "Créer",
-      "viewDetails": "Plus de détails"
+      "viewDetails": "Plus de détails",
+      "loading": "Chargement des scopes...",
+      "errorFetchingScopes": "Une erreur est survenue lors de la récupération des scopes.",
+      "noScopes": "Aucun scope trouvé.",
+      "errorNameRequired": "Le nom du scope est requis.",
+      "scopeCreated": "Scope créé avec succès.",
+      "errorCreatingScope": "Une erreur est survenue lors de la création du scope."
     },
     "catalogs": {
-      "viewDetails": "Plus de détails"
+      "viewDetails": "Plus de détails",
+      "loading": "Chargement des catalogues...",
+      "errorFetchingCatalogs": "Une erreur est survenue lors de la récupération des catalogues.",
+      "noCatalogs": "Aucun catalogue trouvé."
     }
   },
   "login": {

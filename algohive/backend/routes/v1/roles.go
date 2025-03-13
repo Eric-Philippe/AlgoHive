@@ -10,12 +10,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type CreateRoleRequest struct {
+	Name string        `json:"name" binding:"required"`
+	Permission int   `json:"permission"`
+	ScopesIds []string `json:"scopes_ids"`
+}
+
 // @Summary Create a new Role
 // @Description Create a new Role
 // @Tags Roles
 // @Accept json
 // @Produce json
-// @Param role body models.Role true "Role Profile"
+// @Param role body CreateRoleRequest true "Role Profile"
 // @Success 200 {object} models.Role
 // @Failure 400 {object} map[string]string
 // @Router /roles [post]
@@ -39,15 +45,33 @@ func CreateRole(c *gin.Context) {
 		return
 	}
 
-	var role models.Role
-	if err := c.ShouldBindJSON(&role); err != nil {
+	var createRoleRequest CreateRoleRequest
+	if err := c.ShouldBindJSON(&createRoleRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	// If there is no scope
+	var scopePointers []*models.Scope
+	if len(createRoleRequest.ScopesIds) > 0 {
+		var scopes []models.Scope
+		database.DB.Where("id IN (?)", createRoleRequest.ScopesIds).Find(&scopes)
+		
+		for i := range scopes {
+			scopePointers = append(scopePointers, &scopes[i])
+		}
+	}
+
+
+	role := models.Role{
+		Name: createRoleRequest.Name,
+		Permissions: createRoleRequest.Permission,
+		Scopes: scopePointers,
+	}
+
 	database.DB.Create(&role)
 
-	c.JSON(http.StatusOK, role)
+	c.JSON(http.StatusCreated, role)
 }
 
 // @Summary Get all Roles
@@ -77,7 +101,7 @@ func GetAllRoles(c *gin.Context) {
 	}
 
 	var roles []models.Role
-	database.DB.Find(&roles)
+	database.DB.Preload("Users").Preload("Scopes").Find(&roles)
 	c.JSON(http.StatusOK, roles)
 }
 
@@ -262,6 +286,77 @@ func DetachRoleFromUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// @Summary delete a role
+// @Description delete a role and cascade first to roles_scopes and user_roles
+// @Tags Roles
+// @Accept json
+// @Produce json
+// @Param role_id path string true "Role ID"
+// @Success 200 {object} models.Role
+// @Failure 404 {object} map[string]string
+// @Router /roles/{role_id} [delete]
+// @Security Bearer
+func DeleteRole(c *gin.Context) {
+    roleID := c.Param("role_id")
+
+    userID, exists := c.Get("userID")
+    if !exists {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+        return
+    }
+
+    var user models.User
+    result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
+    if result.Error != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+        return
+    }
+
+    if !permissions.RolesHavePermission(user.Roles, permissions.ROLES) {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to delete roles"})
+        return
+    }
+
+    var role models.Role
+    result = database.DB.Where("id = ?", roleID).First(&role)
+    if result.Error != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
+        return
+    }
+
+    // Begin a transaction to ensure all operations succeed or fail together
+    tx := database.DB.Begin()
+
+    // Remove the role from all users who have it (clear user_roles associations)
+    if err := tx.Exec("DELETE FROM user_roles WHERE role_id = ?", roleID).Error; err != nil {
+        tx.Rollback()
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove role associations from users"})
+        return
+    }
+
+    // Remove all scope associations (clear role_scopes associations)
+    if err := tx.Exec("DELETE FROM role_scopes WHERE role_id = ?", roleID).Error; err != nil {
+        tx.Rollback()
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove role associations from scopes"})
+        return
+    }
+
+    // Now delete the role itself
+    if err := tx.Delete(&role).Error; err != nil {
+        tx.Rollback()
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete role"})
+        return
+    }
+
+    // Commit the transaction
+    if err := tx.Commit().Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
+        return
+    }
+
+    c.JSON(http.StatusOK, role)
+}
+
 // Register the endpoints for the v1 API
 func RegisterRolesRoutes(r *gin.RouterGroup) {    
     user := r.Group("/roles")
@@ -273,5 +368,6 @@ func RegisterRolesRoutes(r *gin.RouterGroup) {
 		user.PUT("/:role_id", UpdateRoleByID)
 		user.POST("/:role_id/user/:user_id", AttachRoleToUser)
 		user.DELETE("/:role_id/user/:user_id", DetachRoleFromUser)
+		user.DELETE("/:role_id", DeleteRole)
     }
 }

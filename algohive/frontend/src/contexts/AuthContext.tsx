@@ -55,10 +55,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
-        throw new Error("Identifiants invalides");
+        throw new Error("Invalid credentials");
       } else {
-        console.error("Erreur de connexion", error);
-        throw new Error("Erreur lors de la tentative de connexion");
+        console.error("Login error", error);
+        throw new Error("Connection error");
       }
     }
   };

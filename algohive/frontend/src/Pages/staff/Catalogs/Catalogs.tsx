@@ -21,9 +21,7 @@ export default function CatalogsPage() {
         const data = await fetchCatalogs();
         setCatalogs(data);
       } catch (err) {
-        setError(
-          "Une erreur est survenue lors de la récupération des catalogues"
-        );
+        setError(t("staff.catalogs.errorFetchingCatalogs"));
         console.error(err);
       } finally {
         setLoading(false);
@@ -86,7 +84,7 @@ export default function CatalogsPage() {
       {loading && (
         <div className="flex flex-col items-center justify-center p-6">
           <ProgressSpinner style={{ width: "50px", height: "50px" }} />
-          <p className="mt-4 text-gray-600">Chargement des catalogues...</p>
+          <p className="mt-4 text-gray-600">{t("staff.catalogs.loading")}</p>
         </div>
       )}
 
@@ -102,7 +100,9 @@ export default function CatalogsPage() {
       {!loading && !error && catalogs.length === 0 && (
         <div className="flex flex-col items-center justify-center p-12 bg-white rounded-lg shadow">
           <i className="pi pi-inbox text-5xl text-gray-400 mb-4"></i>
-          <p className="text-gray-600 text-xl">Aucun catalogue trouvé</p>
+          <p className="text-gray-600 text-xl">
+            {t("staff.catalogs.noCatalogs")}
+          </p>
         </div>
       )}
 

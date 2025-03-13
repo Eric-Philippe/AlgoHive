@@ -6,12 +6,12 @@ export async function fetchScopes(): Promise<Scope[]> {
     const response = await ApiClient.get("/scopes/user");
 
     if (response.status !== 200) {
-      throw new Error(`Erreur: ${response.status}`);
+      throw new Error(`Error: ${response.status}`);
     }
 
     return response.data;
   } catch (error) {
-    console.error("Erreur lors de la récupération des scopes:", error);
+    console.error("Error fetching scopes:", error);
     throw error;
   }
 }
@@ -29,12 +29,12 @@ export async function createScope(
     });
 
     if (response.status !== 201) {
-      throw new Error(`Erreur: ${response.status}`);
+      throw new Error(`Error: ${response.status}`);
     }
 
     return response.data;
   } catch (error) {
-    console.error("Erreur lors de la création du scope:", error);
+    console.error("Error creating scope:", error);
     throw error;
   }
 }

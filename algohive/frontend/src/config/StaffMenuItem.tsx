@@ -46,6 +46,8 @@ export const getStaffMenuItems = (t: TFunction): MenuItem[] => [
     icon: "pi pi-shield",
     color: "#662249",
     Component: RolesPage,
+    showInMenu: (user: User) =>
+      rolesHavePermission(user.roles, Permission.ROLES),
   },
   {
     id: "scopes",

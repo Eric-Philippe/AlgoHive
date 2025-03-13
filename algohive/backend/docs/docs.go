@@ -741,7 +741,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Role"
+                            "$ref": "#/definitions/v1.CreateRoleRequest"
                         }
                     }
                 ],
@@ -858,6 +858,50 @@ const docTemplate = `{
                             "additionalProperties": {
                                 "type": "string"
                             }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "delete a role and cascade first to roles_scopes and user_roles",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "delete a role",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Role ID",
+                        "name": "role_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Role"
                         }
                     },
                     "404": {
@@ -1675,10 +1719,10 @@ const docTemplate = `{
         "models.Competition": {
             "type": "object",
             "properties": {
-                "apienvironmentID": {
+                "api_environment_id": {
                     "type": "string"
                 },
-                "apitheme": {
+                "api_theme": {
                     "type": "string"
                 },
                 "description": {
@@ -1722,7 +1766,7 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "scopeID": {
+                "scope_id": {
                     "type": "string"
                 },
                 "users": {
@@ -1762,7 +1806,7 @@ const docTemplate = `{
         "models.Scope": {
             "type": "object",
             "properties": {
-                "apienvironments": {
+                "catalogs": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.APIEnvironment"
@@ -1812,7 +1856,7 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "lastConnected": {
+                "last_connected": {
                     "type": "string"
                 },
                 "lastname": {
@@ -1904,6 +1948,26 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "scope_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "v1.CreateRoleRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "permission": {
+                    "type": "integer"
+                },
+                "scopes_ids": {
                     "type": "array",
                     "items": {
                         "type": "string"

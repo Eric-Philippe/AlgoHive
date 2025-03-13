@@ -15,6 +15,36 @@
       "competitions": "Competition Management",
       "apis": "Puzzle Catalog"
     },
+    "roles": {
+      "new": "Create a new role",
+      "name": "Name",
+      "roleName": "Role Name",
+      "permissionsTitle": "Permissions",
+      "scopes": "Scopes",
+      "selectScopes": "Accessible scopes",
+      "create": "Create",
+      "viewDetails": "More details",
+      "usersTitle": "Number of users with this role",
+      "loading": "Loading roles...",
+      "errorFetchingRoles": "An error occurred while retrieving roles.",
+      "errorDeletingRole": "An error occurred while deleting the role.",
+      "roleDeleted": "Role deleted successfully.",
+      "noRoles": "No roles found.",
+      "errorNameRequired": "Role name is required.",
+      "roleCreated": "Role created successfully.",
+      "errorCreatingRole": "An error occurred while creating the role.",
+      "noScopes": "None",
+      "noUsers": "None",
+      "delete": "Delete",
+      "permissions": {
+        "users": "Users",
+        "roles": "Roles",
+        "scopes": "Scopes",
+        "groups": "Groups",
+        "competitions": "Competitions",
+        "catalogs": "Catalogs"
+      }
+    },
     "scopes": {
       "new": "Create a new scope",
       "name": "Name",
@@ -24,10 +54,19 @@
       "catalogs": "Catalogs",
       "selectCatalogs": "Select catalogs",
       "create": "Create",
-      "viewDetails": "More details"
+      "viewDetails": "More details",
+      "loading": "Loading scopes...",
+      "errorFetchingScopes": "An error occurred while retrieving scopes.",
+      "noScopes": "No scopes found.",
+      "errorNameRequired": "Scope name is required.",
+      "scopeCreated": "Scope created successfully.",
+      "errorCreatingScope": "An error occurred while creating the scope."
     },
     "catalogs": {
-      "viewDetails": "More details"
+      "viewDetails": "More details",
+      "loading": "Loading catalogs...",
+      "errorFetchingCatalogs": "An error occurred while retrieving catalogs.",
+      "noCatalogs": "No catalogs found."
     }
   },
   "login": {

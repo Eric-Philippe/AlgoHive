@@ -17,9 +17,9 @@ definitions:
     type: object
   models.Competition:
     properties:
-      apienvironmentID:
+      api_environment_id:
         type: string
-      apitheme:
+      api_theme:
         type: string
       description:
         type: string
@@ -48,7 +48,7 @@ definitions:
         type: string
       name:
         type: string
-      scopeID:
+      scope_id:
         type: string
       users:
         items:
@@ -74,7 +74,7 @@ definitions:
     type: object
   models.Scope:
     properties:
-      apienvironments:
+      catalogs:
         items:
           $ref: '#/definitions/models.APIEnvironment'
         type: array
@@ -107,7 +107,7 @@ definitions:
         type: array
       id:
         type: string
-      lastConnected:
+      last_connected:
         type: string
       lastname:
         type: string
@@ -171,6 +171,19 @@ definitions:
     required:
     - name
     - scope_ids
+    type: object
+  v1.CreateRoleRequest:
+    properties:
+      name:
+        type: string
+      permission:
+        type: integer
+      scopes_ids:
+        items:
+          type: string
+        type: array
+    required:
+    - name
     type: object
   v1.CreateScopeRequest:
     properties:
@@ -753,7 +766,7 @@ paths:
         name: role
         required: true
         schema:
-          $ref: '#/definitions/models.Role'
+          $ref: '#/definitions/v1.CreateRoleRequest'
       produces:
       - application/json
       responses:
@@ -773,6 +786,34 @@ paths:
       tags:
       - Roles
   /roles/{role_id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete a role and cascade first to roles_scopes and user_roles
+      parameters:
+      - description: Role ID
+        in: path
+        name: role_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Role'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: delete a role
+      tags:
+      - Roles
     get:
       consumes:
       - application/json
