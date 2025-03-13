@@ -64,18 +64,10 @@ func UserOwnsGroup(userID string, targetUserID string) bool {
 // @Router /user/profile [get]
 // @Security Bearer
 func GetUserProfile(c *gin.Context) {
-    userID, exists := c.Get("userID")
-    if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-        return
-    }
-    
-    var user models.User
-    result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-    if result.Error != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-        return
-    }
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
     
     // Hide password from response
     user.Password = ""
@@ -95,16 +87,8 @@ func GetUserProfile(c *gin.Context) {
 // @Router /user/profile [put]
 // @Security Bearer
 func UpdateUserProfile(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-	
-	var user models.User
-	result := database.DB.Where("id = ?", userID).First(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
 		return
 	}
 	
@@ -134,28 +118,20 @@ func UpdateUserProfile(c *gin.Context) {
 // @Router /user/group/{group_id} [post]
 // @Security Bearer
 func CreateUserAndAttachGroup(c *gin.Context) {
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
+
 	groupID := c.Param("group_id")
 
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	var user models.User
-	result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		return
-	}
-
-	if !UserOwnsGroup(userID.(string), groupID) {
+	if !UserOwnsGroup(user.ID, groupID) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to create users"})
 		return
 	}
 	
 	var group models.Group
-	result = database.DB.Where("id = ?", groupID).First(&group)
+	result := database.DB.Where("id = ?", groupID).First(&group)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Group not found"})
 		return
@@ -190,28 +166,20 @@ func CreateUserAndAttachGroup(c *gin.Context) {
 // @Router /user/group/{group_id}/bulk [post]
 // @Security Bearer
 func CreateBulkUsersAndAttachGroup(c *gin.Context) {
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
+
 	groupID := c.Param("group_id")
 
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	var user models.User
-	result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		return
-	}
-
-	if !UserOwnsGroup(userID.(string), groupID) {
+	if !UserOwnsGroup(user.ID, groupID) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to create users"})
 		return
 	}
 	
 	var group models.Group
-	result = database.DB.Where("id = ?", groupID).First(&group)
+	result := database.DB.Where("id = ?", groupID).First(&group)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Group not found"})
 		return
@@ -248,16 +216,8 @@ func CreateBulkUsersAndAttachGroup(c *gin.Context) {
 // @Router /user/roles [post]
 // @Security Bearer
 func CreateUserAndAttachRoles(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	var user models.User
-	result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
 		return
 	}
 
@@ -273,7 +233,7 @@ func CreateUserAndAttachRoles(c *gin.Context) {
 	}
 
 	var roles []models.Role
-	result = database.DB.Where("id IN (?)", userWithRoles.Roles).Find(&roles)
+	result := database.DB.Where("id IN (?)", userWithRoles.Roles).Find(&roles)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
 		return

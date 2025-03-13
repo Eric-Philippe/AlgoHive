@@ -53,16 +53,8 @@ func userCanManageGroup(userID string, group *models.Group) bool {
 // @Router /groups [get]
 // @Security Bearer
 func GetAllGroups(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	var user models.User
-	result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
 		return
 	}
 
@@ -87,28 +79,20 @@ func GetAllGroups(c *gin.Context) {
 // @Router /groups/{group_id} [get]
 // @Security Bearer
 func GetGroup(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	var user models.User
-	result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
 		return
 	}
 
 	groupID := c.Param("group_id")
 	var group models.Group
-	result = database.DB.Where("id = ?", groupID).Preload("Users").Preload("Competitions").First(&group)
+	result := database.DB.Where("id = ?", groupID).Preload("Users").Preload("Competitions").First(&group)
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Group not found"})
 		return
 	}
 
-	if !userCanManageGroup(userID.(string), &group) {
+	if !userCanManageGroup(user.ID, &group) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to view this group"})
 		return
 	}
@@ -128,16 +112,8 @@ func GetGroup(c *gin.Context) {
 // @Router /groups [post]
 // @Security Bearer
 func CreateGroup(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	var user models.User
-	result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
 		return
 	}
 
@@ -180,28 +156,20 @@ func CreateGroup(c *gin.Context) {
 // @Router /groups/{group_id} [delete]
 // @Security Bearer
 func DeleteGroup(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	var user models.User
-	result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
 		return
 	}
 
 	groupID := c.Param("group_id")
 	var group models.Group
-	result = database.DB.Where("id = ?", groupID).Preload("Users").Preload("Competitions").First(&group)
+	result := database.DB.Where("id = ?", groupID).Preload("Users").Preload("Competitions").First(&group)
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Group not found"})
 		return
 	}
 
-	if !userCanManageGroup(userID.(string), &group) {
+	if !userCanManageGroup(user.ID, &group) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to delete this group"})
 		return
 	}
@@ -223,46 +191,39 @@ func DeleteGroup(c *gin.Context) {
 // @Router /groups/{group_id}/users/{user_id} [post]
 // @Security Bearer
 func AddUserToGroup(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	var user models.User
-	result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
 		return
 	}
 
 	groupID := c.Param("group_id")
-	if !UserOwnsGroup(userID.(string), groupID) {
+	if !UserOwnsGroup(user.ID, groupID) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to add users to this group"})
 		return
 	}
 
 	var group models.Group
-	result = database.DB.Where("id = ?", groupID).Preload("Users").First(&group)
+	result := database.DB.Where("id = ?", groupID).Preload("Users").First(&group)
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Group not found"})
 		return
 	}
 
-	if !userCanManageGroup(userID.(string), &group) {
+	if !userCanManageGroup(user.ID, &group) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to add users to this group"})
 		return
 	}
 
-	userID = c.Param("user_id")
+	targetUserID := c.Param("user_id")
+	var targetUser models.User
 
-	result = database.DB.Where("id = ?", userID).First(&user)
+	result = database.DB.Where("id = ?", targetUserID).First(&targetUser)
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "User not found"})
 		return
 	}
 
-	database.DB.Model(&group).Association("Users").Append(&user)
+	database.DB.Model(&group).Association("Users").Append(&targetUserID)
 	c.JSON(http.StatusNoContent, nil)
 }
 
@@ -279,40 +240,32 @@ func AddUserToGroup(c *gin.Context) {
 // @Router /groups/{group_id}/users/{user_id} [delete]
 // @Security Bearer
 func RemoveUserFromGroup(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	var user models.User
-	result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
 		return
 	}
 
 	groupID := c.Param("group_id")
-	if !UserOwnsGroup(userID.(string), groupID) {
+	if !UserOwnsGroup(user.ID, groupID) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to add users to this group"})
 		return
 	}
 
 	var group models.Group
-	result = database.DB.Where("id = ?", groupID).Preload("Users").First(&group)
+	result := database.DB.Where("id = ?", groupID).Preload("Users").First(&group)
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Group not found"})
 		return
 	}
 
-	if !userCanManageGroup(userID.(string), &group) {
+	if !userCanManageGroup(user.ID, &group) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to remove users from this group"})
 		return
 	}
 
-	userID = c.Param("user_id")
+	targetUserID := c.Param("user_id")
 
-	result = database.DB.Where("id = ?", userID).First(&user)
+	result = database.DB.Where("id = ?", targetUserID).First(&user)
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "User not found"})
 		return
@@ -335,28 +288,20 @@ func RemoveUserFromGroup(c *gin.Context) {
 // @Router /groups/{group_id} [put]
 // @Security Bearer
 func UpdateGroup(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	var user models.User
-	result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
 		return
 	}
 
 	groupID := c.Param("group_id")
 	var group models.Group
-	result = database.DB.Where("id = ?", groupID).First(&group)
+	result := database.DB.Where("id = ?", groupID).First(&group)
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Group not found"})
 		return
 	}
 
-	if !userCanManageGroup(userID.(string), &group) {
+	if !userCanManageGroup(user.ID, &group) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to update this group"})
 		return
 	}

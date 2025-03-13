@@ -3,7 +3,7 @@ import { ApiClient } from "../config/ApiClient";
 
 export async function fetchCatalogs(): Promise<Catalog[]> {
   try {
-    const response = await ApiClient.get("/apis/");
+    const response = await ApiClient.get("/catalogs/");
     if (response.status !== 200) {
       throw new Error(`Erreur: ${response.status}`);
     }
@@ -17,7 +17,7 @@ export async function fetchCatalogs(): Promise<Catalog[]> {
 
 export async function fetchCatalogById(id: string): Promise<Catalog> {
   try {
-    const response = await ApiClient.get(`/apis`);
+    const response = await ApiClient.get(`/catalogs`);
 
     if (response.status !== 200) {
       throw new Error(`Error: ${response.status}`);

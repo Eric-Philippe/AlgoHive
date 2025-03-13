@@ -33,81 +33,55 @@ type ThemeResponse struct {
     Size         int             `json:"size"`
 }
 
-type APIEnvironmentResponse struct {
-	ID          string   `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Address     string `json:"address"`
-	Scopes	    []*models.Scope `json:"scopes"`
-}
-
-// @Summary Get all APIs Catalog
-// @Description Get all APIs, only accessible to users with the API_ENV permission
-// @Tags APIs
+// @Summary Get all Catalogs Catalog
+// @Description Get all Catalogs, only accessible to users with the API_ENV permission
+// @Tags Catalogs
 // @Accept json
 // @Produce json
-// @Success 200 {array} APIEnvironmentResponse
+// @Success 200 {array} models.Catalog
 // @Failure 401 {object} map[string]string
-// @Router /apis [get]
+// @Router /catalogs [get]
 // @Security Bearer
-func GetAllApis(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-    }
-
-	var user models.User
-    result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-    if result.Error != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-        return
-    }
-
+func GetAllCatalogs(c *gin.Context) {
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
+	
     if !permissions.RolesHavePermission(user.Roles, permissions.API_ENV) {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to view APIs"})
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to view Catalogs"})
         return
     }
 
-	var apis []models.APIEnvironment
-	database.DB.Preload("Scopes").Find(&apis)
-
-	    response := make([]APIEnvironmentResponse, len(apis))
-    for i, api := range apis {
-        response[i] = APIEnvironmentResponse{
-            ID:          api.ID,
-            Name:        api.Name,
-            Description: api.Description,
-            Address:     api.Address,
-            Scopes:      api.Scopes,
-        }
-    }
+	var catalogs []models.Catalog
+	database.DB.Preload("Scopes").Find(&catalogs)
     
-    c.JSON(http.StatusOK, response)
+    c.JSON(http.StatusOK, catalogs)
 };
 
 // @Summary Get all the themes from a single API from it's ID
 // @Description Get all the themes from a single API from it's ID
-// @Tags APIs
+// @Tags Catalogs
 // @Accept json
 // @Produce json
-// @Param apiID path string true "API ID"
+// @Param catalogID path string true "API ID"
 // @Success 200 {array} ThemeResponse
 // @Failure 401 {object} map[string]string
-// @Router /apis/{apiID}/themes [get]
+// @Router /catalogs/{catalogID}/themes [get]
 // @Security Bearer
-func GetThemesFromAPI(c *gin.Context) {
-	apiID := c.Param("apiID")
-	log.Println(apiID)
+func GetThemesFromCatalog(c *gin.Context) {
+	catalogID := c.Param("catalogID")
+	log.Println(catalogID)
 
-	var api models.APIEnvironment
-	result := database.DB.First(&api, "id = ?", apiID)
+	var catalog models.Catalog
+	result := database.DB.First(&catalog, "id = ?", catalogID)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "API not found"})
 		return
 	}
 
-	// Reach the API at api.Address/themes
-	resp, err := http.Get(api.Address + "/themes")
+	// Reach the API at catalog.Address/themes
+	resp, err := http.Get(catalog.Address + "/themes")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while reaching the API"})
 		return
@@ -130,10 +104,10 @@ func GetThemesFromAPI(c *gin.Context) {
 }
 
 func RegisterApisRoutes(r *gin.RouterGroup) {
-	apis := r.Group("/apis")
-	apis.Use(middleware.AuthMiddleware())
+	catalogs := r.Group("/catalogs")
+	catalogs.Use(middleware.AuthMiddleware())
 	{
-		apis.GET("/", GetAllApis)
-		apis.GET("/:apiID/themes", GetThemesFromAPI)
+		catalogs.GET("/", GetAllCatalogs)
+		catalogs.GET("/:catalogId/themes", GetThemesFromCatalog)
 	}
 }

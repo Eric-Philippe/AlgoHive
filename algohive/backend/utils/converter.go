@@ -36,15 +36,6 @@ func ConvertScopes(scopes []*models.Scope) []models.Scope {
 	return result
 }
 
-// convertAPIEnvironments converts []*models.APIEnvironment to []models.APIEnvironment
-func ConvertAPIEnvironments(environments []*models.APIEnvironment) []models.APIEnvironment {
-	var result []models.APIEnvironment
-	for _, environment := range environments {
-		result = append(result, *environment)
-	}
-	return result
-}
-
 func ContainsScope(scopes []models.Scope, scopeId string) bool {
 	for _, s := range scopes {
 		if s.ID == scopeId {

@@ -27,16 +27,8 @@ type CreateRoleRequest struct {
 // @Router /roles [post]
 // @Security Bearer
 func CreateRole(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	var user models.User
-	result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
 		return
 	}
 
@@ -83,15 +75,8 @@ func CreateRole(c *gin.Context) {
 // @Router /roles [get]
 // @Security Bearer
 func GetAllRoles(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-	}
-
-	var user models.User
-	result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
 		return
 	}
 
@@ -141,18 +126,8 @@ func GetRoleByID(c *gin.Context) {
 // @Router /roles/{role_id} [put]
 // @Security Bearer
 func UpdateRoleByID(c *gin.Context) {
-	roleID := c.Param("role_id")
-
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	var user models.User
-	result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
 		return
 	}
 
@@ -161,8 +136,10 @@ func UpdateRoleByID(c *gin.Context) {
 		return
 	}
 
+	roleID := c.Param("role_id")
+
 	var role models.Role
-	result = database.DB.Where("id = ?", roleID).First(&role)
+	result := database.DB.Where("id = ?", roleID).First(&role)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
 		return
@@ -190,31 +167,26 @@ func UpdateRoleByID(c *gin.Context) {
 // @Router /user/{user_id}/role/{role_id} [post]
 // @Security Bearer
 func AttachRoleToUser(c *gin.Context) {
-	roleID := c.Param("role_id")
-
-	userID, exists := c.Get("userID")
-    if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-        return
-    }
-
-    var user models.User
-    result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-    if result.Error != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-        return
-    }
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
 
     if !permissions.RolesHavePermission(user.Roles, permissions.ROLES) {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to detach roles from users"})
         return
     }
+
+	targetUserId := c.Param("user_id")
+	var targetUser models.User
 	
-	result = database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
+	result := database.DB.Where("id = ?", targetUserId).Preload("Roles").First(&targetUser)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
+
+	roleID := c.Param("role_id")
 	
 	var role models.Role
 	result = database.DB.Where("id = ?", roleID).First(&role)
@@ -223,10 +195,10 @@ func AttachRoleToUser(c *gin.Context) {
 		return
 	}
 	
-	user.Roles = append(user.Roles, &role)
-	database.DB.Save(&user)
+	targetUser.Roles = append(targetUser.Roles, &role)
+	database.DB.Save(&targetUser)
 	
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, targetUser)
 }
 
 // @Summary Detach a Role from a User
@@ -241,18 +213,8 @@ func AttachRoleToUser(c *gin.Context) {
 // @Router /user/{user_id}/role/{role_id} [delete]
 // @Security Bearer
 func DetachRoleFromUser(c *gin.Context) {
-	roleID := c.Param("role_id")
-
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	var user models.User
-	result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
 		return
 	}
 
@@ -260,13 +222,18 @@ func DetachRoleFromUser(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to detach roles from users"})
 		return
 	}
+
+	targetUserId := c.Param("user_id")
+	var targetUser models.User
 	
-	result = database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
+	result := database.DB.Where("id = ?", targetUserId).Preload("Roles").First(&targetUser)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 	
+	roleID := c.Param("role_id")
+
 	var role models.Role
 	result = database.DB.Where("id = ?", roleID).First(&role)
 	if result.Error != nil {
@@ -274,16 +241,16 @@ func DetachRoleFromUser(c *gin.Context) {
 		return
 	}
 	
-	for i, r := range user.Roles {
+	for i, r := range targetUser.Roles {
 		if r.ID == role.ID {
-			user.Roles = append(user.Roles[:i], user.Roles[i+1:]...)
+			targetUser.Roles = append(targetUser.Roles[:i], targetUser.Roles[i+1:]...)
 			break
 		}
 	}
 	
-	database.DB.Save(&user)
+	database.DB.Save(&targetUser)
 	
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, targetUser)
 }
 
 // @Summary delete a role
@@ -297,28 +264,20 @@ func DetachRoleFromUser(c *gin.Context) {
 // @Router /roles/{role_id} [delete]
 // @Security Bearer
 func DeleteRole(c *gin.Context) {
-    roleID := c.Param("role_id")
-
-    userID, exists := c.Get("userID")
-    if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-        return
-    }
-
-    var user models.User
-    result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-    if result.Error != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-        return
-    }
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
 
     if !permissions.RolesHavePermission(user.Roles, permissions.ROLES) {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to delete roles"})
         return
     }
 
+	roleID := c.Param("role_id")
+
     var role models.Role
-    result = database.DB.Where("id = ?", roleID).First(&role)
+    result := database.DB.Where("id = ?", roleID).First(&role)
     if result.Error != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
         return

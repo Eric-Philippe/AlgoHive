@@ -7,6 +7,6 @@ type Competition struct {
     Finished         bool    `gorm:"not null" json:"finished"`
     Show             bool    `gorm:"not null" json:"show"`
     APITheme         string  `gorm:"type:varchar(50);not null" json:"api_theme"`
-    APIEnvironmentID string  `gorm:"type:uuid;not null" json:"api_environment_id"`
+    CatalogId        string  `gorm:"type:uuid;not null" json:"catalog_id"`
     Groups           []*Group `gorm:"many2many:competition_groups;" json:"groups"`
 }

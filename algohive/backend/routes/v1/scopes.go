@@ -6,7 +6,6 @@ import (
 	"api/models"
 	"api/utils"
 	"api/utils/permissions"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,16 +15,7 @@ import (
 type CreateScopeRequest struct {
     Name string `json:"name" binding:"required"`
     Description string `json:"description"`
-    ApiIds []string `json:"api_ids" binding:"required"`
-}
-
-// ScopeResponse model for returning a scope
-type ScopeResponse struct {
-    ID string `json:"id"`
-    Name string `json:"name"`
-    Description string `json:"description"`
-    APIEnvironments []models.APIEnvironment `json:"catalogs"`
-    Roles []models.Role `json:"roles"`
+    CatalogsIds []string `json:"catalogs_ids" binding:"required"`
 }
 
 // @Summary Get all scopes
@@ -33,23 +23,15 @@ type ScopeResponse struct {
 // @Tags Scopes
 // @Accept json
 // @Produce json
-// @Success 200 {array} ScopeResponse
+// @Success 200 {array} models.Scope
 // @Failure 401 {object} map[string]string
 // @Router /scopes [get]
 // @Security Bearer
 func GetAllScopes(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-        return
-    }
-
-	var user models.User
-    result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-    if result.Error != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-        return
-    }
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
 
     if !permissions.RolesHavePermission(user.Roles, permissions.SCOPES) {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to view scopes"})
@@ -57,19 +39,9 @@ func GetAllScopes(c *gin.Context) {
     }
 
     var scopes []models.Scope
-        database.DB.Find(&scopes)
-        var scopeResponses []ScopeResponse
-        for _, scope := range scopes {
-            scopeResponses = append(scopeResponses, ScopeResponse{
-                ID: scope.ID,
-                Name: scope.Name,
-                Description: scope.Description,
-                APIEnvironments: utils.ConvertAPIEnvironments(scope.APIEnvironments),
-                Roles: utils.ConvertRoles(scope.Roles),
-            })
-        }
-
-        c.JSON(http.StatusOK, scopeResponses)
+    database.DB.Find(&scopes)
+       
+    c.JSON(http.StatusOK, scopes)
 }
 
 // @Summary Get all scopes that the user has access to
@@ -77,27 +49,19 @@ func GetAllScopes(c *gin.Context) {
 // @Tags Scopes
 // @Accept json
 // @Produce json
-// @Success 200 {array} ScopeResponse
+// @Success 200 {array} models.Scope
 // @Failure 401 {object} map[string]string
 // @Router /scopes/user [get]
 // @Security Bearer
 func GetUserScopes(c *gin.Context) {
-    userID, exists := c.Get("userID")
-    if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-        return
-    }
-
-    var user models.User
-    result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-    if result.Error != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-        return
-    }
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
 
     var scopes []models.Scope
     if permissions.RolesHavePermission(user.Roles, permissions.SCOPES) {
-        database.DB.Preload("APIEnvironments").Preload("Roles").Find(&scopes)
+        database.DB.Preload("Catalogs").Preload("Roles").Find(&scopes)
     } else {
         database.DB.Model(&user).Preload("Roles").Preload("Roles.Scopes").First(&user)
         for _, role := range user.Roles {
@@ -109,18 +73,7 @@ func GetUserScopes(c *gin.Context) {
         }
     }
 
-    var scopeResponses []ScopeResponse
-    for _, scope := range scopes {
-        scopeResponses = append(scopeResponses, ScopeResponse{
-            ID: scope.ID,
-            Name: scope.Name,
-            Description: scope.Description,
-            APIEnvironments: utils.ConvertAPIEnvironments(scope.APIEnvironments),
-            Roles: utils.ConvertRoles(scope.Roles),
-        })
-    }
-
-    c.JSON(http.StatusOK, scopeResponses)
+    c.JSON(http.StatusOK, scopes)
 }
 
 // @Summary Get a scope
@@ -135,18 +88,10 @@ func GetUserScopes(c *gin.Context) {
 // @Router /scopes/{id} [get]
 // @Security Bearer
 func GetScope(c *gin.Context) {
-    userID, exists := c.Get("userID")
-    if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-        return
-    }
-
-    var user models.User
-    result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-    if result.Error != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-        return
-    }
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
 
     if !permissions.RolesHavePermission(user.Roles, permissions.SCOPES) {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to view scopes"})
@@ -155,22 +100,13 @@ func GetScope(c *gin.Context) {
 
     scopeID := c.Param("scope_id")
     var scope models.Scope
-    result = database.DB.Where("id = ?", scopeID).Preload("APIEnvironments").Preload("Roles").First(&scope)
+    result := database.DB.Where("id = ?", scopeID).Preload("Catalogs").Preload("Roles").First(&scope)
     if result.Error != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "Scope not found"})
         return
     }
 
-    // Parse the found scope into a response
-    scopeResponse := ScopeResponse{
-        ID: scope.ID,
-        Name: scope.Name,
-        Description: scope.Description,
-        APIEnvironments: utils.ConvertAPIEnvironments(scope.APIEnvironments),
-        Roles: utils.ConvertRoles(scope.Roles),
-    }
-
-    c.JSON(http.StatusOK, scopeResponse)
+    c.JSON(http.StatusOK, scope)
 }
 
 // @Summary Create a scope
@@ -185,18 +121,10 @@ func GetScope(c *gin.Context) {
 // @Router /scopes [post]
 // @Security Bearer
 func CreateScope(c *gin.Context) {
-    userID, exists := c.Get("userID")
-    if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-        return
-    }
-
-    var user models.User
-    result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-    if result.Error != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-        return
-    }
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
 
     if !permissions.RolesHavePermission(user.Roles, permissions.SCOPES) {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to create scopes"})
@@ -209,11 +137,10 @@ func CreateScope(c *gin.Context) {
         return
     }
 
-    log.Println(createScopeReq.ApiIds)
-    var apiEnv[]*models.APIEnvironment
-    database.DB.Where("id IN (?)", createScopeReq.ApiIds).Find(&apiEnv)
+    var catalogs[]*models.Catalog
+    database.DB.Where("id IN (?)", createScopeReq.CatalogsIds).Find(&catalogs)
 
-    if len(apiEnv) != len(createScopeReq.ApiIds) {
+    if len(catalogs) != len(createScopeReq.CatalogsIds) {
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid API environment IDs"})
         return
     }
@@ -228,8 +155,8 @@ func CreateScope(c *gin.Context) {
         return
     }
 
-    if len(apiEnv) > 0 {
-        if err := database.DB.Model(&scope).Association("APIEnvironments").Append(apiEnv); err != nil {
+    if len(catalogs) > 0 {
+        if err := database.DB.Model(&scope).Association("Catalogs").Append(catalogs); err != nil {
             c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to associate API environments: " + err.Error()})
             return
         }
@@ -250,18 +177,10 @@ func CreateScope(c *gin.Context) {
 // @Router /scopes/{id} [delete]
 // @Security Bearer
 func DeleteScope(c *gin.Context) {
-    userID, exists := c.Get("userID")
-    if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-        return
-    }
-
-    var user models.User
-    result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-    if result.Error != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-        return
-    }
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
 
     if !permissions.RolesHavePermission(user.Roles, permissions.SCOPES) {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to delete scopes"})
@@ -270,14 +189,14 @@ func DeleteScope(c *gin.Context) {
 
     scopeID := c.Param("scope_id")
     var scope models.Scope
-    result = database.DB.Where("id = ?", scopeID).First(&scope)
+    result := database.DB.Where("id = ?", scopeID).First(&scope)
     if result.Error != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "Scope not found"})
         return
     }
 
     // Clear associations before deleting the scope
-    if err := database.DB.Model(&scope).Association("APIEnvironments").Clear(); err != nil {
+    if err := database.DB.Model(&scope).Association("Catalogs").Clear(); err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clear scope associations: " + err.Error()})
         return
     }
@@ -303,19 +222,10 @@ func DeleteScope(c *gin.Context) {
 // @Router /scopes/{id} [put]
 // @Security Bearer
 func UpdateScope(c *gin.Context) {
-    userID, exists := c.Get("userID")
-    if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-        return
-    }
-
-    var user models.User
-    result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-    if result.Error != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-        return
-    }
-
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
     if !permissions.RolesHavePermission(user.Roles, permissions.SCOPES) {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to update scopes"})
         return
@@ -323,7 +233,7 @@ func UpdateScope(c *gin.Context) {
 
     scopeID := c.Param("scope_id")
     var scope models.Scope
-    result = database.DB.Where("id = ?", scopeID).First(&scope)
+    result := database.DB.Where("id = ?", scopeID).First(&scope)
     if result.Error != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "Scope not found"})
         return
@@ -335,10 +245,10 @@ func UpdateScope(c *gin.Context) {
         return
     }
 
-    var apiEnv[]*models.APIEnvironment
-    database.DB.Where("id IN (?)", updateScopeReq.ApiIds).Find(&apiEnv)
+    var catalogs[]*models.Catalog
+    database.DB.Where("id IN (?)", updateScopeReq.CatalogsIds).Find(&catalogs)
 
-    if len(apiEnv) != len(updateScopeReq.ApiIds) {
+    if len(catalogs) != len(updateScopeReq.CatalogsIds) {
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid API environment IDs"})
         return
     }
@@ -350,7 +260,7 @@ func UpdateScope(c *gin.Context) {
         return
     }
 
-    if err := database.DB.Model(&scope).Association("APIEnvironments").Replace(apiEnv); err != nil {
+    if err := database.DB.Model(&scope).Association("Catalogs").Replace(catalogs); err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update scope associations: " + err.Error()})
         return
     }
@@ -371,18 +281,10 @@ func UpdateScope(c *gin.Context) {
 // @Router /scopes/{scope_id}/roles/{role_id} [post]
 // @Security Bearer
 func AttachScopeToRole(c *gin.Context) {
-    userID, exists := c.Get("userID")
-    if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-        return
-    }
-
-    var user models.User
-    result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-    if result.Error != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-        return
-    }
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
 
     if !permissions.RolesHavePermission(user.Roles, permissions.SCOPES) {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to attach scopes to roles"})
@@ -391,7 +293,7 @@ func AttachScopeToRole(c *gin.Context) {
 
     scopeID := c.Param("scope_id")
     var scope models.Scope
-    result = database.DB.Where("id = ?", scopeID).First(&scope)
+    result := database.DB.Where("id = ?", scopeID).First(&scope)
     if result.Error != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "Scope not found"})
         return
@@ -426,18 +328,10 @@ func AttachScopeToRole(c *gin.Context) {
 // @Router /scopes/{scope_id}/roles/{role_id} [delete]
 // @Security Bearer
 func DetachScopeFromRole(c *gin.Context) {
-    userID, exists := c.Get("userID")
-    if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-        return
-    }
-
-    var user models.User
-    result := database.DB.Where("id = ?", userID).Preload("Roles").First(&user)
-    if result.Error != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-        return
-    }
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
 
     if !permissions.RolesHavePermission(user.Roles, permissions.SCOPES) {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to detach scopes from roles"})
@@ -446,7 +340,7 @@ func DetachScopeFromRole(c *gin.Context) {
 
     scopeID := c.Param("scope_id")
     var scope models.Scope
-    result = database.DB.Where("id = ?", scopeID).First(&scope)
+    result := database.DB.Where("id = ?", scopeID).First(&scope)
     if result.Error != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "Scope not found"})
         return

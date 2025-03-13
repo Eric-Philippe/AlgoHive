@@ -22,95 +22,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/apis": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Get all APIs, only accessible to users with the API_ENV permission",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "APIs"
-                ],
-                "summary": "Get all APIs Catalog",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/v1.APIEnvironmentResponse"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/apis/{apiID}/themes": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Get all the themes from a single API from it's ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "APIs"
-                ],
-                "summary": "Get all the themes from a single API from it's ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "API ID",
-                        "name": "apiID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/v1.ThemeResponse"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/auth/check": {
             "get": {
                 "security": [
@@ -276,6 +187,95 @@ const docTemplate = `{
                     },
                     "409": {
                         "description": "Conflict",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/catalogs": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all Catalogs, only accessible to users with the API_ENV permission",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Catalogs"
+                ],
+                "summary": "Get all Catalogs Catalog",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Catalog"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/catalogs/{catalogID}/themes": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all the themes from a single API from it's ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Catalogs"
+                ],
+                "summary": "Get all the themes from a single API from it's ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API ID",
+                        "name": "catalogID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v1.ThemeResponse"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -940,7 +940,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/v1.ScopeResponse"
+                                "$ref": "#/definitions/models.Scope"
                             }
                         }
                     },
@@ -1035,7 +1035,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/v1.ScopeResponse"
+                                "$ref": "#/definitions/models.Scope"
                             }
                         }
                     },
@@ -1693,7 +1693,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.APIEnvironment": {
+        "models.Catalog": {
             "type": "object",
             "properties": {
                 "address": {
@@ -1719,10 +1719,10 @@ const docTemplate = `{
         "models.Competition": {
             "type": "object",
             "properties": {
-                "api_environment_id": {
+                "api_theme": {
                     "type": "string"
                 },
-                "api_theme": {
+                "catalog_id": {
                     "type": "string"
                 },
                 "description": {
@@ -1809,7 +1809,7 @@ const docTemplate = `{
                 "catalogs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.APIEnvironment"
+                        "$ref": "#/definitions/models.Catalog"
                     }
                 },
                 "description": {
@@ -1869,29 +1869,6 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.Role"
-                    }
-                }
-            }
-        },
-        "v1.APIEnvironmentResponse": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "scopes": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Scope"
                     }
                 }
             }
@@ -1978,11 +1955,11 @@ const docTemplate = `{
         "v1.CreateScopeRequest": {
             "type": "object",
             "required": [
-                "api_ids",
+                "catalogs_ids",
                 "name"
             ],
             "properties": {
-                "api_ids": {
+                "catalogs_ids": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -2070,32 +2047,6 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "minLength": 8
-                }
-            }
-        },
-        "v1.ScopeResponse": {
-            "type": "object",
-            "properties": {
-                "catalogs": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.APIEnvironment"
-                    }
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "roles": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Role"
-                    }
                 }
             }
         },

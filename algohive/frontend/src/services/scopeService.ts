@@ -19,13 +19,13 @@ export async function fetchScopes(): Promise<Scope[]> {
 export async function createScope(
   name: string,
   description: string,
-  api_ids: string[]
+  catalogs_ids: string[]
 ): Promise<Scope> {
   try {
     const response = await ApiClient.post("/scopes/", {
       name,
       description,
-      api_ids,
+      catalogs_ids,
     });
 
     if (response.status !== 201) {

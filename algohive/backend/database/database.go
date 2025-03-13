@@ -36,7 +36,7 @@ func InitDB() {
         &models.User{},
         &models.Role{},
         // &models.Input{},
-        &models.APIEnvironment{},
+        &models.Catalog{},
         &models.Scope{},
         &models.Group{},
         &models.Competition{},
@@ -87,48 +87,48 @@ func Populate() {
     }
 
     // Check if there is no API Environment in the database
-    var apiEnvCount int64
-    DB.Model(&models.APIEnvironment{}).Count(&apiEnvCount)
-    apiEnvs := config.BeeApis
-    if apiEnvCount == 0 && apiEnvs != "" {
-        apiEnvsList := strings.Split(apiEnvs, ",")
-        for _, apiEnv := range apiEnvsList {
-            log.Println("Creating API Environment: ", apiEnv)
-            // Make a GET apiEnv/name to get the apiEnv name if it ends up in an error just ignore it
-            resp, err := http.Get(fmt.Sprintf("%s/name", apiEnv))
+    var catalogsCount int64
+    DB.Model(&models.Catalog{}).Count(&catalogsCount)
+    catalogs := config.BeeApis
+    if catalogsCount == 0 && catalogs != "" {
+        catalogsList := strings.Split(catalogs, ",")
+        for _, catalog := range catalogsList {
+            log.Println("Creating Catalog from API Environment: ", catalog)
+            // Make a GET catalog/name to get the catalog name if it ends up in an error just ignore it
+            resp, err := http.Get(fmt.Sprintf("%s/name", catalog))
             if err != nil {
-                log.Println("Error while getting the apiEnv name: ", err)
+                log.Println("Error while getting the catalog name: ", err)
                 continue
             }
             defer resp.Body.Close()
 
             if resp.StatusCode != http.StatusOK {
-                log.Println("Error while getting the apiEnv name: ", resp.Status)
+                log.Println("Error while getting the catalog name: ", resp.Status)
                 continue
             }
 
             body, err := io.ReadAll(resp.Body)
             if err != nil {
-                log.Println("Error while reading the apiEnv name: ", err)
+                log.Println("Error while reading the catalogc name: ", err)
                 continue
             }
 
             var result map[string]string
             err = json.Unmarshal(body, &result)
             if err != nil {
-                log.Println("Error while unmarshalling the apiEnv name: ", err)
+                log.Println("Error while unmarshalling the catalog name: ", err)
                 continue
             }
-            apiEnvName, nameOk := result["name"]
-            apiEnvDescription, descOk := result["description"]
+            catatalogName, nameOk := result["name"]
+            catatalogDesc, descOk := result["description"]
             if !nameOk || !descOk {
-                log.Println("Error while getting the apiEnv name or description: key not found")
+                log.Println("Error while getting the catalog name or description: key not found")
                 continue
             }
 
-            apiEnvironment := models.APIEnvironment{Name: apiEnvName, Description: apiEnvDescription, Address: apiEnv}
-            DB.Create(&apiEnvironment)
-            log.Println("API Environment created: ", apiEnvName)
+            newCatalog := models.Catalog{Name: catatalogName, Description: catatalogDesc, Address: catalog}
+            DB.Create(&newCatalog)
+            log.Println("API Environment created: ", catatalogName)
         }
     }
 }

@@ -13,7 +13,8 @@ CREATE TABLE Users(
 
 CREATE TABLE Roles(
    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-   name VARCHAR(50) NOT NULL UNIQUE
+   name VARCHAR(50) NOT NULL UNIQUE,
+   permissions INT NOT NULL
 );
 
 CREATE TABLE Inputs(
@@ -26,7 +27,7 @@ CREATE TABLE Inputs(
    FOREIGN KEY(user_id) REFERENCES Users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE APIEnvironments(
+CREATE TABLE Catalogs(
    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
    address VARCHAR(255) NOT NULL,
    name VARCHAR(100) NOT NULL UNIQUE
@@ -35,6 +36,7 @@ CREATE TABLE APIEnvironments(
 CREATE TABLE Scopes(
    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
    name VARCHAR(50) NOT NULL UNIQUE,
+   description VARCHAR(255)
    role_id UUID,
    FOREIGN KEY(role_id) REFERENCES Roles(id) ON DELETE CASCADE
 );
@@ -55,7 +57,7 @@ CREATE TABLE Competitions(
    show BOOLEAN NOT NULL,
    api_theme VARCHAR(50) NOT NULL,
    api_environment_id UUID NOT NULL,
-   FOREIGN KEY(api_environment_id) REFERENCES APIEnvironments(id) ON DELETE CASCADE
+   FOREIGN KEY(api_environment_id) REFERENCES Catalogs(id) ON DELETE CASCADE
 );
 
 CREATE TABLE Tries(
@@ -78,7 +80,7 @@ CREATE TABLE scope_api_access(
    api_environment_id UUID,
    scope_id UUID,
    PRIMARY KEY(api_environment_id, scope_id),
-   FOREIGN KEY(api_environment_id) REFERENCES APIEnvironments(id) ON DELETE CASCADE,
+   FOREIGN KEY(api_environment_id) REFERENCES Catalogs(id) ON DELETE CASCADE,
    FOREIGN KEY(scope_id) REFERENCES Scopes(id) ON DELETE CASCADE
 );
 
