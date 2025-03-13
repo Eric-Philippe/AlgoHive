@@ -12,6 +12,11 @@ const (
     OWNER                // 100000
 )
 
+// Function that returns true if the user is a staff
+func IsStaff(user models.User) bool {
+    return len(user.Roles) > 0
+}
+
 // Function to check if a role has a permission
 func HasPermission(rolePermissions, permission int) bool {
     return (rolePermissions & permission) == permission

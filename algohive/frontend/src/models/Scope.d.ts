@@ -1,4 +1,5 @@
 import { Catalog } from "./Catalogs";
+import { Group } from "./Group";
 import { Role } from "./Role";
 
 export interface Scope {
@@ -6,5 +7,6 @@ export interface Scope {
   name: string;
   description: string;
   roles?: Role[];
+  groups?: Group[];
   catalogs?: Catalog[];
 }

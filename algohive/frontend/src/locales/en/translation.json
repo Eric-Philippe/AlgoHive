@@ -15,6 +15,21 @@
       "competitions": "Competition Management",
       "apis": "Puzzle Catalog"
     },
+    "users": {
+      "loading": "Loading users...",
+      "errorFetchingUsers": "An error occurred while retrieving users.",
+      "noUsers": "No users found.",
+      "staffView": "Staff view",
+      "adminView": "Admin view",
+      "viewAsRoles": "View as roles",
+      "selectViewAsRoles": "Select roles",
+      "selectScope": "Select scope",
+      "selectGroup": "Select group",
+      "firstname": "First Name",
+      "lastname": "Last Name",
+      "email": "Email",
+      "role": "Role"
+    },
     "roles": {
       "new": "Create a new role",
       "name": "Name",

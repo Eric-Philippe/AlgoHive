@@ -1,4 +1,5 @@
 import { Role } from "../models/Role";
+import { User } from "../models/User";
 
 // Permissions allow a specific role to override the default permissions
 export enum Permission {
@@ -8,6 +9,26 @@ export enum Permission {
   COMPETITIONS = 1 << 3, // 001000
   ROLES = 1 << 4, // 010000
   OWNER = 1 << 5, // 100000
+}
+
+// Function that returns true if the user is an owner
+export function isOwner(user: User | null): boolean {
+  if (!user) return false;
+
+  return (
+    user.roles &&
+    user.roles.some((role) => hasPermission(role.permissions, Permission.OWNER))
+  );
+}
+
+export function roleIsOwner(role: Role): boolean {
+  return hasPermission(role.permissions, Permission.OWNER);
+}
+
+// Function that returns true if the user is staff or owner
+export function isStaff(user: User | null): boolean {
+  if (!user) return false;
+  return user.roles && user.roles.length > 0;
 }
 
 // Function to get a 0-based index of a permission

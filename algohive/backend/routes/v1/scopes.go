@@ -6,7 +6,9 @@ import (
 	"api/models"
 	"api/utils"
 	"api/utils/permissions"
+	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -362,6 +364,71 @@ func DetachScopeFromRole(c *gin.Context) {
     c.JSON(http.StatusOK, scope)
 }
 
+// @Summary Get all the scopes that a role has access to
+// @Description Get all the scopes that a role has access to, only accessible to users with the SCOPES permission
+// @Tags Scopes
+// @Accept json
+// @Produce json
+// @Param roles query []string true "Roles IDs"
+// @Success 200 {array} models.Scope
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /scopes/roles [get]
+// @Security Bearer
+func GetRoleScopes(c *gin.Context) {
+    user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
+
+	if !permissions.IsStaff(user) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to get users from roles"})
+		return
+	}
+
+    // Get role IDs from query parameters
+    rolesParam := c.QueryArray("roles")
+    
+    // If we received a single string with comma-separated values, split it
+    var roles []string
+    if len(rolesParam) == 1 && strings.Contains(rolesParam[0], ",") {
+        roles = strings.Split(rolesParam[0], ",")
+    } else {
+        roles = rolesParam
+    }
+
+    if len(roles) == 0 {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Roles are required"})
+        return
+    }
+
+	var scopesIDs []string
+	err = database.DB.Raw(`
+        SELECT DISTINCT s.id
+            FROM scopes s
+            JOIN role_scopes rs ON s.id = rs.scope_id
+            JOIN roles r ON rs.role_id = r.id
+			WHERE r.id IN ?
+	`, roles).Pluck("id", &scopesIDs).Error
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get scopes"})
+		return
+	}
+
+	var scopes []models.Scope
+	if len(scopesIDs) > 0 {
+		err = database.DB.Preload("Groups").Where("id IN ?", scopesIDs).Find(&scopes).Error
+		if err != nil {
+            log.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get scopes"})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, scopes)
+}
+
 // RegisterScopes registers the scope routes
 func RegisterScopesRoutes(r *gin.RouterGroup) {
     scopes := r.Group("/scopes")
@@ -370,6 +437,7 @@ func RegisterScopesRoutes(r *gin.RouterGroup) {
         scopes.POST("/", CreateScope)
         scopes.GET("/", GetAllScopes)
         scopes.GET("/user", GetUserScopes)
+        scopes.GET("/roles", GetRoleScopes)
         scopes.GET("/:scope_id", GetScope)
         scopes.PUT("/:scope_id", UpdateScope)
         scopes.POST("/:scope_id/roles/:role_id", AttachScopeToRole)

@@ -7,6 +7,7 @@ import (
 	"api/utils"
 	"api/utils/permissions"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -325,6 +326,68 @@ func GetUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
+// @Summary Get All users that the given roles have access to
+// @Description Get all users that the given roles have access to from their roles -> scopes -> groups -> users
+// @Tags Users
+// @Param roles query []string true "Roles IDs"
+// @Success 200 {object} []models.User
+// @Router /user/roles [get]
+// @Security Bearer
+func GetUsersFromRoles(c *gin.Context) {
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
+
+	if !permissions.IsStaff(user) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to get users from roles"})
+		return
+	}
+
+    // Get role IDs from query parameters
+    rolesParam := c.QueryArray("roles")
+    
+    // If we received a single string with comma-separated values, split it
+    var roles []string
+    if len(rolesParam) == 1 && strings.Contains(rolesParam[0], ",") {
+        roles = strings.Split(rolesParam[0], ",")
+    } else {
+        roles = rolesParam
+    }
+
+    if len(roles) == 0 {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Roles are required"})
+        return
+    }
+
+	var userIDs []string
+	err = database.DB.Raw(`
+		SELECT DISTINCT u.id
+			FROM users u
+			JOIN user_groups ug ON u.id = ug.user_id
+			JOIN groups g ON ug.group_id = g.id
+			JOIN scopes s ON g.scope_id = s.id
+			JOIN role_scopes rs ON s.id = rs.scope_id
+			JOIN roles r ON rs.role_id = r.id
+			WHERE r.id IN ?
+	`, roles).Pluck("id", &userIDs).Error
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get users"})
+		return
+	}
+
+	var users []models.User
+	if len(userIDs) > 0 {
+		err = database.DB.Preload("Roles").Preload("Groups").Where("id IN ?", userIDs).Find(&users).Error
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get users"})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, users)
+}
 
 // Register the endpoints for the v1 API
 func RegisterUserRoutes(r *gin.RouterGroup) {    
@@ -333,6 +396,7 @@ func RegisterUserRoutes(r *gin.RouterGroup) {
     {
         user.GET("/profile", GetUserProfile)
 		user.GET("/", GetUsers)
+		user.GET("/roles", GetUsersFromRoles)
 		user.PUT("/profile", UpdateUserProfile)
 		user.POST("/group/:group_id", CreateUserAndAttachGroup)
 		user.POST("/group/:group_id/bulk", CreateBulkUsersAndAttachGroup)

@@ -15,6 +15,21 @@
       "competitions": "Gestion des compétitions",
       "apis": "Catalogue des énigmes"
     },
+    "users": {
+      "loading": "Chargement des utilisateurs...",
+      "errorFetchingUsers": "Une erreur est survenue lors de la récupération des utilisateurs.",
+      "noUsers": "Aucun utilisateur trouvé.",
+      "staffView": "Vue staff",
+      "adminView": "Vue admin",
+      "viewAsRoles": "Voir en tant que rôles",
+      "selectViewAsRoles": "Sélectionner les rôles",
+      "selectScope": "Sélectionner le scope",
+      "selectGroup": "Sélectionner le groupe",
+      "firstname": "Prénom",
+      "lastname": "Nom de famille",
+      "email": "E-mail",
+      "role": "Role"
+    },
     "roles": {
       "new": "Créer un nouveau rôle",
       "name": "Nom",

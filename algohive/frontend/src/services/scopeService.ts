@@ -38,3 +38,20 @@ export async function createScope(
     throw error;
   }
 }
+
+export async function fetchScopesFromRoles(roles: string[]): Promise<Scope[]> {
+  try {
+    const response = await ApiClient.get(
+      `/scopes/roles?roles=${roles.join(",")}`
+    );
+
+    if (response.status !== 200) {
+      throw new Error(`Error: ${response.status}`);
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching scopes:", error);
+    throw error;
+  }
+}
