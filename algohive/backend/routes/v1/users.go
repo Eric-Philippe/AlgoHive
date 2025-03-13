@@ -256,6 +256,75 @@ func CreateUserAndAttachRoles(c *gin.Context) {
 	c.JSON(http.StatusCreated, user)
 }
 
+// @Summary Get All users that the curren user has access to 
+// @Description Get all users that the current user has access to from his roles -> scopes -> groups
+// @Tags Users
+// @Success 200 {object} []models.User
+// @Router /user/ [get]
+// @Security Bearer
+func GetUsers(c *gin.Context) {
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
+
+	var users []models.User
+	if permissions.RolesHavePermission(user.Roles, permissions.OWNER) {
+		err = database.DB.Preload("Roles").Preload("Groups").Find(&users).Error
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get users"})
+			return
+		}
+	} else {
+		if len(user.Roles) == 0 {
+			// Only return the users that are in the same groups as the authenticated user
+			err = database.DB.Raw(`
+			SELECT DISTINCT u.*
+				FROM users u
+				JOIN user_groups ug ON u.id = ug.user_id
+				JOIN groups g ON ug.group_id = g.id
+				JOIN user_groups aug ON g.id = aug.group_id
+				JOIN users au ON aug.user_id = au.id
+				WHERE au.id = ?
+		`, user.ID).Scan(&users).Error
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get users"})
+				return
+			}
+		} else {
+			var userIDs []string
+			err = database.DB.Raw(`
+				SELECT DISTINCT u.id
+					FROM users u
+					JOIN user_groups ug ON u.id = ug.user_id
+					JOIN groups g ON ug.group_id = g.id
+					JOIN scopes s ON g.scope_id = s.id
+					JOIN role_scopes rs ON s.id = rs.scope_id
+					JOIN roles r ON rs.role_id = r.id
+					JOIN user_roles ur ON r.id = ur.role_id
+					WHERE ur.user_id = ?
+			`, user.ID).Pluck("id", &userIDs).Error
+			
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get users"})
+				return
+			}
+			
+			// Then use GORM to get the users with their associations
+			if len(userIDs) > 0 {
+				err = database.DB.Preload("Roles").Preload("Groups").Where("id IN ?", userIDs).Find(&users).Error
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get users"})
+					return
+				}
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, users)
+}
+
 
 // Register the endpoints for the v1 API
 func RegisterUserRoutes(r *gin.RouterGroup) {    
@@ -263,6 +332,7 @@ func RegisterUserRoutes(r *gin.RouterGroup) {
     user.Use(middleware.AuthMiddleware())
     {
         user.GET("/profile", GetUserProfile)
+		user.GET("/", GetUsers)
 		user.PUT("/profile", UpdateUserProfile)
 		user.POST("/group/:group_id", CreateUserAndAttachGroup)
 		user.POST("/group/:group_id/bulk", CreateBulkUsersAndAttachGroup)

@@ -1124,6 +1124,22 @@ paths:
       summary: Get all scopes that the user has access to
       tags:
       - Scopes
+  /user/:
+    get:
+      description: Get all users that the current user has access to from his roles
+        -> scopes -> groups
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+      security:
+      - Bearer: []
+      summary: Get All users that the curren user has access to
+      tags:
+      - Users
   /user/{user_id}/role/{role_id}:
     delete:
       consumes:

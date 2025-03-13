@@ -1333,6 +1333,31 @@
                 }
             }
         },
+        "/user/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all users that the current user has access to from his roles -\u003e scopes -\u003e groups",
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get All users that the curren user has access to",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.User"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/user/group/{group_id}": {
             "post": {
                 "security": [
