@@ -1471,51 +1471,45 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/group/{group_id}": {
-            "post": {
+        "/user/block/{id}": {
+            "put": {
                 "security": [
                     {
                         "Bearer": []
                     }
                 ],
-                "description": "Create a new user and attach a group to it",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "description": "Toggle the block status of a user",
                 "tags": [
                     "Users"
                 ],
-                "summary": "Create User and attach a Group",
+                "summary": "Toggle block user",
                 "parameters": [
                     {
-                        "description": "User Profile",
-                        "name": "user",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.User"
-                        }
-                    },
-                    {
                         "type": "string",
-                        "description": "Group ID",
-                        "name": "group_id",
+                        "description": "User ID",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/models.User"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1563,6 +1557,54 @@ const docTemplate = `{
                         "name": "group_id",
                         "in": "path",
                         "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/groups": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create a new user and attach one or more roles to it",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Create a user and attach one or more groups",
+                "parameters": [
+                    {
+                        "description": "User Profile with Groups",
+                        "name": "UserWithGroup",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.UserWithGroup"
+                        }
                     }
                 ],
                 "responses": {
@@ -2287,6 +2329,26 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.UserWithGroup": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "firstname": {
+                    "type": "string"
+                },
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "lastname": {
                     "type": "string"
                 }
             }

@@ -58,6 +58,30 @@ export async function createStaffUser(
   }
 }
 
+// /user/group/{group_id}
+export async function createUser(
+  firstname: string,
+  lastname: string,
+  email: string,
+  groupeId: string
+) {
+  try {
+    const response = await ApiClient.post(`/user/groups`, {
+      firstname,
+      lastname,
+      email,
+      groups: [groupeId],
+    });
+    if (response.status !== 201) {
+      throw new Error(`Error: ${response.status}`);
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Error creating user:", error);
+    throw error;
+  }
+}
+
 export async function deleteUser(userId: string) {
   try {
     const response = await ApiClient.delete(`/user/${userId}`);
@@ -69,6 +93,21 @@ export async function deleteUser(userId: string) {
     return response.data;
   } catch (error) {
     console.error("Error deleting user:", error);
+    throw error;
+  }
+}
+
+export async function toggleBlockUser(userId: string) {
+  try {
+    const response = await ApiClient.put(`/user/block/${userId}`);
+
+    if (response.status !== 200) {
+      throw new Error(`Error: ${response.status}`);
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error toggling block user:", error);
     throw error;
   }
 }

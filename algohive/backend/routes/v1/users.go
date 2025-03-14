@@ -19,6 +19,13 @@ type UserWithRoles struct {
 	Roles []string    `json:"roles"`
 }
 
+type UserWithGroup struct {
+	FirstName string `json:"firstname"`
+	LastName  string `json:"lastname"`
+	Email     string `json:"email"`
+	Group     []string `json:"groups"`
+}
+
 // Func to check all the groups from a target user and see if at least one of theme is owned by the authenticated user
 func UserOwnsGroup(userID string, targetUserID string) bool {
     type GroupIds struct {
@@ -42,19 +49,28 @@ func UserOwnsGroup(userID string, targetUserID string) bool {
     }
 
     // Get all the group IDs from the target user
-    var targetGroupIds GroupIds
+    type SingleGroupId struct {
+        ID string `gorm:"column:id"`
+    }
+    var targetGroupIdSlice []SingleGroupId
     err = database.DB.Raw(`
         SELECT group_id as id
         FROM user_groups
         WHERE user_id = ?
-    `, targetUserID).Scan(&targetGroupIds).Error
+    `, targetUserID).Scan(&targetGroupIdSlice).Error
     
     if err != nil {
         return false
     }
 
+    // Convert the slice of structs to a slice of string IDs
+    var targetGroupIds []string
+    for _, item := range targetGroupIdSlice {
+        targetGroupIds = append(targetGroupIds, item.ID)
+    }
+
     // Check if the authenticated user owns any of the target user's groups
-    for _, groupID := range targetGroupIds.ID {
+    for _, groupID := range targetGroupIds {
         for _, ownedGroupID := range result.ID {
             if groupID == ownedGroupID {
                 return true
@@ -115,16 +131,15 @@ func UpdateUserProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// @Summary Create User and attach a Group
-// @Description Create a new user and attach a group to it
+// @Summary Create a user and attach one or more groups
+// @Description Create a new user and attach one or more roles to it
 // @Tags Users
 // @Accept json
 // @Produce json
-// @Param user body models.User true "User Profile"
-// @Param group_id path string true "Group ID"
+// @Param UserWithGroup body UserWithGroup true "User Profile with Groups"
 // @Success 201 {object} models.User
 // @Failure 400 {object} map[string]string
-// @Router /user/group/{group_id} [post]
+// @Router /user/groups [post]
 // @Security Bearer
 func CreateUserAndAttachGroup(c *gin.Context) {
 	user, err := middleware.GetUserFromRequest(c)
@@ -132,35 +147,41 @@ func CreateUserAndAttachGroup(c *gin.Context) {
 		return
 	}
 
-	groupID := c.Param("group_id")
-
-	if !UserOwnsGroup(user.ID, groupID) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to create users"})
+	if !UserOwnsGroup(user.ID, user.ID) && !permissions.RolesHavePermission(user.Roles, permissions.OWNER) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to create users with groups"})
 		return
 	}
-	
-	var group models.Group
-	result := database.DB.Where("id = ?", groupID).First(&group)
+
+	var userIdWithGroupIds UserWithGroup
+	if err := c.ShouldBindJSON(&userIdWithGroupIds); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var groups []models.Group
+	result := database.DB.Where("id IN (?)", userIdWithGroupIds.Group).Find(&groups)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Group not found"})
 		return
 	}
-	
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	
-	user.Groups = append(user.Groups, &group)
-	hashedPassword, err := utils.HashPassword(user.Password)
+
+	var targetUser models.User
+	targetUser.Firstname = userIdWithGroupIds.FirstName
+	targetUser.Lastname = userIdWithGroupIds.LastName
+	targetUser.Email = userIdWithGroupIds.Email
+	hashedPassword, err := utils.CreateDefaultPassword()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
 		return
 	}
-	user.Password = hashedPassword
-	database.DB.Create(&user)
-	
-	c.JSON(http.StatusCreated, user)
+	targetUser.Password = hashedPassword
+	database.DB.Create(&targetUser)
+
+	for i := range groups {
+		database.DB.Model(&targetUser).Association("Groups").Append(&groups[i])
+	}
+
+	c.JSON(http.StatusCreated, targetUser)
 }
 
 // @Summary Create a user and attach one or more roles
@@ -455,6 +476,39 @@ func DeleteUser(c *gin.Context) {
     c.Status(http.StatusNoContent)
 }
 
+// @Summary Toggle block user
+// @Description Toggle the block status of a user
+// @Tags Users
+// @Param id path string true "User ID"
+// @Success 200 {object} models.User
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /user/block/{id} [put]
+// @Security Bearer
+func ToggleBlockUser(c *gin.Context) {
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
+
+	userID := c.Param("id")
+	var targetUser models.User
+	if err := database.DB.Where("id = ?", userID).First(&targetUser).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	if !UserOwnsGroup(user.ID, targetUser.ID) && !permissions.RolesHavePermission(user.Roles, permissions.OWNER) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to toggle block status"})
+		return
+	}
+
+	targetUser.Blocked = !targetUser.Blocked
+	database.DB.Save(&targetUser)
+
+	c.JSON(http.StatusOK, targetUser)
+}
+
 // Register the endpoints for the v1 API
 func RegisterUserRoutes(r *gin.RouterGroup) {    
     user := r.Group("/user")
@@ -464,9 +518,10 @@ func RegisterUserRoutes(r *gin.RouterGroup) {
 		user.GET("/", GetUsers)
 		user.GET("/roles", GetUsersFromRoles)
 		user.PUT("/profile", UpdateUserProfile)
-		user.POST("/group/:group_id", CreateUserAndAttachGroup)
+		user.PUT("/block/:id", ToggleBlockUser)
 		user.POST("/group/:group_id/bulk", CreateBulkUsersAndAttachGroup)
 		user.POST("/roles", CreateUserAndAttachRoles)
+		user.POST("/groups", CreateUserAndAttachGroup)
 		user.DELETE("/:id", DeleteUser)
     }
 }

@@ -23,6 +23,7 @@
       "name": "Name",
       "description": "Description",
       "roles": "Roles",
+      "groups": "Groups",
       "status": "Status",
       "actions": "Actions",
       "password": "Password",
@@ -67,7 +68,19 @@
       "active": "Active",
       "neverConnected": "Never connected",
       "asStaff": {
-        "targetScope": "Target scope"
+        "title": "Staff User Management",
+        "targetScope": "Target scope",
+        "new": "New user",
+        "newUser": "Create a new user",
+        "editUser": "Edit user",
+        "messages": {
+          "userCreated": "The user has been created successfully.",
+          "userUpdated": "The user has been updated successfully.",
+          "errorCreating": "An error occurred while creating the user.",
+          "errorUpdating": "An error occurred while updating the user.",
+          "errorDeleting": "An error occurred while deleting the user.",
+          "groupRequired": "Group is required."
+        }
       },
       "asAdmin": {
         "title": "Staff User Management",
@@ -80,22 +93,24 @@
           "userUpdated": "The staff member has been updated successfully.",
           "errorCreating": "An error occurred while creating the staff member.",
           "errorUpdating": "An error occurred while updating the staff member.",
-          "userBlocked": "The staff member has been blocked successfully.",
-          "userUnblocked": "The staff member has been unblocked successfully.",
-          "errorBlocking": "An error occurred while blocking the staff member.",
-          "confirmRestPassHeader": "Reset password",
-          "confirmResetPass": "Are you sure you want to reset the password of this staff member?",
-          "passwordReset": "The password has been reset successfully.",
-          "errorResetting": "An error occurred while resetting the password.",
-          "firstNameRequired": "First name is required.",
-          "lastNameRequired": "Last name is required.",
-          "validEmailRequired": "Valid email is required.",
-          "roleRequired": "Role is required.",
-          "confirmDeleteUser": "Are you sure you want to delete this user?",
-          "confirmDeleteHeader": "Delete user",
-          "userDeleted": "User deleted successfully.",
-          "errorDeleting": "An error occurred while deleting the user."
+          "roleRequired": "Role is required."
         }
+      },
+      "messages": {
+        "userBlocked": "The member has been blocked successfully.",
+        "userUnblocked": "The member has been unblocked successfully.",
+        "errorBlocking": "An error occurred while blocking the member.",
+        "firstNameRequired": "First name is required.",
+        "lastNameRequired": "Last name is required.",
+        "validEmailRequired": "Valid email is required.",
+        "confirmRestPassHeader": "Reset password",
+        "confirmResetPass": "Are you sure you want to reset the password of this staff member?",
+        "passwordReset": "The password has been reset successfully.",
+        "errorResetting": "An error occurred while resetting the password.",
+        "confirmDeleteUser": "Are you sure you want to delete this user?",
+        "confirmDeleteHeader": "Delete user",
+        "userDeleted": "User deleted successfully.",
+        "errorDeleting": "An error occurred while deleting the user."
       }
     },
     "roles": {

@@ -16,6 +16,7 @@ import {
   createStaffUser,
   deleteUser,
   fetchUsers,
+  toggleBlockUser,
   // createUser,
   // updateUser,
   // blockUser,
@@ -162,35 +163,29 @@ export default function UsersTableAdmin() {
   };
 
   // Handle block/unblock user
-  const toggleBlockUser = async (user: User) => {
+  const handleToggleBlockUser = async (user: User) => {
     try {
-      if (user.blocked) {
-        // await unblockUser(user.id);
-        toast.current?.show({
-          severity: "success",
-          summary: t("common.states.success"),
-          detail: t("staffTabs.users.asAdmin.messages.userUnblocked"),
-          life: 3000,
-        });
-      } else {
-        // await blockUser(user.id);
-        toast.current?.show({
-          severity: "success",
-          summary: t("common.states.success"),
-          detail: t("staffTabs.users.asAdmin.messages.userBlocked"),
-          life: 3000,
-        });
-      }
+      // Call the block/unblock API
+      await toggleBlockUser(user.id);
 
-      // Reload users
+      // Update the user list
       const updatedUsers = await fetchUsers();
-      setUsers(updatedUsers);
+      refreshUsers(updatedUsers);
+
+      toast.current?.show({
+        severity: "success",
+        summary: t("common.states.success"),
+        detail: user.blocked
+          ? t("staffTabs.users.messages.userUnblocked")
+          : t("staffTabs.users.messages.userBlocked"),
+        life: 3000,
+      });
     } catch (err) {
       console.error("Error toggling user block status:", err);
       toast.current?.show({
         severity: "error",
         summary: t("common.states.error"),
-        detail: t("staffTabs.users.asAdmin.messages.errorBlocking"),
+        detail: t("staffTabs.users.messages.errorBlocking"),
         life: 3000,
       });
     }
@@ -201,8 +196,8 @@ export default function UsersTableAdmin() {
     console.log("Reset password for user:", user);
 
     confirmDialog({
-      message: t("staffTabs.users.asAdmin.messages.confirmResetPass"),
-      header: t("staffTabs.users.asAdmin.messages.confirmRestPassHeader"),
+      message: t("staffTabs.users.messages.confirmResetPass"),
+      header: t("staffTabs.users.messages.confirmResetPassHeader"),
       icon: "pi pi-exclamation-triangle",
       acceptClassName: "p-button-danger",
       accept: async () => {
@@ -211,7 +206,7 @@ export default function UsersTableAdmin() {
           toast.current?.show({
             severity: "success",
             summary: t("common.states.success"),
-            detail: t("staffTabs.users.asAdmin.messages.passwordReset"),
+            detail: t("staffTabs.users.messages.passwordReset"),
             life: 3000,
           });
         } catch (err) {
@@ -219,7 +214,7 @@ export default function UsersTableAdmin() {
           toast.current?.show({
             severity: "error",
             summary: t("common.states.error"),
-            detail: t("staffTabs.users.asAdmin.messages."),
+            detail: t("staffTabs.users.messages.errorResetting"),
             life: 3000,
           });
         }
@@ -230,8 +225,8 @@ export default function UsersTableAdmin() {
   // Handle delete user
   const handleDeleteUser = (user: User) => {
     confirmDialog({
-      message: t("staffTabs.users.asAdmin.messages.confirmDeleteUser"),
-      header: t("staffTabs.users.asAdmin.messages.confirmDeleteHeader"),
+      message: t("staffTabs.users.messages.confirmDeleteUser"),
+      header: t("staffTabs.users.messages.confirmDeleteHeader"),
       icon: "pi pi-exclamation-triangle",
       acceptClassName: "p-button-danger",
       accept: async () => {
@@ -245,7 +240,7 @@ export default function UsersTableAdmin() {
           toast.current?.show({
             severity: "success",
             summary: t("common.states.success"),
-            detail: t("staffTabs.users.asAdmin.messages.userDeleted"),
+            detail: t("staffTabs.users.messages.userDeleted"),
             life: 3000,
           });
         } catch (err) {
@@ -253,7 +248,7 @@ export default function UsersTableAdmin() {
           toast.current?.show({
             severity: "error",
             summary: t("common.states.error"),
-            detail: t("staffTabs.users.asAdmin.messages.errorDeleting"),
+            detail: t("staffTabs.users.messages.errorDeleting"),
             life: 3000,
           });
         }
@@ -267,7 +262,7 @@ export default function UsersTableAdmin() {
       toast.current?.show({
         severity: "error",
         summary: t("common.states.validationError"),
-        detail: t("staffTabs.users.asAdmin.messages.firstNameRequired"),
+        detail: t("staffTabs.users.messages.firstNameRequired"),
         life: 3000,
       });
       return false;
@@ -277,7 +272,7 @@ export default function UsersTableAdmin() {
       toast.current?.show({
         severity: "error",
         summary: t("common.states.validationError"),
-        detail: t("staffTabs.users.asAdmin.messages.lastNameRequired"),
+        detail: t("staffTabs.users.messages.lastNameRequired"),
         life: 3000,
       });
       return false;
@@ -287,7 +282,7 @@ export default function UsersTableAdmin() {
       toast.current?.show({
         severity: "error",
         summary: t("common.states.validationError"),
-        detail: t("staffTabs.users.asAdmin.messages.validEmailRequired"),
+        detail: t("staffTabs.users.messages.validEmailRequired"),
         life: 3000,
       });
       return false;
@@ -322,7 +317,7 @@ export default function UsersTableAdmin() {
           className={`p-button-rounded p-button-sm ${
             rowData.blocked ? "p-button-warning" : "p-button-secondary"
           }`}
-          onClick={() => toggleBlockUser(rowData)}
+          onClick={() => handleToggleBlockUser(rowData)}
           tooltip={
             rowData.blocked
               ? t("common.actions.unblock")

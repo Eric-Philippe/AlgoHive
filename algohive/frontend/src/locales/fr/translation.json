@@ -23,6 +23,7 @@
       "name": "Nom",
       "description": "Description",
       "roles": "Rôles",
+      "groups": "Groupes",
       "status": "Statut",
       "actions": "Actions",
       "password": "Mot de passe",
@@ -67,7 +68,19 @@
       "active": "Actif",
       "neverConnected": "Jamais connecté",
       "asStaff": {
-        "targetScope": "Périmètre cible"
+        "title": "Gestion des utilisateurs du personnel",
+        "targetScope": "Périmètre cible",
+        "new": "Nouvel utilisateur",
+        "newUser": "Créer un nouvel utilisateur",
+        "editUser": "Modifier l'utilisateur",
+        "messages": {
+          "userCreated": "L'utilisateur a été créé avec succès.",
+          "userUpdated": "L'utilisateur a été mis à jour avec succès.",
+          "errorCreating": "Une erreur est survenue lors de la création de l'utilisateur.",
+          "errorUpdating": "Une erreur est survenue lors de la mise à jour de l'utilisateur.",
+          "errorDeleting": "Une erreur est survenue lors de la suppression de l'utilisateur.",
+          "groupRequired": "Le groupe est requis."
+        }
       },
       "asAdmin": {
         "title": "Gestion des membres du personnel",
@@ -80,18 +93,24 @@
           "userUpdated": "Le membre du personnel a été mis à jour avec succès.",
           "errorCreating": "Une erreur est survenue lors de la création du membre du personnel.",
           "errorUpdating": "Une erreur est survenue lors de la mise à jour du membre du personnel.",
-          "userBlocked": "Le membre du personnel a été bloqué avec succès.",
-          "userUnblocked": "Le membre du personnel a été débloqué avec succès.",
-          "errorBlocking": "Une erreur est survenue lors du blocage du membre du personnel.",
-          "confirmRestPassHeader": "Réinitialiser le mot de passe",
-          "confirmResetPass": "Êtes-vous sûr de vouloir réinitialiser le mot de passe de ce membre du personnel ?",
-          "passwordReset": "Le mot de passe a été réinitialisé avec succès.",
-          "errorResetting": "Une erreur est survenue lors de la réinitialisation du mot de passe.",
-          "firstNameRequired": "Le prénom est requis.",
-          "lastNameRequired": "Le nom est requis.",
-          "validEmailRequired": "Un email valide est requis.",
           "roleRequired": "Un rôle est requis."
         }
+      },
+      "messages": {
+        "userBlocked": "L'utilisateur a été bloqué avec succès.",
+        "userUnblocked": "L'utilisateur a été débloqué avec succès.",
+        "errorBlocking": "Une erreur est survenue lors du blocage de l'utilisateur.",
+        "firstNameRequired": "Le prénom est requis.",
+        "lastNameRequired": "Le nom est requis.",
+        "validEmailRequired": "Un email valide est requis.",
+        "confirmResetPassHeader": "Réinitialiser le mot de passe",
+        "confirmResetPass": "Êtes-vous sûr de vouloir réinitialiser le mot de passe de ce membre du personnel ?",
+        "passwordReset": "Le mot de passe a été réinitialisé avec succès.",
+        "errorResetting": "Une erreur est survenue lors de la réinitialisation du mot de passe.",
+        "confirmDeleteUser": "Êtes-vous sûr de vouloir supprimer cet utilisateur ?",
+        "confirmDeleteHeader": "Supprimer l'utilisateur",
+        "userDeleted": "Utilisateur supprimé avec succès.",
+        "errorDeleting": "Une erreur est survenue lors de la suppression de l'utilisateur."
       }
     },
     "roles": {

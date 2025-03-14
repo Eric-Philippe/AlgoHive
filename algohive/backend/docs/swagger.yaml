@@ -254,6 +254,19 @@ definitions:
       name:
         type: string
     type: object
+  v1.UserWithGroup:
+    properties:
+      email:
+        type: string
+      firstname:
+        type: string
+      groups:
+        items:
+          type: string
+        type: array
+      lastname:
+        type: string
+    type: object
   v1.UserWithRoles:
     properties:
       email:
@@ -1309,28 +1322,18 @@ paths:
       summary: Attach a Role to a User
       tags:
       - Roles
-  /user/group/{group_id}:
-    post:
-      consumes:
-      - application/json
-      description: Create a new user and attach a group to it
+  /user/block/{id}:
+    put:
+      description: Toggle the block status of a user
       parameters:
-      - description: User Profile
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/models.User'
-      - description: Group ID
+      - description: User ID
         in: path
-        name: group_id
+        name: id
         required: true
         type: string
-      produces:
-      - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
             $ref: '#/definitions/models.User'
         "400":
@@ -1339,9 +1342,15 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       security:
       - Bearer: []
-      summary: Create User and attach a Group
+      summary: Toggle block user
       tags:
       - Users
   /user/group/{group_id}/bulk:
@@ -1379,6 +1388,36 @@ paths:
       security:
       - Bearer: []
       summary: Create Bulk Users and attach a Group
+      tags:
+      - Users
+  /user/groups:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user and attach one or more roles to it
+      parameters:
+      - description: User Profile with Groups
+        in: body
+        name: UserWithGroup
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UserWithGroup'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Create a user and attach one or more groups
       tags:
       - Users
   /user/profile:
