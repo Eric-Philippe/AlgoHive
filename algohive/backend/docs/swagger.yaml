@@ -149,13 +149,11 @@ definitions:
         type: string
       name:
         type: string
-      scope_ids:
-        items:
-          type: string
-        type: array
+      scope_id:
+        type: string
     required:
     - name
-    - scope_ids
+    - scope_id
     type: object
   v1.CreateRoleRequest:
     properties:
@@ -258,12 +256,16 @@ definitions:
     type: object
   v1.UserWithRoles:
     properties:
+      email:
+        type: string
+      firstname:
+        type: string
+      lastname:
+        type: string
       roles:
         items:
           type: string
         type: array
-      user:
-        $ref: '#/definitions/models.User'
     type: object
 info:
   contact:
@@ -688,6 +690,36 @@ paths:
       security:
       - Bearer: []
       summary: Add a user to a group
+      tags:
+      - Groups
+  /groups/scope/{scope_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get all the groups from a given scope and list the users in each
+        group
+      parameters:
+      - description: Scope ID
+        in: path
+        name: scope_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Group'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all the groups from a given scope
       tags:
       - Groups
   /ping:
@@ -1181,6 +1213,35 @@ paths:
       summary: Get All users that the curren user has access to
       tags:
       - Users
+  /user/{id}:
+    delete:
+      description: Delete a user by ID, if user isStaff, required ownership permission
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Delete User
+      tags:
+      - Users
   /user/{user_id}/role/{role_id}:
     delete:
       consumes:
@@ -1402,11 +1463,11 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new user and attach roles to it
+      description: Create a new user and attach one or more roles to it
       parameters:
-      - description: User and Roles
+      - description: User Profile with Roles
         in: body
-        name: userWithRoles
+        name: UserWithRoles
         required: true
         schema:
           $ref: '#/definitions/v1.UserWithRoles'
@@ -1425,7 +1486,7 @@ paths:
             type: object
       security:
       - Bearer: []
-      summary: Create a new user and attach roles
+      summary: Create a user and attach one or more roles
       tags:
       - Users
 securityDefinitions:

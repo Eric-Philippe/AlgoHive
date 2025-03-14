@@ -11,7 +11,7 @@ import { t } from "i18next";
 import { Message } from "primereact/message";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Toast } from "primereact/toast";
-import { fetchScopes } from "../../../services/scopeService";
+import { fetchScopes } from "../../../services/scopesService";
 import { MultiSelect } from "primereact/multiselect";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";

@@ -6,7 +6,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import { Message } from "primereact/message";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { fetchScopesFromRoles } from "../../../../services/scopeService";
+import { fetchScopesFromRoles } from "../../../../services/scopesService";
 import { Scope } from "../../../../models/Scope";
 import { Group } from "../../../../models/Group";
 import { Dropdown } from "primereact/dropdown";
@@ -30,10 +30,10 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
 
   // Define table columns
   const columns = [
-    { field: "firstname", header: t("staff.users.firstname") },
-    { field: "lastname", header: t("staff.users.lastname") },
-    { field: "email", header: t("staff.users.email") },
-    { field: "roles", header: t("staff.users.roles") },
+    { field: "firstname", header: t("common.fields.firstName") },
+    { field: "lastname", header: t("common.fields.lastName") },
+    { field: "email", header: t("common.fields.email") },
+    { field: "last_connected", header: t("common.fields.lastConnection") },
   ];
 
   // Fetch users and scopes on component mount or when rolesIds changes
@@ -50,7 +50,7 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
         setUsers(userData);
         setScopes(scopesData);
       } catch (err) {
-        setError(t("staff.users.errorFetchingUsers"));
+        setError(t("common.states.errorMessage"));
         console.error(err);
       } finally {
         setLoading(false);
@@ -61,20 +61,21 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
   }, [rolesIds]);
 
   // Memoize scope options to prevent unnecessary recalculations
-  const scopeOptions = useMemo(
-    () =>
-      scopes.map((scope) => ({
-        label: scope.name,
-        value: scope.id,
-      })),
-    [scopes]
-  );
+  const scopeOptions = useMemo(() => {
+    // Filter only from the selectedScope
+
+    return scopes.map((scope) => ({
+      label: scope.name,
+      value: scope.id,
+    }));
+  }, [scopes]);
 
   // Get the available groups for the selected scope
   const groupOptions = useMemo(() => {
     if (!selectedScope) return [];
 
     const scope = scopes.find((scope) => scope.id === selectedScope);
+
     return (
       scope?.groups?.map((group: Group) => ({
         label: group.name,
@@ -85,7 +86,7 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
 
   // Filter users based on selected scope and group
   const filteredUsers = useMemo(() => {
-    if (!selectedScope || !selectedGroup) return [];
+    if (!selectedScope || !selectedGroup || !users) return [];
 
     return users.filter((user) =>
       user.groups?.some((group) => group.id === selectedGroup)
@@ -103,7 +104,7 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
     return (
       <div className="flex flex-col items-center justify-center p-6">
         <ProgressSpinner style={{ width: "50px", height: "50px" }} />
-        <p className="mt-4 text-gray-600">{t("t.scopes.loading")}</p>
+        <p className="mt-4 text-gray-600">{t("common.states.loading")}</p>
       </div>
     );
   }
@@ -119,11 +120,11 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
     );
   }
 
-  if (users.length === 0) {
+  if (users && users.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-12 bg-white rounded-lg shadow">
         <i className="pi pi-inbox text-5xl text-gray-400 mb-4"></i>
-        <p className="text-gray-600 text-xl">{t("staff.scopes.noScopes")}</p>
+        <p className="text-gray-600 text-xl">{t("common.states.empty")}</p>
       </div>
     );
   }
@@ -136,14 +137,14 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
           htmlFor="scopes"
           className="block text-sm font-medium text-white mb-1"
         >
-          {t("staff.users.selectScope")}
+          {t("common.selects.scopes")}
         </label>
         <Dropdown
           id="scopes"
           value={selectedScope}
           options={scopeOptions}
           onChange={(e) => handleScopeChange(e.value)}
-          placeholder={t("staff.users.selectScope")}
+          placeholder={t("common.selects.scopes")}
           className="w-full"
         />
       </div>
@@ -155,14 +156,14 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
             htmlFor="groups"
             className="block text-sm font-medium text-white mb-1"
           >
-            {t("staff.users.selectGroup")}
+            {t("common.selects.groups")}
           </label>
           <Dropdown
             id="groups"
             value={selectedGroup}
             options={groupOptions}
             onChange={(e) => setSelectedGroup(e.value)}
-            placeholder={t("staff.users.selectGroup")}
+            placeholder={t("common.selects.groups")}
             className="w-full"
           />
         </div>

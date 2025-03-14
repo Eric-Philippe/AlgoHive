@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Catalog } from "../../../models/Catalogs";
-import { fetchCatalogs } from "../../../services/catalogService";
+import { fetchCatalogs } from "../../../services/catalogsService";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";

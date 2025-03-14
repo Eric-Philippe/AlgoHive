@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Scope } from "../../../models/Scope";
 import "./Scopes.css";
-import { fetchScopes, createScope } from "../../../services/scopeService";
+import { fetchScopes, createScope } from "../../../services/scopesService";
 import { Message } from "primereact/message";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { InputText } from "primereact/inputtext";
@@ -10,7 +10,7 @@ import { MultiSelect } from "primereact/multiselect";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { useRef } from "react";
-import { fetchCatalogs } from "../../../services/catalogService";
+import { fetchCatalogs } from "../../../services/catalogsService";
 import { t } from "i18next";
 
 export default function ScopesPage() {

@@ -4,8 +4,48 @@
     "description": "Algorithmic challenges platform",
     "footer": "AlgoHive © 2025"
   },
-  "staff": {
-    "menu": {
+  "common": {
+    "actions": {
+      "create": "Create",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel",
+      "block": "Block",
+      "unblock": "Unblock",
+      "reset": "Reset",
+      "view": "View"
+    },
+    "fields": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "name": "Name",
+      "description": "Description",
+      "roles": "Roles",
+      "status": "Status",
+      "actions": "Actions",
+      "password": "Password",
+      "lastConnection": "Last connection"
+    },
+    "selects": {
+      "scopes": "Select scopes",
+      "groups": "Select groups",
+      "roles": "Select roles",
+      "catalogs": "Select catalogs"
+    },
+    "states": {
+      "none": "None",
+      "loading": "Loading resources...",
+      "empty": "No data available",
+      "error": "Error",
+      "validationError": "Form validation error",
+      "errorMessage": "An error occurred while retrieving resources.",
+      "success": "Success"
+    }
+  },
+  "navigation": {
+    "staff": {
       "terminal": "Terminal",
       "home": "Home",
       "users": "User Management",
@@ -13,45 +53,67 @@
       "scopes": "Scope Management",
       "groups": "Group Management",
       "competitions": "Competition Management",
-      "apis": "Puzzle Catalog"
-    },
+      "catalogs": "Puzzle Catalog"
+    }
+  },
+  "staffTabs": {
     "users": {
-      "loading": "Loading users...",
-      "errorFetchingUsers": "An error occurred while retrieving users.",
-      "noUsers": "No users found.",
-      "staffView": "Staff view",
-      "adminView": "Admin view",
-      "viewAsRoles": "View as roles",
-      "selectViewAsRoles": "Select roles",
-      "selectScope": "Select scope",
-      "selectGroup": "Select group",
-      "firstname": "First Name",
-      "lastname": "Last Name",
-      "email": "Email",
-      "role": "Role"
+      "views": {
+        "asAdmin": "Admin view",
+        "asStaff": "Staff view"
+      },
+      "asRoles": "View as roles",
+      "blocked": "Blocked",
+      "active": "Active",
+      "neverConnected": "Never connected",
+      "asStaff": {
+        "targetScope": "Target scope"
+      },
+      "asAdmin": {
+        "title": "Staff User Management",
+        "new": "Create a new staff member",
+        "resetPassword": "Reset password",
+        "editUser": "Edit staff member",
+        "newStaff": "New staff member",
+        "messages": {
+          "userCreated": "The staff member has been created successfully.",
+          "userUpdated": "The staff member has been updated successfully.",
+          "errorCreating": "An error occurred while creating the staff member.",
+          "errorUpdating": "An error occurred while updating the staff member.",
+          "userBlocked": "The staff member has been blocked successfully.",
+          "userUnblocked": "The staff member has been unblocked successfully.",
+          "errorBlocking": "An error occurred while blocking the staff member.",
+          "confirmRestPassHeader": "Reset password",
+          "confirmResetPass": "Are you sure you want to reset the password of this staff member?",
+          "passwordReset": "The password has been reset successfully.",
+          "errorResetting": "An error occurred while resetting the password.",
+          "firstNameRequired": "First name is required.",
+          "lastNameRequired": "Last name is required.",
+          "validEmailRequired": "Valid email is required.",
+          "roleRequired": "Role is required.",
+          "confirmDeleteUser": "Are you sure you want to delete this user?",
+          "confirmDeleteHeader": "Delete user",
+          "userDeleted": "User deleted successfully.",
+          "errorDeleting": "An error occurred while deleting the user."
+        }
+      }
     },
     "roles": {
       "new": "Create a new role",
-      "name": "Name",
-      "roleName": "Role Name",
-      "permissionsTitle": "Permissions",
+      "name": "Role Name",
+      "permissions": "Permissions",
       "scopes": "Scopes",
-      "selectScopes": "Accessible scopes",
-      "create": "Create",
-      "viewDetails": "More details",
-      "usersTitle": "Number of users with this role",
-      "loading": "Loading roles...",
-      "errorFetchingRoles": "An error occurred while retrieving roles.",
-      "errorDeletingRole": "An error occurred while deleting the role.",
-      "roleDeleted": "Role deleted successfully.",
-      "noRoles": "No roles found.",
-      "errorNameRequired": "Role name is required.",
-      "roleCreated": "Role created successfully.",
-      "errorCreatingRole": "An error occurred while creating the role.",
-      "noScopes": "None",
-      "noUsers": "None",
-      "delete": "Delete",
-      "permissions": {
+      "details": "More details",
+      "userCount": "Number of users with this role",
+      "messages": {
+        "deleteError": "An error occurred while deleting the role.",
+        "deleteSuccess": "Role deleted successfully.",
+        "notFound": "No roles found.",
+        "nameRequired": "Role name is required.",
+        "createSuccess": "Role created successfully.",
+        "createError": "An error occurred while creating the role."
+      },
+      "permissionTypes": {
         "users": "Users",
         "roles": "Roles",
         "scopes": "Scopes",
@@ -62,26 +124,21 @@
     },
     "scopes": {
       "new": "Create a new scope",
-      "name": "Name",
-      "scopeName": "Scope Name",
-      "description": "Description",
-      "scopeDescription": "Scope Description",
+      "name": "Scope Name",
+      "description": "Scope Description",
       "catalogs": "Catalogs",
-      "selectCatalogs": "Select catalogs",
-      "create": "Create",
-      "viewDetails": "More details",
-      "loading": "Loading scopes...",
-      "errorFetchingScopes": "An error occurred while retrieving scopes.",
-      "noScopes": "No scopes found.",
-      "errorNameRequired": "Scope name is required.",
-      "scopeCreated": "Scope created successfully.",
-      "errorCreatingScope": "An error occurred while creating the scope."
+      "details": "More details",
+      "messages": {
+        "fetchError": "An error occurred while retrieving scopes.",
+        "notFound": "No scopes found.",
+        "nameRequired": "Scope name is required.",
+        "createSuccess": "Scope created successfully.",
+        "createError": "An error occurred while creating the scope."
+      }
     },
     "catalogs": {
-      "viewDetails": "More details",
-      "loading": "Loading catalogs...",
-      "errorFetchingCatalogs": "An error occurred while retrieving catalogs.",
-      "noCatalogs": "No catalogs found."
+      "details": "More details",
+      "notFound": "No catalogs found."
     }
   },
   "login": {

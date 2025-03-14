@@ -381,6 +381,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/groups/scope/{scope_id}": {
+            "get": {
+                "description": "Get all the groups from a given scope and list the users in each group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Groups"
+                ],
+                "summary": "Get all the groups from a given scope",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Scope ID",
+                        "name": "scope_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Group"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/groups/{group_id}": {
             "get": {
                 "security": [
@@ -1669,7 +1713,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "Create a new user and attach roles to it",
+                "description": "Create a new user and attach one or more roles to it",
                 "consumes": [
                     "application/json"
                 ],
@@ -1679,11 +1723,11 @@ const docTemplate = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Create a new user and attach roles",
+                "summary": "Create a user and attach one or more roles",
                 "parameters": [
                     {
-                        "description": "User and Roles",
-                        "name": "userWithRoles",
+                        "description": "User Profile with Roles",
+                        "name": "UserWithRoles",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -1700,6 +1744,52 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete a user by ID, if user isStaff, required ownership permission",
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Delete User",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -2038,7 +2128,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "name",
-                "scope_ids"
+                "scope_id"
             ],
             "properties": {
                 "description": {
@@ -2047,11 +2137,8 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "scope_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                "scope_id": {
+                    "type": "string"
                 }
             }
         },
@@ -2207,14 +2294,20 @@ const docTemplate = `{
         "v1.UserWithRoles": {
             "type": "object",
             "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "firstname": {
+                    "type": "string"
+                },
+                "lastname": {
+                    "type": "string"
+                },
                 "roles": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
-                },
-                "user": {
-                    "$ref": "#/definitions/models.User"
                 }
             }
         }

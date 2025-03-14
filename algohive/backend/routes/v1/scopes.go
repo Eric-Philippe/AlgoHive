@@ -402,6 +402,26 @@ func GetRoleScopes(c *gin.Context) {
         return
     }
 
+    var loadedRoles []*models.Role
+    err = database.DB.Where("id IN ?", roles).Find(&loadedRoles).Error
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get roles"})
+        return
+    }
+
+    if permissions.RolesHavePermission(loadedRoles, permissions.OWNER) {
+        // Return all scopes if the user has the OWNER permission
+        var scopes []models.Scope
+        err = database.DB.Preload("Groups").Find(&scopes).Error
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get scopes"})
+            return
+        }
+
+        c.JSON(http.StatusOK, scopes)
+        return
+    }
+
 	var scopesIDs []string
 	err = database.DB.Raw(`
         SELECT DISTINCT s.id

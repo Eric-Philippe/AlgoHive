@@ -28,7 +28,7 @@ export default function StaffDashboard() {
               <div className="p-4 min-h-screen mb-28">
                 <div className="mb-6">
                   <h1 className="text-3xl font-bold text-white mb-2">
-                    {t("staff.menu." + activePage)}
+                    {t("navigation.staff." + activePage)}
                   </h1>
                   <div className="w-20 h-1 bg-amber-500 rounded"></div>
                 </div>

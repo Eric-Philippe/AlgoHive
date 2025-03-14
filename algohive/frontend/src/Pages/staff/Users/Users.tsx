@@ -35,7 +35,7 @@ export default function UsersPage() {
             value: role.id,
           }));
       } catch (err) {
-        setError(t("staff.users.errorFetchingUsers"));
+        setError(t("common.states.error"));
         console.error(err);
       } finally {
         setLoading(false);
@@ -43,7 +43,7 @@ export default function UsersPage() {
     };
 
     getUsers();
-  }, []);
+  }, [user]);
 
   return (
     <div className="p-4 min-h-screen mb-28">
@@ -69,23 +69,23 @@ export default function UsersPage() {
         <div>
           {isOwner(user) ? (
             <TabView>
-              <TabPanel header={t("staff.users.adminView")}>
+              <TabPanel header={t("staffTabs.users.views.asAdmin")}>
                 <UsersTableAdmin />
               </TabPanel>
-              <TabPanel header={t("staff.users.staffView")}>
+              <TabPanel header={t("staffTabs.users.views.asStaff")}>
                 <div className="mb-4">
                   <label
                     htmlFor="rolesIds"
                     className="block text-sm font-medium text-white mb-1"
                   >
-                    {t("staff.users.viewAsRoles")}
+                    {t("staffTabs.users.asRoles")}
                   </label>
                   <MultiSelect
                     id="rolesIds"
                     value={selectedRoles}
                     options={rolesOptions.current}
                     onChange={(e) => setSelectedRoles(e.value)}
-                    placeholder={t("staff.users.selectViewAsRoles")}
+                    placeholder={t("common.selects.roles")}
                     className="w-full"
                     display="chip"
                   />

@@ -13,48 +13,56 @@ import (
 )
 
 type UserWithRoles struct {
-	User  models.User `json:"user"`
+	FirstName string `json:"firstname"`
+	LastName  string `json:"lastname"`
+	Email     string `json:"email"`
 	Roles []string    `json:"roles"`
 }
 
 // Func to check all the groups from a target user and see if at least one of theme is owned by the authenticated user
 func UserOwnsGroup(userID string, targetUserID string) bool {
-	type GroupIds struct {
-		ID []string
-	}
-	
-	var result GroupIds
-	err := database.DB.Raw(`
-		SELECT DISTINCT g.id
-			FROM groups g
-			JOIN scopes s ON g.scope_id = s.id
-			JOIN role_scopes rs ON s.id = rs.scope_id
-			JOIN roles r ON rs.role_id = r.id
-			JOIN user_roles ur ON r.id = ur.role_id
-			WHERE ur.user_id = 'da58cef5-4e0f-45d1-8168-1be0afa08196'
-	`, userID).Scan(&result).Error
+    type GroupIds struct {
+        ID []string
+    }
+    
+    // Get all groups owned by the authenticated user
+    var result GroupIds
+    err := database.DB.Raw(`
+        SELECT DISTINCT g.id
+            FROM groups g
+            JOIN scopes s ON g.scope_id = s.id
+            JOIN role_scopes rs ON s.id = rs.scope_id
+            JOIN roles r ON rs.role_id = r.id
+            JOIN user_roles ur ON r.id = ur.role_id
+            WHERE ur.user_id = ?
+    `, userID).Scan(&result).Error
 
-	if err != nil {
-		return false
-	}
+    if err != nil {
+        return false
+    }
 
-	// Get all the group IDs from the target user
-	var targetGroupIds GroupIds
-	err = database.DB.Where("id = ?", targetUserID).Preload("Groups").First(&targetGroupIds).Error
-	if err != nil {
-		return false
-	}
+    // Get all the group IDs from the target user
+    var targetGroupIds GroupIds
+    err = database.DB.Raw(`
+        SELECT group_id as id
+        FROM user_groups
+        WHERE user_id = ?
+    `, targetUserID).Scan(&targetGroupIds).Error
+    
+    if err != nil {
+        return false
+    }
 
-	// Check if the authenticated user owns any of the target user's groups
-	for _, groupID := range targetGroupIds.ID {
-		for _, ownedGroupID := range result.ID {
-			if groupID == ownedGroupID {
-				return true
-			}
-		}
-	}
+    // Check if the authenticated user owns any of the target user's groups
+    for _, groupID := range targetGroupIds.ID {
+        for _, ownedGroupID := range result.ID {
+            if groupID == ownedGroupID {
+                return true
+            }
+        }
+    }
 
-	return false
+    return false
 }
 
 // @Summary Get User Profile
@@ -155,6 +163,59 @@ func CreateUserAndAttachGroup(c *gin.Context) {
 	c.JSON(http.StatusCreated, user)
 }
 
+// @Summary Create a user and attach one or more roles
+// @Description Create a new user and attach one or more roles to it
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param UserWithRoles body UserWithRoles true "User Profile with Roles"
+// @Success 201 {object} models.User
+// @Failure 400 {object} map[string]string
+// @Router /user/roles [post]
+// @Security Bearer
+func CreateUserAndAttachRoles(c *gin.Context) {
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
+
+	if !permissions.RolesHavePermission(user.Roles, permissions.ROLES) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to create users with roles"})
+		return
+	}
+
+	var userIdWithRolesIds UserWithRoles
+	if err := c.ShouldBindJSON(&userIdWithRolesIds); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var roles []models.Role
+	result := database.DB.Where("id IN (?)", userIdWithRolesIds.Roles).Find(&roles)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
+		return
+	}
+
+	var targetUser models.User
+	targetUser.Firstname = userIdWithRolesIds.FirstName
+	targetUser.Lastname = userIdWithRolesIds.LastName
+	targetUser.Email = userIdWithRolesIds.Email
+	hashedPassword, err := utils.CreateDefaultPassword()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		return
+	}
+	targetUser.Password = hashedPassword
+	database.DB.Create(&targetUser)
+
+	for i := range roles {
+		database.DB.Model(&targetUser).Association("Roles").Append(&roles[i])
+	}
+
+	c.JSON(http.StatusCreated, targetUser)
+}
+
 // @Summary Create Bulk Users and attach a Group
 // @Description Create multiple new users and attach a group to them
 // @Tags Users
@@ -204,57 +265,6 @@ func CreateBulkUsersAndAttachGroup(c *gin.Context) {
 	}
 	
 	c.JSON(http.StatusCreated, users)
-}
-
-// @Summary Create a new user and attach roles
-// @Description Create a new user and attach roles to it
-// @Tags Users
-// @Accept json
-// @Produce json
-// @Param userWithRoles body UserWithRoles true "User and Roles"
-// @Success 201 {object} models.User
-// @Failure 400 {object} map[string]string
-// @Router /user/roles [post]
-// @Security Bearer
-func CreateUserAndAttachRoles(c *gin.Context) {
-	user, err := middleware.GetUserFromRequest(c)
-	if err != nil {
-		return
-	}
-
-	if !permissions.RolesHavePermission(user.Roles, permissions.ROLES) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to create users with roles"})
-		return
-	}
-
-	var userWithRoles UserWithRoles
-	if err := c.ShouldBindJSON(&userWithRoles); err != nil {	
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	var roles []models.Role
-	result := database.DB.Where("id IN (?)", userWithRoles.Roles).Find(&roles)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
-		return
-	}
-
-	user = userWithRoles.User
-	user.Roles = make([]*models.Role, len(roles))
-	for i := range roles {
-		user.Roles[i] = &roles[i]
-	}
-
-	hashedPassword, err := utils.HashPassword(user.Password)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
-		return
-	}
-	user.Password = hashedPassword
-	database.DB.Create(&user)
-
-	c.JSON(http.StatusCreated, user)
 }
 
 // @Summary Get All users that the curren user has access to 
@@ -389,6 +399,62 @@ func GetUsersFromRoles(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
+// @Summary Delete User
+// @Description Delete a user by ID, if user isStaff, required ownership permission
+// @Tags Users
+// @Param id path string true "User ID"
+// @Success 204
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /user/{id} [delete]
+// @Security Bearer
+func DeleteUser(c *gin.Context) {
+    user, err := middleware.GetUserFromRequest(c)
+    if err != nil {
+        return
+    }
+
+    userID := c.Param("id")
+    var targetUser models.User
+    if err := database.DB.Where("id = ?", userID).First(&targetUser).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+        return
+    }
+
+    if !UserOwnsGroup(user.ID, targetUser.ID) && !permissions.RolesHavePermission(user.Roles, permissions.OWNER) {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to delete this user"})
+        return
+    }
+
+    // Begin transaction to ensure all operations succeed or fail together
+    tx := database.DB.Begin()
+
+    // Remove associations first
+    if err := tx.Model(&targetUser).Association("Roles").Clear(); err != nil {
+        tx.Rollback()
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove user role associations"})
+        return
+    }
+    
+    if err := tx.Model(&targetUser).Association("Groups").Clear(); err != nil {
+        tx.Rollback()
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove user group associations"})
+        return
+    }
+
+    // Delete the user
+    if err := tx.Delete(&targetUser).Error; err != nil {
+        tx.Rollback()
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
+        return
+    }
+
+    // Commit the transaction
+    tx.Commit()
+    
+    c.Status(http.StatusNoContent)
+}
+
 // Register the endpoints for the v1 API
 func RegisterUserRoutes(r *gin.RouterGroup) {    
     user := r.Group("/user")
@@ -401,5 +467,6 @@ func RegisterUserRoutes(r *gin.RouterGroup) {
 		user.POST("/group/:group_id", CreateUserAndAttachGroup)
 		user.POST("/group/:group_id/bulk", CreateBulkUsersAndAttachGroup)
 		user.POST("/roles", CreateUserAndAttachRoles)
+		user.DELETE("/:id", DeleteUser)
     }
 }

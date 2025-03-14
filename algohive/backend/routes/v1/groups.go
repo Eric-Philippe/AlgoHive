@@ -14,7 +14,7 @@ import (
 type CreateGroupRequest struct {
 	Name        string `json:"name" binding:"required"`
 	Description string `json:"description"`
-	ScopeIds	[]string `json:"scope_ids" binding:"required"`
+	ScopeId		string `json:"scope_id" binding:"required"`
 }
 
 // UpdateGroupRequest model for updating a group
@@ -117,7 +117,8 @@ func CreateGroup(c *gin.Context) {
 		return
 	}
 
-	if !permissions.RolesHavePermission(user.Roles, permissions.GROUPS) {
+	// TODO: Check if the user given scope is in its roles reach
+	if !permissions.IsStaff(user) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have permission to create groups"})
 		return
 	}
@@ -129,8 +130,8 @@ func CreateGroup(c *gin.Context) {
 	}
 
 	var scopes []models.Scope
-	database.DB.Where("id IN (?)", req.ScopeIds).Find(&scopes)
-	if len(scopes) != len(req.ScopeIds) {
+	result := database.DB.Where("id = ?", req.ScopeId).Find(&scopes)
+	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid scope IDs"})
 		return
 	}
@@ -138,6 +139,7 @@ func CreateGroup(c *gin.Context) {
 	group := models.Group{
 		Name:        req.Name,
 		Description: req.Description,
+		ScopeID:    req.ScopeId,
 	}
 	database.DB.Create(&group)
 	database.DB.Model(&group).Association("Scopes").Append(scopes)
@@ -319,6 +321,39 @@ func UpdateGroup(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 }
 
+// @Summary Get all the groups from a given scope
+// @Description Get all the groups from a given scope and list the users in each group
+// @Tags Groups
+// @Accept json
+// @Produce json
+// @Param scope_id path string true "Scope ID"
+// @Success 200 {array} models.Group
+// @Failure 400 {object} map[string]string
+// @Router /groups/scope/{scope_id} [get]
+func GetGroupsFromScope(c *gin.Context) {
+	_, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
+
+	scopeID := c.Param("scope_id")
+	var scope models.Scope
+	result := database.DB.Where("id = ?", scopeID).First(&scope)
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Scope not found"})
+		return
+	}
+
+	var groups []models.Group
+	result = database.DB.Where("scope_id = ?", scopeID).Preload("Users").Find(&groups)
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while fetching groups"})
+		return
+	}
+
+	c.JSON(http.StatusOK, groups)
+}
+
 // RegisterGroups registers the group routes
 func RegisterGroupsRoutes(r *gin.RouterGroup) {
 	groups := r.Group("/groups")
@@ -326,6 +361,7 @@ func RegisterGroupsRoutes(r *gin.RouterGroup) {
 	{
 		groups.GET("/", GetAllGroups)
 		groups.GET("/:group_id", GetGroup)
+		groups.GET("/scope/:scope_id", GetGroupsFromScope)
 		groups.PUT("/:group_id", UpdateGroup)
 		groups.POST("/:group_id/users/:user_id", AddUserToGroup)
 		groups.DELETE("/:group_id/users/:user_id", RemoveUserFromGroup)
