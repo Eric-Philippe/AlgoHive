@@ -50,6 +50,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         firstname: response.data.firstname,
         lastname: response.data.lastname,
         permissions: response.data.permissions,
+        blocked: response.data.blocked,
+        last_connected: response.data.last_connected,
         roles: response.data.roles,
         groups: response.data.groups,
       });
@@ -89,6 +91,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         firstname: response.data.firstname,
         lastname: response.data.lastname,
         permissions: response.data.permissions,
+        blocked: response.data.blocked,
+        last_connected: response.data.last_connected,
         roles: response.data.roles,
         groups: response.data.groups,
       });
