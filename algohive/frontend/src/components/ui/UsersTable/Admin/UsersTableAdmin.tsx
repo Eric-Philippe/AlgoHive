@@ -1,14 +1,11 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
-import { MultiSelect } from "primereact/multiselect";
-import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Message } from "primereact/message";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { ConfirmDialog } from "primereact/confirmdialog";
 import { t } from "i18next";
 import { User } from "../../../../models/User";
 import { Role } from "../../../../models/Role";
@@ -17,16 +14,24 @@ import {
   deleteUser,
   fetchUsers,
   toggleBlockUser,
-  // createUser,
-  // updateUser,
-  // blockUser,
-  // unblockUser,
-  // resetPassword,
-  // updateUserRoles
 } from "../../../../services/usersService";
 import { fetchRoles } from "../../../../services/rolesService";
 import { isStaff, roleIsOwner } from "../../../../utils/permissions";
 
+// Importation des composants partagés
+import UserForm from "../shared/UserForm";
+import UserActions from "../shared/UserActions";
+import {
+  StatusTemplate,
+  LastConnectionTemplate,
+  RolesTemplate,
+} from "../shared/TableTemplates";
+import { useUserManagement } from "../../../../hooks/useUserManagement";
+
+/**
+ * Component that displays and manages staff users with administrative privileges.
+ * Provides CRUD operations for staff users and their roles.
+ */
 export default function UsersTableAdmin() {
   // State variables
   const [users, setUsers] = useState<User[]>([]);
@@ -34,95 +39,65 @@ export default function UsersTableAdmin() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // User form states
-  const [userDialog, setUserDialog] = useState<boolean>(false);
-  const [editMode, setEditMode] = useState<boolean>(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  // Fetch data function for refreshing users
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      // Load users and roles in parallel
+      const [usersData, rolesData] = await Promise.all([
+        fetchUsers(),
+        fetchRoles(),
+      ]);
 
-  // New user form
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+      // Filter out non-staff users and owner roles
+      setUsers(usersData.filter((user) => isStaff(user)));
+      setRoles(rolesData.filter((role) => !roleIsOwner(role)));
+      setLoading(false);
+    } catch (err) {
+      console.error("Error loading data:", err);
+      setError(t("common.states.errorMessage"));
+      setLoading(false);
+    }
+  };
 
-  // Refs
-  const toast = useRef<Toast>(null);
+  // Use custom hook for user management
+  const {
+    userDialog,
+    setUserDialog,
+    editMode,
+    selectedUser,
+    formFields,
+    toast,
+    updateFormField,
+    resetForm,
+    openNewUserDialog,
+    openEditUserDialog,
+    validateForm,
+    confirmDeleteUser,
+    confirmResetPassword,
+  } = useUserManagement(fetchData);
 
   // Load users and roles on component mount
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-
-        // Load users and roles in parallel
-        const [usersData, rolesData] = await Promise.all([
-          fetchUsers(),
-          fetchRoles(),
-        ]);
-
-        setUsers(usersData.filter((user) => isStaff(user)));
-        setRoles(rolesData.filter((role) => !roleIsOwner(role)));
-      } catch (err) {
-        console.error("Error loading data:", err);
-        setError(t("common.states.errorMessage"));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
+    fetchData();
   }, []);
-
-  const refreshUsers = async (users: User[]) => {
-    setUsers(users.filter((user) => isStaff(user)));
-  };
-
-  // Reset form fields
-  const resetForm = () => {
-    setFirstName("");
-    setLastName("");
-    setEmail("");
-    setSelectedRoles([]);
-    setSelectedUser(null);
-    setEditMode(false);
-  };
-
-  // Open dialog for new user
-  const openNewUserDialog = () => {
-    resetForm();
-    setUserDialog(true);
-  };
-
-  // Open dialog for editing user
-  const openEditUserDialog = (user: User) => {
-    setSelectedUser(user);
-    setFirstName(user.firstname || "");
-    setLastName(user.lastname || "");
-    setEmail(user.email);
-    setSelectedRoles(
-      user.roles
-        ? user.roles.filter((role) => !roleIsOwner(role)).map((role) => role.id)
-        : []
-    );
-    setEditMode(true);
-    setUserDialog(true);
-  };
 
   // Save user (create or update)
   const saveUser = async () => {
-    if (!validateForm()) return;
+    // Validate form with requirement for roles
+    if (!validateForm(true)) return;
 
     try {
       if (editMode && selectedUser) {
-        // Update existing user
+        // Update existing user logic would go here
         // await updateUser(selectedUser.id, {
-        //   firstname: firstName,
-        //   lastname: lastName,
-        //   email: email,
+        //   firstname: formFields.firstName,
+        //   lastname: formFields.lastName,
+        //   email: formFields.email,
         // });
 
         // Update roles if changed
-        // await updateUserRoles(selectedUser.id, selectedRoles);
+        // await updateUserRoles(selectedUser.id, formFields.selectedRoles || []);
 
         toast.current?.show({
           severity: "success",
@@ -131,8 +106,13 @@ export default function UsersTableAdmin() {
           life: 3000,
         });
       } else {
-        // Create new user
-        await createStaffUser(firstName, lastName, email, selectedRoles);
+        // Create new staff user
+        await createStaffUser(
+          formFields.firstName,
+          formFields.lastName,
+          formFields.email,
+          formFields.selectedRoles || []
+        );
 
         toast.current?.show({
           severity: "success",
@@ -143,8 +123,7 @@ export default function UsersTableAdmin() {
       }
 
       // Reload users list
-      const updatedUsers = await fetchUsers();
-      refreshUsers(updatedUsers);
+      await fetchData();
 
       // Close dialog and reset form
       setUserDialog(false);
@@ -165,12 +144,8 @@ export default function UsersTableAdmin() {
   // Handle block/unblock user
   const handleToggleBlockUser = async (user: User) => {
     try {
-      // Call the block/unblock API
       await toggleBlockUser(user.id);
-
-      // Update the user list
-      const updatedUsers = await fetchUsers();
-      refreshUsers(updatedUsers);
+      await fetchData();
 
       toast.current?.show({
         severity: "success",
@@ -191,222 +166,11 @@ export default function UsersTableAdmin() {
     }
   };
 
-  // Handle password reset
-  const handleResetPassword = (user: User) => {
-    console.log("Reset password for user:", user);
-
-    confirmDialog({
-      message: t("staffTabs.users.messages.confirmResetPass"),
-      header: t("staffTabs.users.messages.confirmResetPassHeader"),
-      icon: "pi pi-exclamation-triangle",
-      acceptClassName: "p-button-danger",
-      accept: async () => {
-        try {
-          // await resetPassword(user.id);
-          toast.current?.show({
-            severity: "success",
-            summary: t("common.states.success"),
-            detail: t("staffTabs.users.messages.passwordReset"),
-            life: 3000,
-          });
-        } catch (err) {
-          console.error("Error resetting password:", err);
-          toast.current?.show({
-            severity: "error",
-            summary: t("common.states.error"),
-            detail: t("staffTabs.users.messages.errorResetting"),
-            life: 3000,
-          });
-        }
-      },
-    });
-  };
-
-  // Handle delete user
-  const handleDeleteUser = (user: User) => {
-    confirmDialog({
-      message: t("staffTabs.users.messages.confirmDeleteUser"),
-      header: t("staffTabs.users.messages.confirmDeleteHeader"),
-      icon: "pi pi-exclamation-triangle",
-      acceptClassName: "p-button-danger",
-      accept: async () => {
-        try {
-          await deleteUser(user.id);
-
-          // Reload users list
-          const updatedUsers = await fetchUsers();
-          refreshUsers(updatedUsers);
-
-          toast.current?.show({
-            severity: "success",
-            summary: t("common.states.success"),
-            detail: t("staffTabs.users.messages.userDeleted"),
-            life: 3000,
-          });
-        } catch (err) {
-          console.error("Error deleting user:", err);
-          toast.current?.show({
-            severity: "error",
-            summary: t("common.states.error"),
-            detail: t("staffTabs.users.messages.errorDeleting"),
-            life: 3000,
-          });
-        }
-      },
-    });
-  };
-
-  // Form validation
-  const validateForm = (): boolean => {
-    if (!firstName.trim()) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("common.states.validationError"),
-        detail: t("staffTabs.users.messages.firstNameRequired"),
-        life: 3000,
-      });
-      return false;
-    }
-
-    if (!lastName.trim()) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("common.states.validationError"),
-        detail: t("staffTabs.users.messages.lastNameRequired"),
-        life: 3000,
-      });
-      return false;
-    }
-
-    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("common.states.validationError"),
-        detail: t("staffTabs.users.messages.validEmailRequired"),
-        life: 3000,
-      });
-      return false;
-    }
-
-    if (selectedRoles.length === 0) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("common.states.validationError"),
-        detail: t("staffTabs.users.asAdmin.messages.roleRequired"),
-        life: 3000,
-      });
-      return false;
-    }
-
-    return true;
-  };
-
-  // Custom cell templates for DataTable
-  const actionBodyTemplate = (rowData: User) => {
-    return (
-      <div className="flex gap-2 justify-center">
-        <Button
-          icon="pi pi-pencil"
-          className="p-button-rounded p-button-success p-button-sm"
-          onClick={() => openEditUserDialog(rowData)}
-          tooltip={t("common.actions.edit")}
-          tooltipOptions={{ position: "top" }}
-        />
-        <Button
-          icon={rowData.blocked ? "pi pi-lock-open" : "pi pi-lock"}
-          className={`p-button-rounded p-button-sm ${
-            rowData.blocked ? "p-button-warning" : "p-button-secondary"
-          }`}
-          onClick={() => handleToggleBlockUser(rowData)}
-          tooltip={
-            rowData.blocked
-              ? t("common.actions.unblock")
-              : t("common.actions.block")
-          }
-          tooltipOptions={{ position: "top" }}
-        />
-        <Button
-          icon="pi pi-key"
-          className="p-button-rounded p-button-info p-button-sm"
-          onClick={() => handleResetPassword(rowData)}
-          tooltip={t("staffTabs.users.asAdmin.resetPassword")}
-          tooltipOptions={{ position: "top" }}
-        />
-        <Button
-          icon="pi pi-trash"
-          className="p-button-rounded p-button-danger p-button-sm"
-          onClick={() => handleDeleteUser(rowData)}
-          tooltip={t("common.actions.delete")}
-          tooltipOptions={{ position: "top" }}
-        />
-      </div>
-    );
-  };
-
-  const statusBodyTemplate = (rowData: User) => {
-    return (
-      <span
-        className={`px-2 py-1 rounded text-xs ${
-          rowData.blocked
-            ? "bg-red-200 text-red-800"
-            : "bg-green-200 text-green-800"
-        }`}
-      >
-        {rowData.blocked
-          ? t("staffTabs.users.blocked")
-          : t("staffTabs.users.active")}
-      </span>
-    );
-  };
-
-  const lastConnectionTemplate = (rowData: User) => {
-    return (
-      <span className="text-sm">
-        {rowData.last_connected
-          ? new Date(rowData.last_connected).toLocaleString()
-          : t("staffTabs.users.neverConnected")}
-      </span>
-    );
-  };
-
-  const rolesBodyTemplate = (rowData: User) => {
-    return (
-      <div className="flex flex-wrap gap-1">
-        {rowData.roles?.map((role) => (
-          <span
-            key={role.id}
-            className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded"
-          >
-            {role.name}
-          </span>
-        ))}
-      </div>
-    );
-  };
-
   // Role options for MultiSelect
   const roleOptions = roles.map((role) => ({
     label: role.name,
     value: role.id,
   }));
-
-  // Dialog footer with save/cancel buttons
-  const userDialogFooter = (
-    <div className="flex justify-end gap-2">
-      <Button
-        label={t("common.actions.cancel")}
-        icon="pi pi-times"
-        className="p-button-text"
-        onClick={() => setUserDialog(false)}
-      />
-      <Button
-        label={t("common.actions.save")}
-        icon="pi pi-check"
-        className="p-button-primary"
-        onClick={saveUser}
-      />
-    </div>
-  );
 
   // Render loading spinner if loading
   if (loading) {
@@ -448,7 +212,7 @@ export default function UsersTableAdmin() {
         />
       </div>
 
-      {/* Users DataTable */}
+      {/* Staff Users DataTable */}
       <DataTable
         value={users}
         paginator
@@ -475,7 +239,7 @@ export default function UsersTableAdmin() {
         <Column
           field="status"
           header={t("common.fields.status")}
-          body={statusBodyTemplate}
+          body={StatusTemplate}
           style={{ width: "10%" }}
           sortable
           sortField="blocked"
@@ -483,17 +247,25 @@ export default function UsersTableAdmin() {
         <Column
           field="last_connected"
           header={t("common.fields.lastConnection")}
-          body={lastConnectionTemplate}
+          body={LastConnectionTemplate}
           style={{ width: "20%" }}
         />
         <Column
           field="roles"
           header={t("common.fields.roles")}
-          body={rolesBodyTemplate}
+          body={RolesTemplate}
           style={{ width: "20%" }}
         />
         <Column
-          body={actionBodyTemplate}
+          body={(rowData) => (
+            <UserActions
+              user={rowData}
+              onEdit={openEditUserDialog}
+              onToggleBlock={handleToggleBlockUser}
+              onResetPassword={(user) => confirmResetPassword(user)}
+              onDelete={(user) => confirmDeleteUser(user, deleteUser)}
+            />
+          )}
           header={t("common.fields.actions")}
           style={{ width: "15%" }}
           exportable={false}
@@ -501,74 +273,18 @@ export default function UsersTableAdmin() {
       </DataTable>
 
       {/* User Dialog (Create/Edit) */}
-      <Dialog
+      <UserForm
         visible={userDialog}
-        style={{ width: "450px" }}
-        header={
-          editMode
-            ? t("staffTabs.users.asAdmin.editUser")
-            : t("staffTabs.users.asAdmin.newStaff")
-        }
-        modal
-        className="p-fluid"
-        footer={userDialogFooter}
         onHide={() => setUserDialog(false)}
-      >
-        <div className="field mt-4">
-          <label htmlFor="firstname" className="font-bold">
-            {t("common.fields.firstName")}
-          </label>
-          <InputText
-            id="firstname"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            required
-            className="mt-1"
-          />
-        </div>
-
-        <div className="field mt-4">
-          <label htmlFor="lastname" className="font-bold">
-            {t("common.fields.lastName")}
-          </label>
-          <InputText
-            id="lastname"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            required
-            className="mt-1"
-          />
-        </div>
-
-        <div className="field mt-4">
-          <label htmlFor="email" className="font-bold">
-            {t("common.fields.email")}
-          </label>
-          <InputText
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="mt-1"
-            type="email"
-          />
-        </div>
-
-        <div className="field mt-4">
-          <label htmlFor="roles" className="font-bold">
-            {t("common.fields.roles")}
-          </label>
-          <MultiSelect
-            id="roles"
-            value={selectedRoles}
-            options={roleOptions}
-            onChange={(e) => setSelectedRoles(e.value)}
-            placeholder={t("common.selects.roles")}
-            display="chip"
-            className="w-full mt-1"
-          />
-        </div>
-      </Dialog>
+        onSave={saveUser}
+        editMode={editMode}
+        fields={formFields}
+        onFieldChange={updateFormField}
+        headerPrefix="staffTabs.users.asAdmin"
+        roleOptions={roleOptions}
+        showRoles={true}
+        isAdmin={true}
+      />
     </div>
   );
 }

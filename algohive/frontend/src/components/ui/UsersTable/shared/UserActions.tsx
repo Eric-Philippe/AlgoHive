@@ -1,0 +1,62 @@
+import React from "react";
+import { Button } from "primereact/button";
+import { t } from "i18next";
+import { User } from "../../../../models/User";
+
+interface UserActionsProps {
+  user: User;
+  onEdit: (user: User) => void;
+  onToggleBlock: (user: User) => void;
+  onResetPassword: (user: User) => void;
+  onDelete: (user: User) => void;
+}
+
+/**
+ * Component that renders user action buttons
+ */
+const UserActions: React.FC<UserActionsProps> = ({
+  user,
+  onEdit,
+  onToggleBlock,
+  onResetPassword,
+  onDelete,
+}) => {
+  return (
+    <div className="flex gap-2 justify-center">
+      <Button
+        icon="pi pi-pencil"
+        className="p-button-rounded p-button-success p-button-sm"
+        onClick={() => onEdit(user)}
+        tooltip={t("common.actions.edit")}
+        tooltipOptions={{ position: "top" }}
+      />
+      <Button
+        icon={user.blocked ? "pi pi-lock-open" : "pi pi-lock"}
+        className={`p-button-rounded p-button-sm ${
+          user.blocked ? "p-button-warning" : "p-button-secondary"
+        }`}
+        onClick={() => onToggleBlock(user)}
+        tooltip={
+          user.blocked ? t("common.actions.unblock") : t("common.actions.block")
+        }
+        tooltipOptions={{ position: "top" }}
+      />
+      <Button
+        icon="pi pi-key"
+        className="p-button-rounded p-button-info p-button-sm"
+        onClick={() => onResetPassword(user)}
+        tooltip={t("staffTabs.users.asAdmin.resetPassword")}
+        tooltipOptions={{ position: "top" }}
+      />
+      <Button
+        icon="pi pi-trash"
+        className="p-button-rounded p-button-danger p-button-sm"
+        onClick={() => onDelete(user)}
+        tooltip={t("common.actions.delete")}
+        tooltipOptions={{ position: "top" }}
+      />
+    </div>
+  );
+};
+
+export default UserActions;
