@@ -14,7 +14,8 @@
       "block": "Block",
       "unblock": "Unblock",
       "reset": "Reset",
-      "view": "View"
+      "view": "View",
+      "close": "Close"
     },
     "fields": {
       "firstName": "First name",
@@ -143,12 +144,31 @@
       "description": "Scope Description",
       "catalogs": "Catalogs",
       "details": "More details",
+      "editScope": "Edit Scope",
+      "deleteScope": "Delete Scope",
+      "confirmDelete": "Confirm Deletion",
+      "confirmDeleteMessage": "Are you sure you want to delete scope '{name}'?",
+      "noDescription": "No description provided",
+      "noCatalogs": "No catalogs assigned",
+      "roles": "Roles",
+      "noRoles": "No roles assigned",
+      "groups": "Groups",
+      "noGroups": "No groups assigned",
+      "information": "Information",
+      "id": "ID",
+      "search": "Search scopes...",
+      "noSearchResults": "No scopes found matching your search",
       "messages": {
         "fetchError": "An error occurred while retrieving scopes.",
         "notFound": "No scopes found.",
         "nameRequired": "Scope name is required.",
         "createSuccess": "Scope created successfully.",
-        "createError": "An error occurred while creating the scope."
+        "createError": "An error occurred while creating the scope.",
+        "updateSuccess": "Scope updated successfully.",
+        "updateError": "An error occurred while updating the scope.",
+        "deleteSuccess": "Scope deleted successfully.",
+        "deleteError": "An error occurred while deleting the scope.",
+        "fetchDetailError": "An error occurred while fetching scope details."
       }
     },
     "groups": {

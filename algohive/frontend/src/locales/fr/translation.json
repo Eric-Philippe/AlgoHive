@@ -14,7 +14,8 @@
       "block": "Bloquer",
       "unblock": "Débloquer",
       "reset": "Réinitialiser",
-      "view": "Voir"
+      "view": "Voir",
+      "close": "Fermer"
     },
     "fields": {
       "firstName": "Prénom",
@@ -143,12 +144,31 @@
       "description": "Description du périmètre",
       "catalogs": "Catalogues",
       "details": "Plus de détails",
+      "editScope": "Modifier le périmètre",
+      "deleteScope": "Supprimer le périmètre",
+      "confirmDelete": "Confirmer la suppression",
+      "confirmDeleteMessage": "Êtes-vous sûr de vouloir supprimer le périmètre '{name}' ?",
+      "noDescription": "Aucune description fournie",
+      "noCatalogs": "Aucun catalogue assigné",
+      "roles": "Rôles",
+      "noRoles": "Aucun rôle assigné",
+      "groups": "Groupes",
+      "noGroups": "Aucun groupe assigné",
+      "information": "Informations",
+      "id": "ID",
+      "search": "Rechercher des périmètres...",
+      "noSearchResults": "Aucun périmètre ne correspond à votre recherche",
       "messages": {
         "fetchError": "Une erreur est survenue lors de la récupération des périmètres.",
         "notFound": "Aucun périmètre trouvé.",
         "nameRequired": "Le nom du périmètre est requis.",
         "createSuccess": "Périmètre créé avec succès.",
-        "createError": "Une erreur est survenue lors de la création du périmètre."
+        "createError": "Une erreur est survenue lors de la création du périmètre.",
+        "updateSuccess": "Périmètre mis à jour avec succès.",
+        "updateError": "Une erreur est survenue lors de la mise à jour du périmètre.",
+        "deleteSuccess": "Périmètre supprimé avec succès.",
+        "deleteError": "Une erreur est survenue lors de la suppression du périmètre.",
+        "fetchDetailError": "Une erreur est survenue lors de la récupération des détails du périmètre."
       }
     },
     "groups": {
