@@ -151,6 +151,22 @@
         "createError": "Une erreur est survenue lors de la création du périmètre."
       }
     },
+    "groups": {
+      "new": "Créer un nouveau groupe",
+      "name": "Nom du groupe",
+      "groupName": "Entrez le nom du groupe",
+      "description": "Description du groupe",
+      "groupDescription": "Entrez la description du groupe",
+      "create": "Créer le groupe",
+      "viewDetails": "Voir les détails",
+      "students": "Étudiants",
+      "noGroups": "Aucun groupe trouvé dans ce périmètre",
+      "selectScopeFirst": "Veuillez d'abord sélectionner un périmètre",
+      "nameRequired": "Le nom du groupe est requis",
+      "groupCreated": "Groupe créé avec succès",
+      "errorCreatingGroup": "Une erreur est survenue lors de la création du groupe",
+      "errorFetchingGroups": "Une erreur est survenue lors de la récupération des groupes"
+    },
     "catalogs": {
       "details": "Plus de détails",
       "notFound": "Aucun catalogue trouvé."

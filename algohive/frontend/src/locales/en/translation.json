@@ -151,6 +151,22 @@
         "createError": "An error occurred while creating the scope."
       }
     },
+    "groups": {
+      "new": "Create a new group",
+      "name": "Group Name",
+      "groupName": "Enter group name",
+      "description": "Group Description",
+      "groupDescription": "Enter group description",
+      "create": "Create Group",
+      "viewDetails": "View Details",
+      "students": "Students",
+      "noGroups": "No groups found in this scope",
+      "selectScopeFirst": "Please select a scope first",
+      "nameRequired": "Group name is required",
+      "groupCreated": "Group created successfully",
+      "errorCreatingGroup": "An error occurred while creating the group",
+      "errorFetchingGroups": "An error occurred while fetching groups"
+    },
     "catalogs": {
       "details": "More details",
       "notFound": "No catalogs found."

@@ -37,7 +37,7 @@ export default function ScopesPage() {
           value: catalog.id,
         }));
       } catch (err) {
-        setError(t("staff.scopes.errorFetchingScopes"));
+        setError(t("staffTabs.scopes.messages.fetchError"));
         console.error(err);
       } finally {
         setLoading(false);
@@ -52,7 +52,7 @@ export default function ScopesPage() {
       toast.current?.show({
         severity: "error",
         summary: "Erreur",
-        detail: t("staff.scopes.errorNameRequired"),
+        detail: t("staffTabs.scopes.messages.nameRequired"),
         life: 3000,
       });
       return;
@@ -74,14 +74,14 @@ export default function ScopesPage() {
       toast.current?.show({
         severity: "success",
         summary: "Succès",
-        detail: t("staff.scopes.scopeCreated"),
+        detail: t("staffTabs.scopes.messages.createSuccess"),
         life: 3000,
       });
     } catch (err) {
       toast.current?.show({
         severity: "error",
         summary: "Erreur",
-        detail: t("staff.scopes.errorCreatingScope"),
+        detail: t("staffTabs.scopes.messages.createError"),
         life: 3000,
       });
       console.error(err);
@@ -97,7 +97,7 @@ export default function ScopesPage() {
       {loading && (
         <div className="flex flex-col items-center justify-center p-6">
           <ProgressSpinner style={{ width: "50px", height: "50px" }} />
-          <p className="mt-4 text-gray-600">{t("t.scopes.loading")}</p>
+          <p className="mt-4 text-gray-600">{t("common.states.loading")}</p>
         </div>
       )}
 
@@ -113,7 +113,9 @@ export default function ScopesPage() {
       {!loading && !error && scopes.length === 0 && (
         <div className="flex flex-col items-center justify-center p-12 bg-white rounded-lg shadow">
           <i className="pi pi-inbox text-5xl text-gray-400 mb-4"></i>
-          <p className="text-gray-600 text-xl">{t("staff.scopes.noScopes")}</p>
+          <p className="text-gray-600 text-xl">
+            {t("staffTabs.scopes.messages.notFound")}
+          </p>
         </div>
       )}
 
@@ -136,7 +138,7 @@ export default function ScopesPage() {
                   {scope.catalogs ? (
                     <>
                       <span className="font-semibold">
-                        {t("staff.scopes.catalogs")}:
+                        {t("staffTabs.scopes.catalogs")}:
                       </span>{" "}
                       {scope.catalogs.map((catalog) => (
                         <span key={catalog.id} className="text-gray-400">
@@ -150,7 +152,7 @@ export default function ScopesPage() {
                 </p>
                 <div className="flex justify-end mt-4 space-x-2">
                   <Button
-                    label={t("staff.scopes.viewDetails")}
+                    label={t("staffTabs.scopes.details")}
                     className="p-button-primary ml-2"
                   />
                 </div>
@@ -161,7 +163,7 @@ export default function ScopesPage() {
             <div className="p-4 bg-white/10 backdrop-blur-md rounded-lg shadow-lg border border-white/30 hover:shadow-xl transition-all duration-300">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-amber-500">
-                  {t("staff.scopes.new")}
+                  {t("staffTabs.scopes.new")}
                 </h2>
                 <i className="pi pi-plus-circle text-4xl text-amber-500"></i>
               </div>
@@ -171,14 +173,14 @@ export default function ScopesPage() {
                   htmlFor="scopeName"
                   className="block text-sm font-medium text-white mb-1"
                 >
-                  {t("staff.scopes.name")}
+                  {t("staffTabs.scopes.name")}
                 </label>
                 <InputText
                   id="scopeName"
                   value={newScopeName}
                   onChange={(e) => setNewScopeName(e.target.value)}
                   className="w-full"
-                  placeholder={t("staff.scopes.scopeName")}
+                  placeholder={t("common.fields.name")}
                 />
               </div>
 
@@ -187,7 +189,7 @@ export default function ScopesPage() {
                   htmlFor="scopeDescription"
                   className="block text-sm font-medium text-white mb-1"
                 >
-                  {t("staff.scopes.description")}
+                  {t("staffTabs.scopes.description")}
                 </label>
                 <InputTextarea
                   id="scopeDescription"
@@ -195,7 +197,7 @@ export default function ScopesPage() {
                   onChange={(e) => setNewScopeDescription(e.target.value)}
                   rows={2}
                   className="w-full"
-                  placeholder={t("staff.scopes.scopeDescription")}
+                  placeholder={t("common.fields.description")}
                 />
               </div>
 
@@ -204,14 +206,14 @@ export default function ScopesPage() {
                   htmlFor="apiIds"
                   className="block text-sm font-medium text-white mb-1"
                 >
-                  {t("staff.scopes.catalogs")}
+                  {t("staffTabs.scopes.catalogs")}
                 </label>
                 <MultiSelect
                   id="apiIds"
                   value={selectedApiIds}
                   options={apiOptions.current}
                   onChange={(e) => setSelectedApiIds(e.value)}
-                  placeholder={t("staff.scopes.selectCatalogs")}
+                  placeholder={t("common.selects.catalogs")}
                   className="w-full"
                   display="chip"
                 />
@@ -219,7 +221,7 @@ export default function ScopesPage() {
 
               <div className="flex justify-end mt-4">
                 <Button
-                  label={t("staff.scopes.create")}
+                  label={t("common.actions.create")}
                   icon="pi pi-plus"
                   className="p-button-primary"
                   onClick={handleCreateScope}

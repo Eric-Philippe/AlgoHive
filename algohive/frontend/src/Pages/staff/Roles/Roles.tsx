@@ -36,27 +36,27 @@ export default function RolesPage() {
     {
       name: "SCOPES",
       value: Permission.SCOPES,
-      label: t("staff.roles.permissions.scopes"),
+      label: t("staffTabs.roles.permissionTypes.scopes"),
     },
     {
       name: "API_ENV",
       value: Permission.API_ENV,
-      label: t("staff.roles.permissions.catalogs"),
+      label: t("staffTabs.roles.permissionTypes.catalogs"),
     },
     {
       name: "GROUPS",
       value: Permission.GROUPS,
-      label: t("staff.roles.permissions.groups"),
+      label: t("staffTabs.roles.permissionTypes.groups"),
     },
     {
       name: "COMPETITIONS",
       value: Permission.COMPETITIONS,
-      label: t("staff.roles.permissions.competitions"),
+      label: t("staffTabs.roles.permissionTypes.competitions"),
     },
     {
       name: "ROLES",
       value: Permission.ROLES,
-      label: t("staff.roles.permissions.roles"),
+      label: t("staffTabs.roles.permissionTypes.roles"),
     },
   ];
 
@@ -80,7 +80,7 @@ export default function RolesPage() {
           value: scope.id,
         }));
       } catch (err) {
-        setError(t("staff.roles.errorFetchingRoles"));
+        setError(t("staffTabs.roles.messages.fetchError"));
         console.error(err);
       } finally {
         setLoading(false);
@@ -95,7 +95,7 @@ export default function RolesPage() {
       toast.current?.show({
         severity: "error",
         summary: "Erreur",
-        detail: t("staff.roles.errorNameRequired"),
+        detail: t("staffTabs.roles.messages.nameRequired"),
         life: 3000,
       });
       return;
@@ -107,7 +107,7 @@ export default function RolesPage() {
       toast.current?.show({
         severity: "success",
         summary: "Succès",
-        detail: t("staff.roles.roleCreated"),
+        detail: t("staffTabs.roles.messages.createSuccess"),
         life: 3000,
       });
 
@@ -122,7 +122,7 @@ export default function RolesPage() {
       toast.current?.show({
         severity: "error",
         summary: "Erreur",
-        detail: t("staff.roles.errorCreatingRole"),
+        detail: t("staffTabs.roles.messages.createError"),
         life: 3000,
       });
       console.error(err);
@@ -145,7 +145,7 @@ export default function RolesPage() {
       toast.current?.show({
         severity: "success",
         summary: "Succès",
-        detail: t("staff.roles.roleDeleted"),
+        detail: t("staffTabs.roles.messages.deleteSuccess"),
         life: 3000,
       });
 
@@ -154,7 +154,7 @@ export default function RolesPage() {
       toast.current?.show({
         severity: "error",
         summary: "Erreur",
-        detail: t("staff.roles.errorDeletingRole"),
+        detail: t("staffTabs.roles.messages.deleteError"),
         life: 3000,
       });
       console.error(err);
@@ -170,7 +170,7 @@ export default function RolesPage() {
       {loading && (
         <div className="flex flex-col items-center justify-center p-6">
           <ProgressSpinner style={{ width: "50px", height: "50px" }} />
-          <p className="mt-4 text-gray-600">{t("staff.roles.loading")}</p>
+          <p className="mt-4 text-gray-600">{t("common.states.loading")}</p>
         </div>
       )}
 
@@ -186,7 +186,9 @@ export default function RolesPage() {
       {!loading && !error && roles.length === 0 && (
         <div className="flex flex-col items-center justify-center p-12 bg-white rounded-lg shadow">
           <i className="pi pi-inbox text-5xl text-gray-400 mb-4"></i>
-          <p className="text-gray-600 text-xl">{t("staff.roles.noRoles")}</p>
+          <p className="text-gray-600 text-xl">
+            {t("staffTabs.roles.messages.notFound")}
+          </p>
         </div>
       )}
 
@@ -198,7 +200,7 @@ export default function RolesPage() {
                 <h2 className="text-xl font-bold text-gray-800">{role.name}</h2>
                 <div className="mt-2">
                   <label className="block text-sm font-medium text-gray-600 mb-1">
-                    {t("staff.roles.permissionsTitle") + ":"}
+                    {t("staffTabs.roles.permissions") + ":"}
                   </label>
                   {permissionsList.map((perm) => (
                     <div key={perm.name} className="flex items-center">
@@ -214,7 +216,7 @@ export default function RolesPage() {
                 </div>
                 <div className="mt-2">
                   <label className="block text-sm font-medium text-gray-600 mb-1">
-                    {t("staff.roles.scopes") + ":"}
+                    {t("staffTabs.roles.scopes") + ":"}
                   </label>
                   <div className="flex flex-wrap">
                     {role.scopes && role.scopes.length > 0 ? (
@@ -227,27 +229,25 @@ export default function RolesPage() {
                         </span>
                       ))
                     ) : (
-                      <p className="text-gray-800">
-                        {t("staff.roles.noScopes")}
-                      </p>
+                      <p className="text-gray-800">{t("common.states.none")}</p>
                     )}
                   </div>
                 </div>
                 <div className="mt-2">
                   <label className="block text-sm font-medium text-gray-600 mb-1">
-                    {t("staff.roles.usersTitle") + ":"}
+                    {t("staffTabs.roles.userCount") + ":"}
                   </label>
                   <div className="flex flex-wrap">
                     <p className="text-gray-800">
                       {role.users && role.users.length
                         ? role.users.length
-                        : t("staff.roles.noUsers")}
+                        : "0"}
                     </p>
                   </div>
                 </div>
                 <div className="mt-8">
                   <Button
-                    label={t("staff.roles.delete")}
+                    label={t("common.actions.delete")}
                     className="p-button-danger"
                     disabled={role.permissions == 63 ? true : false}
                     onClick={() => handleDeleteRole(role.id)}
@@ -262,7 +262,7 @@ export default function RolesPage() {
           <div className="p-4 bg-white/10 backdrop-blur-md rounded-lg shadow-lg border border-white/30 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-amber-500">
-                {t("staff.roles.new")}
+                {t("staffTabs.roles.new")}
               </h2>
               <i className="pi pi-plus-circle text-4xl text-amber-500"></i>
             </div>
@@ -272,14 +272,14 @@ export default function RolesPage() {
                 htmlFor="scopeName"
                 className="block text-sm font-medium text-white mb-1"
               >
-                {t("staff.roles.name")}
+                {t("staffTabs.roles.name")}
               </label>
               <InputText
                 id="scopeName"
                 value={newRoleName}
                 onChange={(e) => setNewRoleName(e.target.value)}
                 className="w-full"
-                placeholder={t("staff.roles.roleName")}
+                placeholder={t("common.fields.name")}
               />
             </div>
 
@@ -288,7 +288,7 @@ export default function RolesPage() {
                 htmlFor="rolePermissions"
                 className="block text-sm font-medium text-white mb-1"
               >
-                {t("staff.roles.permissionsTitle")}
+                {t("staffTabs.roles.permissions")}
               </label>
               <div className="grid grid-cols-1 gap-2 mt-2">
                 {permissionsList.map((perm) => (
@@ -314,14 +314,14 @@ export default function RolesPage() {
                 htmlFor="apiIds"
                 className="block text-sm font-medium text-white mb-1"
               >
-                {t("staff.roles.scopes")}
+                {t("staffTabs.roles.scopes")}
               </label>
               <MultiSelect
                 id="apiIds"
                 value={selectedScopes}
                 options={scopeOptions.current}
                 onChange={(e) => setSelectedScopes(e.value)}
-                placeholder={t("staff.roles.selectScopes")}
+                placeholder={t("common.selects.scopes")}
                 className="w-full"
                 display="chip"
               />
@@ -329,7 +329,7 @@ export default function RolesPage() {
 
             <div className="flex justify-end mt-4">
               <Button
-                label={t("staff.scopes.create")}
+                label={t("common.actions.create")}
                 icon="pi pi-plus"
                 className="p-button-primary"
                 onClick={handleCreateRole}

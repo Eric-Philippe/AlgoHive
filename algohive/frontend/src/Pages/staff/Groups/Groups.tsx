@@ -69,7 +69,7 @@ export default function GroupsPage() {
         toast.current?.show({
           severity: "error",
           summary: "Error",
-          detail: t("staff.groups.errorFetchingGroups"),
+          detail: t("staffTabs.groups.errorFetchingGroups"),
           life: 3000,
         });
         console.error(err);
@@ -84,7 +84,7 @@ export default function GroupsPage() {
       toast.current?.show({
         severity: "error",
         summary: "Error",
-        detail: t("staff.groups.selectScopeFirst"),
+        detail: t("staffTabs.groups.selectScopeFirst"),
         life: 3000,
       });
       return;
@@ -94,7 +94,7 @@ export default function GroupsPage() {
       toast.current?.show({
         severity: "error",
         summary: "Error",
-        detail: t("staff.groups.nameRequired"),
+        detail: t("staffTabs.groups.nameRequired"),
         life: 3000,
       });
       return;
@@ -114,14 +114,14 @@ export default function GroupsPage() {
       toast.current?.show({
         severity: "success",
         summary: "Success",
-        detail: t("staff.groups.groupCreated"),
+        detail: t("staffTabs.groups.groupCreated"),
         life: 3000,
       });
     } catch (err) {
       toast.current?.show({
         severity: "error",
         summary: "Error",
-        detail: t("staff.groups.errorCreatingGroup"),
+        detail: t("staffTabs.groups.errorCreatingGroup"),
         life: 3000,
       });
       console.error(err);
@@ -145,7 +145,7 @@ export default function GroupsPage() {
     return (
       <div className="flex flex-col items-center justify-center p-6">
         <ProgressSpinner style={{ width: "50px", height: "50px" }} />
-        <p className="mt-4 text-gray-600">{t("t.scopes.loading")}</p>
+        <p className="mt-4 text-gray-600">{t("common.states.loading")}</p>
       </div>
     );
   }
@@ -165,7 +165,9 @@ export default function GroupsPage() {
     return (
       <div className="flex flex-col items-center justify-center p-12 bg-white rounded-lg shadow">
         <i className="pi pi-inbox text-5xl text-gray-400 mb-4"></i>
-        <p className="text-gray-600 text-xl">{t("staff.scopes.noScopes")}</p>
+        <p className="text-gray-600 text-xl">
+          {t("staffTabs.scopes.messages.notFound")}
+        </p>
       </div>
     );
   }
@@ -180,14 +182,14 @@ export default function GroupsPage() {
           htmlFor="scopes"
           className="block text-sm font-medium text-white mb-1"
         >
-          {t("staff.users.selectScope")}
+          {t("common.selects.scopes")}
         </label>
         <Dropdown
           id="scopes"
           value={selectedScope}
           options={scopeOptions}
           onChange={handleSelectedScopeChange}
-          placeholder={t("staff.users.selectScope")}
+          placeholder={t("common.selects.scopes")}
           className="w-full"
         />
       </div>
@@ -199,7 +201,7 @@ export default function GroupsPage() {
             <div className="p-4 bg-white/10 backdrop-blur-md rounded-lg shadow-lg border border-white/30 hover:shadow-xl transition-all duration-300">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-amber-500">
-                  {t("staff.groups.new")}
+                  {t("staffTabs.groups.new")}
                 </h2>
                 <i className="pi pi-plus-circle text-4xl text-amber-500"></i>
               </div>
@@ -209,14 +211,14 @@ export default function GroupsPage() {
                   htmlFor="groupName"
                   className="block text-sm font-medium text-white mb-1"
                 >
-                  {t("staff.groups.name")}
+                  {t("staffTabs.groups.name")}
                 </label>
                 <InputText
                   id="groupName"
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
                   className="w-full"
-                  placeholder={t("staff.groups.groupName")}
+                  placeholder={t("staffTabs.groups.groupName")}
                 />
               </div>
 
@@ -225,7 +227,7 @@ export default function GroupsPage() {
                   htmlFor="groupDescription"
                   className="block text-sm font-medium text-white mb-1"
                 >
-                  {t("staff.groups.description")}
+                  {t("staffTabs.groups.description")}
                 </label>
                 <InputTextarea
                   id="groupDescription"
@@ -233,13 +235,13 @@ export default function GroupsPage() {
                   onChange={(e) => setNewGroupDescription(e.target.value)}
                   rows={2}
                   className="w-full"
-                  placeholder={t("staff.groups.groupDescription")}
+                  placeholder={t("staffTabs.groups.groupDescription")}
                 />
               </div>
 
               <div className="flex justify-end mt-4">
                 <Button
-                  label={t("staff.groups.create")}
+                  label={t("staffTabs.groups.create")}
                   icon="pi pi-plus"
                   className="p-button-primary"
                   onClick={handleCreateGroup}
@@ -263,7 +265,7 @@ export default function GroupsPage() {
                 <p className="text-white mt-2">{group.description}</p>
                 <p className="text-white mt-2">
                   <span className="font-semibold">
-                    {t("staff.groups.students")}:
+                    {t("staffTabs.groups.students")}:
                   </span>{" "}
                   <span className="text-gray-300">
                     {group.users?.length || 0}
@@ -271,7 +273,7 @@ export default function GroupsPage() {
                 </p>
                 <div className="flex justify-end mt-4 space-x-2">
                   <Button
-                    label={t("staff.groups.viewDetails")}
+                    label={t("staffTabs.groups.viewDetails")}
                     className="p-button-primary ml-2"
                   />
                 </div>
@@ -283,7 +285,7 @@ export default function GroupsPage() {
             <div className="flex flex-col items-center justify-center p-12 bg-white/10 backdrop-blur-md rounded-lg shadow">
               <i className="pi pi-inbox text-5xl text-gray-400 mb-4"></i>
               <p className="text-gray-300 text-xl">
-                {t("staff.groups.noGroups")}
+                {t("staffTabs.groups.noGroups")}
               </p>
             </div>
           )}

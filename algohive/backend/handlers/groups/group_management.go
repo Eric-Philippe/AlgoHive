@@ -130,12 +130,6 @@ func CreateGroup(c *gin.Context) {
 		return
 	}
 	
-	if err := database.DB.Model(&group).Association("Scopes").Append(scopes); err != nil {
-		log.Printf("Error appending scopes to group: %v", err)
-		respondWithError(c, http.StatusInternalServerError, "Failed to associate scopes")
-		return
-	}
-	
 	c.JSON(http.StatusCreated, group)
 }
 
