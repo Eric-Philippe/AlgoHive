@@ -4,9 +4,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Constantes pour les messages d'erreur
+// Error messages constants
 const (
 	ErrNotFound               = "User not found"
+	ErrUserNotFound		      = "User not found"
 	ErrGroupNotFound          = "Group not found"
 	ErrRoleNotFound           = "Role not found"
 	ErrUnauthorized           = "Unauthorized access"
@@ -23,7 +24,7 @@ const (
 	ErrFailedAssociationGroups = "Failed to remove user group associations"
 )
 
-// UserWithRoles représente un utilisateur avec ses rôles associés pour les requêtes API
+// UserWithRoles represents a user with associated roles for API requests
 type UserWithRoles struct {
 	FirstName string   `json:"firstname"`
 	LastName  string   `json:"lastname"`
@@ -31,7 +32,7 @@ type UserWithRoles struct {
 	Roles     []string `json:"roles"`
 }
 
-// UserWithGroup représente un utilisateur avec ses groupes associés pour les requêtes API
+// UserWithGroup represents a user with associated groups for API requests
 type UserWithGroup struct {
 	FirstName string   `json:"firstname"`
 	LastName  string   `json:"lastname"`
@@ -39,7 +40,13 @@ type UserWithGroup struct {
 	Group     []string `json:"groups"`
 }
 
-// respondWithError envoie une réponse d'erreur standardisée
+// UserIdWithRoles represents a user ID with associated rolesIDs for API requests
+type UserIdWithRoles struct {
+	UserId string   `json:"user_id"`
+	Roles  []string `json:"roles"`
+}
+
+// respondWithError sends a JSON response with an error message
 func respondWithError(c *gin.Context, status int, message string) {
     c.JSON(status, gin.H{"error": message})
 }

@@ -111,3 +111,22 @@ export async function toggleBlockUser(userId: string) {
     throw error;
   }
 }
+
+export async function updateUserRoles(
+  userId: string,
+  roles: string[]
+): Promise<void> {
+  try {
+    const response = await ApiClient.put(`/user/roles`, {
+      user_id: userId,
+      roles,
+    });
+
+    if (response.status !== 200) {
+      throw new Error(`Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error("Error updating user roles:", error);
+    throw error;
+  }
+}

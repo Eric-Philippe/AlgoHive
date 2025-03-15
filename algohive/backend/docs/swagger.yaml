@@ -368,6 +368,15 @@ definitions:
     - catalogs_ids
     - name
     type: object
+  users.UserIdWithRoles:
+    properties:
+      roles:
+        items:
+          type: string
+        type: array
+      user_id:
+        type: string
+    type: object
   users.UserWithGroup:
     properties:
       email:
@@ -2177,6 +2186,42 @@ paths:
       security:
       - Bearer: []
       summary: Create a user and attach one or more roles
+      tags:
+      - Users
+  /user/roles/{userId}:
+    put:
+      consumes:
+      - application/json
+      description: Update the roles of a user
+      parameters:
+      - description: User ID with Roles
+        in: body
+        name: roles
+        required: true
+        schema:
+          $ref: '#/definitions/users.UserIdWithRoles'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Update the roles of a user
       tags:
       - Users
 securityDefinitions:

@@ -149,3 +149,63 @@ func getUsersFromRoleIDs(roleIDs []string) ([]models.User, error) {
 	
 	return users, nil
 }
+
+// UpdateUserRoles met à jour les rôles d'un utilisateur
+// @Summary Update the roles of a user
+// @Description Update the roles of a user
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param roles body UserIdWithRoles true "User ID with Roles"
+// @Success 200 {object} models.User
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /user/roles/{userId} [put]
+// @Security Bearer
+func UpdateUserRoles(c *gin.Context) {
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
+
+	// Vérifier les permissions
+	if !permissions.IsStaff(user) {
+		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionUsersRoles)
+		return
+	}
+
+	var userIdWithRoles UserIdWithRoles
+	if err := c.ShouldBindJSON(&userIdWithRoles); err != nil {
+		respondWithError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	
+	var targetUser models.User
+	if err := database.DB.Where("id = ?", userIdWithRoles.UserId).Preload("Roles").First(&targetUser).Error; err != nil {
+		respondWithError(c, http.StatusNotFound, ErrUserNotFound)
+		return
+	}
+	// Vérifier que les rôles existent
+	var roles []models.Role
+	if err := database.DB.Where("id IN (?)", userIdWithRoles.Roles).Find(&roles).Error; err != nil {
+		respondWithError(c, http.StatusNotFound, ErrRoleNotFound)
+		return
+	}
+	if len(roles) == 0 {
+		respondWithError(c, http.StatusNotFound, ErrRoleNotFound)
+		return
+	}
+	// Supprimer les associations existantes
+	if err := database.DB.Model(&targetUser).Association("Roles").Clear(); err != nil {
+		respondWithError(c, http.StatusInternalServerError, "Failed to clear user roles")
+		return
+	}
+	// Associer les nouveaux rôles à l'utilisateur
+	for i := range roles {
+		if err := database.DB.Model(&targetUser).Association("Roles").Append(&roles[i]); err != nil {
+			respondWithError(c, http.StatusInternalServerError, "Failed to attach role to user")
+			return
+		}
+	}
+	c.JSON(http.StatusOK, targetUser)
+}

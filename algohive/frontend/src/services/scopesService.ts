@@ -83,7 +83,11 @@ export async function deleteScope(id: string): Promise<void> {
     const response = await ApiClient.delete(`/scopes/${id}`);
 
     if (response.status !== 204) {
-      throw new Error(`Error: ${response.status}`);
+      if (response.status === 409) {
+        throw new Error("Scope is in use and cannot be deleted.");
+      } else {
+        throw new Error(`Error: ${response.status}`);
+      }
     }
   } catch (error) {
     console.error("Error deleting scope:", error);

@@ -161,12 +161,22 @@ export default function ScopesPage() {
       });
       setDeleteDialogVisible(false);
     } catch (err) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("common.states.error"),
-        detail: t("staffTabs.scopes.messages.deleteError"),
-        life: 3000,
-      });
+      // Check specifically for 409 error message
+      if (err instanceof Error && err.message.includes("409")) {
+        toast.current?.show({
+          severity: "error",
+          summary: t("common.states.error"),
+          detail: t("staffTabs.scopes.messages.deleteErrorInUse"),
+          life: 3000,
+        });
+      } else {
+        toast.current?.show({
+          severity: "error",
+          summary: t("common.states.error"),
+          detail: t("staffTabs.scopes.messages.deleteError"),
+          life: 3000,
+        });
+      }
       console.error(err);
     } finally {
       setDeletingScope(false);
@@ -294,7 +304,7 @@ export default function ScopesPage() {
       {/* Scopes grid */}
       {!loading && !error && (
         <div className="container mx-auto px-2">
-          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
             {/* Create new scope card */}
             <CreateScopeForm
               apiOptions={apiOptions.current}

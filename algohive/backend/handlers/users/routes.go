@@ -24,6 +24,7 @@ func RegisterRoutes(r *gin.RouterGroup) {
         // Routes pour les relations utilisateurs-rôles
         user.GET("/roles", GetUsersFromRoles)
         user.POST("/roles", CreateUserAndAttachRoles)
+        user.PUT("/roles", UpdateUserRoles)
         
         // Routes pour les relations utilisateurs-groupes
         user.POST("/groups", CreateUserAndAttachGroup)

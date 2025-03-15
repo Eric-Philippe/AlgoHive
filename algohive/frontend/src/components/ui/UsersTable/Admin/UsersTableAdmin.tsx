@@ -14,6 +14,7 @@ import {
   deleteUser,
   fetchUsers,
   toggleBlockUser,
+  updateUserRoles,
 } from "../../../../services/usersService";
 import { fetchRoles } from "../../../../services/rolesService";
 import { isStaff, roleIsOwner } from "../../../../utils/permissions";
@@ -97,7 +98,7 @@ export default function UsersTableAdmin() {
         // });
 
         // Update roles if changed
-        // await updateUserRoles(selectedUser.id, formFields.selectedRoles || []);
+        await updateUserRoles(selectedUser.id, formFields.selectedRoles || []);
 
         toast.current?.show({
           severity: "success",

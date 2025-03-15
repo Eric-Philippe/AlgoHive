@@ -236,50 +236,63 @@ func UpdateScope(c *gin.Context) {
 // @Router /scopes/{id} [delete]
 // @Security Bearer
 func DeleteScope(c *gin.Context) {
-	user, err := middleware.GetUserFromRequest(c)
-	if err != nil {
-		return
-	}
+    user, err := middleware.GetUserFromRequest(c)
+    if err != nil {
+        return
+    }
 
-	if !permissions.RolesHavePermission(user.Roles, permissions.SCOPES) {
-		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionDelete)
-		return
-	}
+    if !permissions.RolesHavePermission(user.Roles, permissions.SCOPES) {
+        respondWithError(c, http.StatusUnauthorized, ErrNoPermissionDelete)
+        return
+    }
 
-	scopeID := c.Param("scope_id")
-	var scope models.Scope
-	if err := database.DB.Where("id = ?", scopeID).First(&scope).Error; err != nil {
-		respondWithError(c, http.StatusNotFound, ErrScopeNotFound)
-		return
-	}
+    scopeID := c.Param("scope_id")
+    var scope models.Scope
+    if err := database.DB.Where("id = ?", scopeID).First(&scope).Error; err != nil {
+        respondWithError(c, http.StatusNotFound, ErrScopeNotFound)
+        return
+    }
 
-	// Transaction pour assurer l'atomicité
-	tx := database.DB.Begin()
+    // Vérifier si des groupes utilisent ce scope
+    var groupCount int64
+    if err := database.DB.Model(&models.Group{}).Where("scope_id = ?", scope.ID).Count(&groupCount).Error; err != nil {
+        log.Printf("Error checking for groups with scope: %v", err)
+        respondWithError(c, http.StatusInternalServerError, "Failed to check for associated groups: "+err.Error())
+        return
+    }
 
-	// Supprimer les associations avant de supprimer le scope
-	if err := tx.Model(&scope).Association("Catalogs").Clear(); err != nil {
-		tx.Rollback()
-		log.Printf("Error clearing scope associations: %v", err)
-		respondWithError(c, http.StatusInternalServerError, ErrFailedClearAssoc+err.Error())
-		return
-	}
+    if groupCount > 0 {
+        respondWithError(c, http.StatusConflict, "Cannot delete scope: it is still being used by groups")
+        return
+    }
 
-	// Supprimer les associations avec les rôles
-	if err := tx.Model(&scope).Association("Roles").Clear(); err != nil {
-		tx.Rollback()
-		log.Printf("Error clearing scope role associations: %v", err)
-		respondWithError(c, http.StatusInternalServerError, ErrFailedClearAssoc+err.Error())
-		return
-	}
+    // Transaction pour assurer l'atomicité
+    tx := database.DB.Begin()
 
-	// Supprimer le scope
-	if err := tx.Delete(&scope).Error; err != nil {
-		tx.Rollback()
-		log.Printf("Error deleting scope: %v", err)
-		respondWithError(c, http.StatusInternalServerError, ErrFailedDeleteScope+err.Error())
-		return
-	}
+    // Supprimer les associations avant de supprimer le scope
+    if err := tx.Model(&scope).Association("Catalogs").Clear(); err != nil {
+        tx.Rollback()
+        log.Printf("Error clearing scope catalog associations: %v", err)
+        respondWithError(c, http.StatusInternalServerError, ErrFailedClearAssoc+err.Error())
+        return
+    }
 
-	tx.Commit()
-	c.Status(http.StatusNoContent)
+    // Supprimer les associations avec les rôles
+    if err := tx.Model(&scope).Association("Roles").Clear(); err != nil {
+        tx.Rollback()
+        log.Printf("Error clearing scope role associations: %v", err)
+        respondWithError(c, http.StatusInternalServerError, ErrFailedClearAssoc+err.Error())
+        return
+    }
+
+    // Supprimer le scope
+    if err := tx.Delete(&scope).Error; err != nil {
+        tx.Rollback()
+        log.Printf("Error deleting scope: %v", err)
+        respondWithError(c, http.StatusInternalServerError, ErrFailedDeleteScope+err.Error())
+        return
+    }
+
+    tx.Commit()
+    c.Status(http.StatusNoContent)
 }
