@@ -17,6 +17,10 @@ func IsStaff(user models.User) bool {
     return len(user.Roles) > 0
 }
 
+func IsOwner(user models.User) bool {
+    return RolesHavePermission(user.Roles, OWNER)
+}
+
 // Function to check if a role has a permission
 func HasPermission(rolePermissions, permission int) bool {
     return (rolePermissions & permission) == permission

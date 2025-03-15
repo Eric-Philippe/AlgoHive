@@ -15,4 +15,5 @@ func Register(r *gin.Engine) {
 	RegisterUserRoutes(v1)
 	RegisterGroupsRoutes(v1)
 	RegisterRolesRoutes(v1)
+	RegisterCompetitionsRoutes(v1)
 }
