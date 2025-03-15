@@ -104,7 +104,7 @@
         "lastNameRequired": "Le nom est requis.",
         "validEmailRequired": "Un email valide est requis.",
         "confirmResetPassHeader": "Réinitialiser le mot de passe",
-        "confirmResetPass": "Êtes-vous sûr de vouloir réinitialiser le mot de passe de ce membre du personnel ?",
+        "confirmResetPass": "Êtes-vous sûr de vouloir réinitialiser le mot de passe de ce membre ?",
         "passwordReset": "Le mot de passe a été réinitialisé avec succès.",
         "errorResetting": "Une erreur est survenue lors de la réinitialisation du mot de passe.",
         "confirmDeleteUser": "Êtes-vous sûr de vouloir supprimer cet utilisateur ?",

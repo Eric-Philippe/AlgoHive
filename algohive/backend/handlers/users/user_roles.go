@@ -1,0 +1,151 @@
+package users
+
+import (
+	"api/database"
+	"api/middleware"
+	"api/models"
+	"api/utils/permissions"
+	"log"
+	"net/http"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+)
+
+// CreateUserAndAttachRoles crée un utilisateur et lui attache des rôles
+// @Summary Create a user and attach one or more roles
+// @Description Create a new user and attach one or more roles to it
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param UserWithRoles body UserWithRoles true "User Profile with Roles"
+// @Success 201 {object} models.User
+// @Failure 400 {object} map[string]string
+// @Router /user/roles [post]
+// @Security Bearer
+func CreateUserAndAttachRoles(c *gin.Context) {
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
+
+	// Vérifier les permissions
+	if !permissions.RolesHavePermission(user.Roles, permissions.ROLES) {
+		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionRoles)
+		return
+	}
+
+	var userWithRoles UserWithRoles
+	if err := c.ShouldBindJSON(&userWithRoles); err != nil {
+		respondWithError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// Vérifier que les rôles existent
+	var roles []models.Role
+	if err := database.DB.Where("id IN (?)", userWithRoles.Roles).Find(&roles).Error; err != nil {
+		log.Printf("Error finding roles: %v", err)
+		respondWithError(c, http.StatusNotFound, ErrRoleNotFound)
+		return
+	}
+	
+	if len(roles) == 0 {
+		respondWithError(c, http.StatusNotFound, ErrRoleNotFound)
+		return
+	}
+
+	// Créer l'utilisateur
+	targetUser, err := createUser(userWithRoles.FirstName, userWithRoles.LastName, userWithRoles.Email)
+	if err != nil {
+		log.Printf("Error creating user: %v", err)
+		respondWithError(c, http.StatusInternalServerError, ErrFailedToHashPassword)
+		return
+	}
+
+	// Associer les rôles à l'utilisateur
+	for i := range roles {
+		if err := database.DB.Model(targetUser).Association("Roles").Append(&roles[i]); err != nil {
+			log.Printf("Error attaching role to user: %v", err)
+			respondWithError(c, http.StatusInternalServerError, "Failed to attach role to user")
+			return
+		}
+	}
+
+	c.JSON(http.StatusCreated, targetUser)
+}
+
+// GetUsersFromRoles récupère tous les utilisateurs accessibles via des rôles spécifiques
+// @Summary Get All users that the given roles have access to
+// @Description Get all users that the given roles have access to from their roles -> scopes -> groups -> users
+// @Tags Users
+// @Param roles query []string true "Roles IDs"
+// @Success 200 {object} []models.User
+// @Router /user/roles [get]
+// @Security Bearer
+func GetUsersFromRoles(c *gin.Context) {
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
+
+	// Vérifier les permissions
+	if !permissions.IsStaff(user) {
+		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionUsersRoles)
+		return
+	}
+
+    // Récupérer les IDs des rôles depuis les paramètres de requête
+    rolesParam := c.QueryArray("roles")
+    
+    // Si on a reçu une seule chaîne avec des valeurs séparées par des virgules, la diviser
+    var roles []string
+    if len(rolesParam) == 1 && strings.Contains(rolesParam[0], ",") {
+        roles = strings.Split(rolesParam[0], ",")
+    } else {
+        roles = rolesParam
+    }
+
+    // Vérifier qu'on a au moins un rôle
+    if len(roles) == 0 {
+        respondWithError(c, http.StatusBadRequest, ErrRolesRequired)
+        return
+    }
+
+    // Récupérer les utilisateurs accessibles via ces rôles
+	users, err := getUsersFromRoleIDs(roles)
+	if err != nil {
+		log.Printf("Error getting users from roles: %v", err)
+		respondWithError(c, http.StatusInternalServerError, ErrFailedToGetUsers)
+		return
+	}
+
+	c.JSON(http.StatusOK, users)
+}
+
+// getUsersFromRoleIDs récupère tous les utilisateurs accessibles via les rôles spécifiés
+// roleIDs: IDs des rôles
+// retourne: la liste des utilisateurs et une erreur éventuelle
+func getUsersFromRoleIDs(roleIDs []string) ([]models.User, error) {
+	var userIDs []string
+	if err := database.DB.Raw(`
+		SELECT DISTINCT u.id
+			FROM users u
+			JOIN user_groups ug ON u.id = ug.user_id
+			JOIN groups g ON ug.group_id = g.id
+			JOIN scopes s ON g.scope_id = s.id
+			JOIN role_scopes rs ON s.id = rs.scope_id
+			JOIN roles r ON rs.role_id = r.id
+			WHERE r.id IN ?
+	`, roleIDs).Pluck("id", &userIDs).Error; err != nil {
+		return nil, err
+	}
+
+	var users []models.User
+	if len(userIDs) > 0 {
+		if err := database.DB.Preload("Roles").Preload("Groups").Where("id IN ?", userIDs).Find(&users).Error; err != nil {
+			return nil, err
+		}
+	}
+	
+	return users, nil
+}
