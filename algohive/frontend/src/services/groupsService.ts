@@ -36,3 +36,51 @@ export async function createGroup(
     throw error;
   }
 }
+
+export async function getGroupById(groupId: string): Promise<Group> {
+  try {
+    const response = await ApiClient.get(`/groups/${groupId}`);
+
+    if (response.status !== 200) {
+      throw new Error(`Error: ${response.status}`);
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching group details:", error);
+    throw error;
+  }
+}
+
+export async function updateGroup(
+  groupId: string,
+  name: string,
+  description: string
+): Promise<void> {
+  try {
+    const response = await ApiClient.put(`/groups/${groupId}`, {
+      name,
+      description,
+    });
+
+    if (response.status !== 204) {
+      throw new Error(`Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error("Error updating group:", error);
+    throw error;
+  }
+}
+
+export async function deleteGroup(groupId: string): Promise<void> {
+  try {
+    const response = await ApiClient.delete(`/groups/${groupId}`);
+
+    if (response.status !== 204) {
+      throw new Error(`Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error("Error deleting group:", error);
+    throw error;
+  }
+}

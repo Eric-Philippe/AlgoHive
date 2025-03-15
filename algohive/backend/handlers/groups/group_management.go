@@ -66,7 +66,7 @@ func GetGroup(c *gin.Context) {
 		return
 	}
 
-	if !userCanManageGroup(user.ID, &group) {
+	if !userCanManageGroup(user.ID, &group) && !permissions.RolesHavePermission(user.Roles, permissions.OWNER) {
 		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionViewGroup)
 		return
 	}
@@ -158,7 +158,7 @@ func DeleteGroup(c *gin.Context) {
 		return
 	}
 
-	if !userCanManageGroup(user.ID, &group) {
+	if !userCanManageGroup(user.ID, &group) && !permissions.RolesHavePermission(user.Roles, permissions.OWNER) {
 		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionDelete)
 		return
 	}
@@ -218,7 +218,7 @@ func UpdateGroup(c *gin.Context) {
 		return
 	}
 
-	if !userCanManageGroup(user.ID, &group) {
+	if !userCanManageGroup(user.ID, &group) && !permissions.RolesHavePermission(user.Roles, permissions.OWNER) {
 		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionUpdate)
 		return
 	}

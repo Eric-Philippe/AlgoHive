@@ -12,31 +12,55 @@ import { Group } from "../../../models/Group";
 import {
   fetchGroupsFromScope,
   createGroup,
+  getGroupById,
+  updateGroup,
+  deleteGroup,
 } from "../../../services/groupsService";
-import { InputText } from "primereact/inputtext";
-import { InputTextarea } from "primereact/inputtextarea";
-import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
+import { InputText } from "primereact/inputtext";
+import CreateGroupForm from "./components/CreateGroupForm";
+import GroupCard from "./components/GroupCard";
+import EditGroupDialog from "./components/EditGroupDialog";
+import GroupDetailsDialog from "./components/GroupDetailsDialog";
+import DeleteGroupDialog from "./components/DeleteGroupDialog";
 
+/**
+ * Groups management page component
+ * Provides full CRUD functionality for managing student groups
+ */
 export default function GroupsPage() {
   const { user } = useAuth();
   const [scopes, setScopes] = useState<Scope[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
+  const [filteredGroups, setFilteredGroups] = useState<Group[]>([]);
   const [selectedScope, setSelectedScope] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const toast = useRef<Toast>(null);
 
-  // New group form state
-  const [newGroupName, setNewGroupName] = useState<string>("");
-  const [newGroupDescription, setNewGroupDescription] = useState<string>("");
-  const [creatingGroup, setCreatingGroup] = useState<boolean>(false);
+  // Selected group for operations
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
 
+  // Operation states
+  const [creatingGroup, setCreatingGroup] = useState<boolean>(false);
+  const [updatingGroup, setUpdatingGroup] = useState<boolean>(false);
+  const [deletingGroup, setDeletingGroup] = useState<boolean>(false);
+
+  // Dialog visibility states
+  const [editDialogVisible, setEditDialogVisible] = useState<boolean>(false);
+  const [detailsDialogVisible, setDetailsDialogVisible] =
+    useState<boolean>(false);
+  const [deleteDialogVisible, setDeleteDialogVisible] =
+    useState<boolean>(false);
+
+  /**
+   * Fetch available scopes on component mount
+   */
   useEffect(() => {
     const fetchScopes = async () => {
       try {
         setLoading(true);
-        // Fetch scopes
         const rolesIds: string[] =
           user && user.roles ? user.roles.map((role: Role) => role.id) : [];
 
@@ -45,7 +69,7 @@ export default function GroupsPage() {
 
         setScopes(scopesData);
       } catch (err) {
-        setError("Error fetching scopes");
+        setError(t("staffTabs.groups.errorFetchingScopes"));
         console.error(err);
       } finally {
         setLoading(false);
@@ -55,45 +79,77 @@ export default function GroupsPage() {
     fetchScopes();
   }, [user]);
 
+  /**
+   * Filter groups based on search query
+   */
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredGroups(groups);
+    } else {
+      const filtered = groups.filter(
+        (group) =>
+          group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (group.description &&
+            group.description.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+      setFilteredGroups(filtered);
+    }
+  }, [searchQuery, groups]);
+
+  /**
+   * Handle scope selection change and load associated groups
+   */
   const handleSelectedScopeChange = async (e: DropdownChangeEvent) => {
     setSelectedScope(e.value);
+    setSearchQuery("");
     await loadGroups(e.value);
   };
 
+  /**
+   * Load groups based on selected scope
+   */
   const loadGroups = async (scopeId: string) => {
     if (scopeId) {
       try {
-        const groups = await fetchGroupsFromScope(scopeId);
-        setGroups(groups);
+        setLoading(true);
+        const fetchedGroups = await fetchGroupsFromScope(scopeId);
+        setGroups(fetchedGroups);
+        setFilteredGroups(fetchedGroups);
       } catch (err) {
         toast.current?.show({
           severity: "error",
-          summary: "Error",
+          summary: t("common.states.error"),
           detail: t("staffTabs.groups.errorFetchingGroups"),
           life: 3000,
         });
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     } else {
       setGroups([]);
+      setFilteredGroups([]);
     }
   };
 
-  const handleCreateGroup = async () => {
+  /**
+   * Handle group creation
+   */
+  const handleCreateGroup = async (name: string, description: string) => {
     if (!selectedScope) {
       toast.current?.show({
         severity: "error",
-        summary: "Error",
+        summary: t("common.states.error"),
         detail: t("staffTabs.groups.selectScopeFirst"),
         life: 3000,
       });
       return;
     }
 
-    if (!newGroupName.trim()) {
+    if (!name.trim()) {
       toast.current?.show({
         severity: "error",
-        summary: "Error",
+        summary: t("common.states.error"),
         detail: t("staffTabs.groups.nameRequired"),
         life: 3000,
       });
@@ -102,25 +158,21 @@ export default function GroupsPage() {
 
     try {
       setCreatingGroup(true);
-      await createGroup(selectedScope, newGroupName, newGroupDescription);
+      await createGroup(selectedScope, name, description);
 
       // Refresh groups list
       await loadGroups(selectedScope);
 
-      // Reset form
-      setNewGroupName("");
-      setNewGroupDescription("");
-
       toast.current?.show({
         severity: "success",
-        summary: "Success",
+        summary: t("common.states.success"),
         detail: t("staffTabs.groups.groupCreated"),
         life: 3000,
       });
     } catch (err) {
       toast.current?.show({
         severity: "error",
-        summary: "Error",
+        summary: t("common.states.error"),
         detail: t("staffTabs.groups.errorCreatingGroup"),
         life: 3000,
       });
@@ -128,6 +180,124 @@ export default function GroupsPage() {
     } finally {
       setCreatingGroup(false);
     }
+  };
+
+  /**
+   * Handle group update
+   */
+  const handleUpdateGroup = async (
+    id: string,
+    name: string,
+    description: string
+  ) => {
+    if (!name.trim()) {
+      toast.current?.show({
+        severity: "error",
+        summary: t("common.states.error"),
+        detail: t("staffTabs.groups.nameRequired"),
+        life: 3000,
+      });
+      return;
+    }
+
+    try {
+      setUpdatingGroup(true);
+      await updateGroup(id, name, description);
+
+      // Refresh groups list if scope is selected
+      if (selectedScope) {
+        await loadGroups(selectedScope);
+      }
+
+      toast.current?.show({
+        severity: "success",
+        summary: t("common.states.success"),
+        detail: t("staffTabs.groups.groupUpdated"),
+        life: 3000,
+      });
+      setEditDialogVisible(false);
+    } catch (err) {
+      toast.current?.show({
+        severity: "error",
+        summary: t("common.states.error"),
+        detail: t("staffTabs.groups.errorUpdatingGroup"),
+        life: 3000,
+      });
+      console.error(err);
+    } finally {
+      setUpdatingGroup(false);
+    }
+  };
+
+  /**
+   * Handle group deletion
+   */
+  const handleDeleteGroup = async () => {
+    if (!selectedGroup) return;
+
+    try {
+      setDeletingGroup(true);
+      await deleteGroup(selectedGroup.id);
+
+      // Refresh groups list if scope is selected
+      if (selectedScope) {
+        await loadGroups(selectedScope);
+      }
+
+      toast.current?.show({
+        severity: "success",
+        summary: t("common.states.success"),
+        detail: t("staffTabs.groups.groupDeleted"),
+        life: 3000,
+      });
+      setDeleteDialogVisible(false);
+    } catch (err) {
+      toast.current?.show({
+        severity: "error",
+        summary: t("common.states.error"),
+        detail: t("staffTabs.groups.errorDeletingGroup"),
+        life: 3000,
+      });
+      console.error(err);
+    } finally {
+      setDeletingGroup(false);
+    }
+  };
+
+  /**
+   * Open group details dialog
+   */
+  const openDetailsDialog = async (group: Group) => {
+    try {
+      // Fetch the latest group data to ensure we have all relationships
+      const fetchedGroup = await getGroupById(group.id);
+      setSelectedGroup(fetchedGroup);
+      setDetailsDialogVisible(true);
+    } catch (err) {
+      toast.current?.show({
+        severity: "error",
+        summary: t("common.states.error"),
+        detail: t("staffTabs.groups.errorFetchingGroupDetails"),
+        life: 3000,
+      });
+      console.error(err);
+    }
+  };
+
+  /**
+   * Open edit group dialog
+   */
+  const openEditDialog = (group: Group) => {
+    setSelectedGroup(group);
+    setEditDialogVisible(true);
+  };
+
+  /**
+   * Open delete group dialog
+   */
+  const openDeleteDialog = (group: Group) => {
+    setSelectedGroup(group);
+    setDeleteDialogVisible(true);
   };
 
   // Memoize scope options to prevent unnecessary recalculations
@@ -141,7 +311,7 @@ export default function GroupsPage() {
   );
 
   // Render different UI states based on loading, error, and data availability
-  if (loading) {
+  if (loading && !selectedScope) {
     return (
       <div className="flex flex-col items-center justify-center p-6">
         <ProgressSpinner style={{ width: "50px", height: "50px" }} />
@@ -163,9 +333,9 @@ export default function GroupsPage() {
 
   if (scopes && scopes.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 bg-white rounded-lg shadow">
+      <div className="flex flex-col items-center justify-center p-12 bg-white/10 backdrop-blur-md rounded-lg shadow">
         <i className="pi pi-inbox text-5xl text-gray-400 mb-4"></i>
-        <p className="text-gray-600 text-xl">
+        <p className="text-gray-300 text-xl">
           {t("staffTabs.scopes.messages.notFound")}
         </p>
       </div>
@@ -175,6 +345,42 @@ export default function GroupsPage() {
   return (
     <div className="p-4 min-h-screen mb-28">
       <Toast ref={toast} />
+
+      {/* Dialogs */}
+      <EditGroupDialog
+        visible={editDialogVisible}
+        group={selectedGroup}
+        onHide={() => setEditDialogVisible(false)}
+        onSave={handleUpdateGroup}
+        loading={updatingGroup}
+      />
+
+      <GroupDetailsDialog
+        visible={detailsDialogVisible}
+        group={selectedGroup}
+        onHide={() => setDetailsDialogVisible(false)}
+        onEdit={() => {
+          setDetailsDialogVisible(false);
+          setEditDialogVisible(true);
+        }}
+      />
+
+      <DeleteGroupDialog
+        visible={deleteDialogVisible}
+        group={selectedGroup}
+        onHide={() => setDeleteDialogVisible(false)}
+        onConfirm={handleDeleteGroup}
+        loading={deletingGroup}
+      />
+
+      {/* Header and scope selection */}
+      <div className="mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
+          <h1 className="text-2xl font-bold text-white">
+            {t("navigation.staff.groups")}
+          </h1>
+        </div>
+      </div>
 
       {/* Scope selection dropdown */}
       <div className="mb-4">
@@ -195,100 +401,82 @@ export default function GroupsPage() {
       </div>
 
       {selectedScope && (
-        <div className="container mx-auto px-2">
-          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
-            {/* Create new group card */}
-            <div className="p-4 bg-white/10 backdrop-blur-md rounded-lg shadow-lg border border-white/30 hover:shadow-xl transition-all duration-300">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-amber-500">
-                  {t("staffTabs.groups.new")}
-                </h2>
-                <i className="pi pi-plus-circle text-4xl text-amber-500"></i>
-              </div>
-
-              <div className="mb-3">
-                <label
-                  htmlFor="groupName"
-                  className="block text-sm font-medium text-white mb-1"
-                >
-                  {t("staffTabs.groups.name")}
-                </label>
+        <>
+          {/* Search box */}
+          {groups.length > 0 && (
+            <div className="mb-4">
+              <span className="p-input-icon-right w-full">
+                <i className="pi pi-search" style={{ right: "10px" }} />
                 <InputText
-                  id="groupName"
-                  value={newGroupName}
-                  onChange={(e) => setNewGroupName(e.target.value)}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t("staffTabs.groups.searchGroups")}
                   className="w-full"
-                  placeholder={t("staffTabs.groups.groupName")}
+                  style={{ paddingRight: "35px" }}
                 />
-              </div>
-
-              <div className="mb-3">
-                <label
-                  htmlFor="groupDescription"
-                  className="block text-sm font-medium text-white mb-1"
-                >
-                  {t("staffTabs.groups.description")}
-                </label>
-                <InputTextarea
-                  id="groupDescription"
-                  value={newGroupDescription}
-                  onChange={(e) => setNewGroupDescription(e.target.value)}
-                  rows={2}
-                  className="w-full"
-                  placeholder={t("staffTabs.groups.groupDescription")}
-                />
-              </div>
-
-              <div className="flex justify-end mt-4">
-                <Button
-                  label={t("staffTabs.groups.create")}
-                  icon="pi pi-plus"
-                  className="p-button-primary"
-                  onClick={handleCreateGroup}
-                  loading={creatingGroup}
-                />
-              </div>
-            </div>
-
-            {/* Existing groups */}
-            {groups.map((group) => (
-              <div
-                key={group.id}
-                className="p-4 bg-white/10 backdrop-blur-md rounded-lg shadow-lg border border-white/30 hover:shadow-xl transition-all duration-300"
-              >
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-amber-500">
-                    {group.name}
-                  </h2>
-                  <i className="pi pi-users text-4xl text-amber-500"></i>
-                </div>
-                <p className="text-white mt-2">{group.description}</p>
-                <p className="text-white mt-2">
-                  <span className="font-semibold">
-                    {t("staffTabs.groups.students")}:
-                  </span>{" "}
-                  <span className="text-gray-300">
-                    {group.users?.length || 0}
-                  </span>
-                </p>
-                <div className="flex justify-end mt-4 space-x-2">
-                  <Button
-                    label={t("staffTabs.groups.viewDetails")}
-                    className="p-button-primary ml-2"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {groups.length === 0 && (
-            <div className="flex flex-col items-center justify-center p-12 bg-white/10 backdrop-blur-md rounded-lg shadow">
-              <i className="pi pi-inbox text-5xl text-gray-400 mb-4"></i>
-              <p className="text-gray-300 text-xl">
-                {t("staffTabs.groups.noGroups")}
-              </p>
+              </span>
             </div>
           )}
+
+          <div className="container mx-auto px-2">
+            {loading && (
+              <div className="flex justify-center p-4">
+                <ProgressSpinner style={{ width: "40px", height: "40px" }} />
+              </div>
+            )}
+
+            {!loading && (
+              <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
+                {/* Create new group card */}
+                <CreateGroupForm
+                  selectedScope={selectedScope}
+                  onCreateGroup={handleCreateGroup}
+                  isLoading={creatingGroup}
+                />
+
+                {/* Existing groups */}
+                {filteredGroups.map((group) => (
+                  <GroupCard
+                    key={group.id}
+                    group={group}
+                    onEdit={() => openEditDialog(group)}
+                    onDelete={() => openDeleteDialog(group)}
+                    onViewDetails={() => openDetailsDialog(group)}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* No groups found message */}
+            {!loading && groups.length === 0 && (
+              <div className="flex flex-col items-center justify-center p-12 bg-white/10 backdrop-blur-md rounded-lg shadow">
+                <i className="pi pi-inbox text-5xl text-gray-400 mb-4"></i>
+                <p className="text-gray-300 text-xl">
+                  {t("staffTabs.groups.noGroups")}
+                </p>
+              </div>
+            )}
+
+            {/* No search results */}
+            {!loading && groups.length > 0 && filteredGroups.length === 0 && (
+              <div className="flex flex-col items-center justify-center p-8 mt-6 bg-white/10 backdrop-blur-md rounded-lg shadow">
+                <i className="pi pi-search text-4xl text-gray-400 mb-3"></i>
+                <p className="text-gray-300 text-lg">
+                  {t("staffTabs.groups.noSearchResults")}
+                </p>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* No scope selected yet */}
+      {!selectedScope && !loading && (
+        <div className="flex flex-col items-center justify-center p-12 bg-white/10 backdrop-blur-md rounded-lg shadow">
+          <i className="pi pi-arrow-up text-5xl text-amber-500 mb-4"></i>
+          <p className="text-gray-300 text-xl">
+            {t("staffTabs.groups.selectScopeToManageGroups")}
+          </p>
         </div>
       )}
     </div>
