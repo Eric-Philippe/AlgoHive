@@ -112,6 +112,7 @@ func CheckAuth(c *gin.Context) {
 		Firstname:     user.Firstname,
 		Lastname:      user.Lastname,
 		LastConnected: user.LastConnected,
+		Blocked:       user.Blocked,
 		Permissions:   permissions.MergeRolePermissions(user.Roles),
 		Roles:         utils.ConvertRoles(user.Roles),
 		Groups:        utils.ConvertGroups(user.Groups),

@@ -85,7 +85,7 @@ export default function CompetitionsList({
         {t("staffTabs.competitions.title")}
       </h2>
       <span className="p-input-icon-left">
-        <i className="pi pi-search" />
+        <i className="pi pi-search" style={{ right: "10px" }} />
         <InputText
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
@@ -120,7 +120,7 @@ export default function CompetitionsList({
         <Column
           field="description"
           header={t("staffTabs.competitions.form.description")}
-          style={{ maxWidth: "300px" }}
+          style={{ maxWidth: "100px" }}
           body={(rowData) => (
             <div
               className="description-cell"
@@ -138,7 +138,7 @@ export default function CompetitionsList({
           field="api_theme"
           header={t("staffTabs.competitions.form.apiTheme")}
           sortable
-          style={{ width: "150px" }}
+          style={{ width: "15rem" }}
         />
         <Column
           header={t("common.fields.status")}

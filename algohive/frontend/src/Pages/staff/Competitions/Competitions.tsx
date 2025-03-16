@@ -4,11 +4,10 @@ import { Toast } from "primereact/toast";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
-import { confirmDialog } from "primereact/confirmdialog";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
 import {
   fetchCompetitions,
-  Competition,
   deleteCompetition,
 } from "../../../services/competitionsService";
 import CompetitionsList from "./components/CompetitionsList";
@@ -16,6 +15,7 @@ import CompetitionForm from "./components/CompetitionForm";
 import CompetitionDetails from "./components/CompetitionDetails";
 
 import "./Competitions.css";
+import { Competition } from "../../../models/Competition";
 
 export default function CompetitionsPage() {
   const { t } = useTranslation();
@@ -113,12 +113,10 @@ export default function CompetitionsPage() {
   return (
     <div className="p-4 min-h-screen mb-28">
       <Toast ref={toast} />
+      <ConfirmDialog />
 
       {/* Header with title and create button */}
       <div className="flex flex-wrap justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold">
-          {t("staffTabs.competitions.title")}
-        </h1>
         <Button
           label={t("staffTabs.competitions.create")}
           icon="pi pi-plus"

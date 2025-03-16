@@ -46,6 +46,7 @@ type AuthResponse struct {
 	Firstname     string        `json:"firstname"`
 	Lastname      string        `json:"lastname"`
 	LastConnected *time.Time    `json:"last_connected"`
+	Blocked 	 bool          `json:"blocked"`
 	Permissions   int           `json:"permissions"`
 	Roles         []models.Role  `json:"roles"`
 	Groups        []models.Group `json:"groups"`

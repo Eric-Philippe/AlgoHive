@@ -39,6 +39,7 @@ export const getStaffMenuItems = (t: TFunction): MenuItem[] => [
     icon: "pi pi-server",
     color: "#8D6E33", // Ambre foncé
     Component: CatalogsPage,
+    showInMenu: (user: User) => !user.blocked,
   },
   {
     id: "scopes",
@@ -47,7 +48,7 @@ export const getStaffMenuItems = (t: TFunction): MenuItem[] => [
     color: "#4F3A1B", // Brun foncé
     Component: ScopesPage,
     showInMenu: (user: User) =>
-      rolesHavePermission(user.roles, Permission.SCOPES),
+      rolesHavePermission(user.roles, Permission.SCOPES) && !user.blocked,
   },
   {
     id: "roles",
@@ -56,7 +57,7 @@ export const getStaffMenuItems = (t: TFunction): MenuItem[] => [
     color: "#E0A800", // Ambre doré
     Component: RolesPage,
     showInMenu: (user: User) =>
-      rolesHavePermission(user.roles, Permission.ROLES),
+      rolesHavePermission(user.roles, Permission.ROLES) && !user.blocked,
   },
   {
     id: "groups",
@@ -64,6 +65,7 @@ export const getStaffMenuItems = (t: TFunction): MenuItem[] => [
     icon: "pi pi-users", // Icône de groupe (plusieurs personnes)
     color: "#7D6608", // Brun miel
     Component: GroupsPage,
+    showInMenu: (user: User) => !user.blocked,
   },
   {
     id: "users",
@@ -71,6 +73,7 @@ export const getStaffMenuItems = (t: TFunction): MenuItem[] => [
     icon: "pi pi-user", // Changé pour une icône d'utilisateur individuel
     color: "#BF8F30", // Ambre clair
     Component: UsersPage,
+    showInMenu: (user: User) => !user.blocked,
   },
   {
     id: "competitions",
@@ -78,5 +81,6 @@ export const getStaffMenuItems = (t: TFunction): MenuItem[] => [
     icon: "pi pi-graduation-cap",
     color: "#5A3E28", // Brun foncé
     Component: CompetitionsPage,
+    showInMenu: (user: User) => !user.blocked,
   },
 ];

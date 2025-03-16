@@ -34,7 +34,8 @@
       "scopes": "Sélectionner des périmètres",
       "groups": "Sélectionner des groupes",
       "roles": "Sélectionner des rôles",
-      "catalogs": "Sélectionner des catalogues"
+      "catalogs": "Sélectionner des catalogues",
+      "themes": "Sélectionner des thèmes"
     },
     "states": {
       "none": "Aucun",
@@ -333,6 +334,7 @@
       },
       "actions": {
         "finish": "Marquer comme terminée",
+        "unfinish": "Marquer comme active",
         "show": "Afficher",
         "hide": "Masquer",
         "addGroup": "Ajouter un groupe",

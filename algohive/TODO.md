@@ -42,16 +42,17 @@
 ### Competitions
 
 - [ ] Refresh the view details when toggling the visibility and the finished status
-- [ ] Don't hide the "Finish" button when the competition is finished, display a "Reopen" button instead
+- [x] Don't hide the "Finish" button when the competition is finished, display a "Reopen" button instead
 - [ ] Fix the display for participating groups / users
-- [ ] Fix the search icon bar
-- [ ] Plug the delete button
-- [ ] commmon.selects.themes to change / translate
-- [ ] Remove double title
+- [x] Fix the search icon bar
+- [x] Plug the delete button
+- [ ] Owner has to be able to select a scope before creating a competition
+- [x] commmon.selects.themes to change / translate
+- [x] Remove double title
 
-### Login
+### Misc
 
-- [ ] Display a message when the user is blocked
+- [x] Do something when the user is blocked
 - [ ] Display a message when the user is not "activated" (no roles no groups)
 
 ## Backend

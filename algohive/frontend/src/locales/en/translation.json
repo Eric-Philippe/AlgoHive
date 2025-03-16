@@ -34,7 +34,8 @@
       "scopes": "Select scopes",
       "groups": "Select groups",
       "roles": "Select roles",
-      "catalogs": "Select catalogs"
+      "catalogs": "Select catalogs",
+      "themes": "Select themes"
     },
     "states": {
       "none": "None",
@@ -333,6 +334,7 @@
       },
       "actions": {
         "finish": "Mark as Finished",
+        "unfinish": "Unmark as Finished",
         "show": "Show",
         "hide": "Hide",
         "addGroup": "Add Group",

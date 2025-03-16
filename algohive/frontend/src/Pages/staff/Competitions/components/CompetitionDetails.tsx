@@ -124,7 +124,7 @@ export default function CompetitionDetails({
       await finishCompetition(competition.id);
       showToast("success", t("staffTabs.competitions.messages.finishSuccess"));
       // Update competition in parent component
-      competition.finished = true;
+      competition.finished = !competition.finished;
     } catch (error) {
       console.error("Error finishing competition:", error);
       showToast("error", t("staffTabs.competitions.messages.finishError"));
@@ -218,14 +218,17 @@ export default function CompetitionDetails({
                     className="p-button-outlined p-button-success"
                     onClick={onEdit}
                   />
-                  {!competition.finished && (
-                    <Button
-                      icon="pi pi-flag-fill"
-                      label={t("staffTabs.competitions.actions.finish")}
-                      className="p-button-outlined p-button-warning"
-                      onClick={handleFinishCompetition}
-                    />
-                  )}
+                  <Button
+                    icon="pi pi-flag-fill"
+                    label={
+                      competition.finished
+                        ? t("staffTabs.competitions.actions.unfinish")
+                        : t("staffTabs.competitions.actions.finish")
+                    }
+                    className="p-button-outlined p-button-warning"
+                    onClick={handleFinishCompetition}
+                  />
+
                   <Button
                     icon={competition.show ? "pi pi-eye-slash" : "pi pi-eye"}
                     label={
