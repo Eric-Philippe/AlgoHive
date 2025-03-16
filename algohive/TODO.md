@@ -4,15 +4,15 @@
 
 ### Home
 
-- [ ] Display the roles (probably preload them)
+- [x] Display the roles (probably preload them)
 
 ### Catalogs
 
-- [ ] Add a little description, or a button to briefly explain what is a catalog and a puzzle and what to expect from it
+- [x] Add a little description, or a button to briefly explain what is a catalog and a puzzle and what to expect from it
 
 ### Scopes
 
-- [ ] Preload the Groups in order to display them correctly in the ScopesDetails
+- [x] Preload the Groups in order to display them correctly in the ScopesDetails
 
 ### Users
 
@@ -28,13 +28,14 @@
 
 ### Roles
 
-- [ ] Display the scopes and users having the role (probably preload them)
+- [x] Display the scopes and users having the role (probably preload them)
 
 ### Competitions
 
 - [ ] Refresh the view details when toggling the visibility and the finished status
 - [ ] Don't hide the "Finish" button when the competition is finished, display a "Reopen" button instead
 - [ ] Fix the display for participating groups / users
+- [ ] Fix the search icon bar
 
 ### Login
 

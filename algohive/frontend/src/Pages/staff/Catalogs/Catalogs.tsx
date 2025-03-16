@@ -73,6 +73,12 @@ export default function CatalogsPage() {
 
       {!loading && !error && catalogs.length > 0 && (
         <>
+          <div className="flex items-center justify-between mb-10">
+            <p className="font-semibold text-white-800">
+              {t("staffTabs.catalogs.description")}
+            </p>
+          </div>
+
           {selectedCatalog ? (
             <CatalogDetails catalog={selectedCatalog} onBack={handleBack} />
           ) : (

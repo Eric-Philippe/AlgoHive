@@ -270,7 +270,8 @@
     },
     "catalogs": {
       "details": "More details",
-      "notFound": "No catalogs found."
+      "notFound": "No catalogs found.",
+      "description": "Catalogs are a collection of libraries containing two steps puzzles."
     },
     "competitions": {
       "title": "Competition Management",

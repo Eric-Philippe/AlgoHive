@@ -270,7 +270,8 @@
     },
     "catalogs": {
       "details": "Plus de détails",
-      "notFound": "Aucun catalogue trouvé."
+      "notFound": "Aucun catalogue trouvé.",
+      "description": "Les catalogues sont une collection de bibliothèques contenant des énigmes à deux étapes."
     },
     "competitions": {
       "title": "Gestion des compétitions",

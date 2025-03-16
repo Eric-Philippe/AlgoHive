@@ -113,7 +113,7 @@ func GetRoleByID(c *gin.Context) {
 	roleID := c.Param("role_id")
 
 	var role models.Role
-	if err := database.DB.Where("id = ?", roleID).First(&role).Error; err != nil {
+	if err := database.DB.Where("id = ?", roleID).Preload("Users").Preload("Scopes").First(&role).Error; err != nil {
 		respondWithError(c, http.StatusNotFound, ErrRoleNotFound)
 		return
 	}

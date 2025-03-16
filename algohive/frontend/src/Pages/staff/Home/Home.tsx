@@ -378,6 +378,17 @@ export default function HomePage() {
           <p className="text-gray-500">
             {t("staffTabs.home.rolesDescription")}
           </p>
+
+          <div className="flex flex-wrap gap-2 mt-4">
+            {user?.roles.map((role) => (
+              <Chip
+                key={role.id}
+                label={role.name}
+                icon="pi pi-user-edit"
+                className="bg-indigo-100 text-indigo-800"
+              />
+            ))}
+          </div>
         </Card>
 
         <Card className="shadow-lg">
@@ -417,7 +428,7 @@ export default function HomePage() {
           </div>
         </Card>
 
-        {/* Replace Last Activity with Update Profile panel */}
+        {/* Update Profile panel */}
         <Card className="shadow-lg">
           <div className="flex justify-between items-center mb-3">
             <div className="text-xl font-semibold">

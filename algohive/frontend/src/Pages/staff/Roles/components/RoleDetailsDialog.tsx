@@ -28,6 +28,8 @@ const RoleDetailsDialog: React.FC<RoleDetailsDialogProps> = ({
     return null;
   }
 
+  console.log("RoleDetailsDialog", role);
+
   const footerContent = (
     <div className="flex justify-end gap-2">
       <Button

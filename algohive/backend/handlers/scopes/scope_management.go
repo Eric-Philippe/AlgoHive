@@ -66,7 +66,7 @@ func GetScope(c *gin.Context) {
 	scopeID := c.Param("scope_id")
 	var scope models.Scope
 	
-	if err := database.DB.Where("id = ?", scopeID).Preload("Catalogs").Preload("Roles").First(&scope).Error; err != nil {
+	if err := database.DB.Where("id = ?", scopeID).Preload("Catalogs").Preload("Roles").Preload("Groups").First(&scope).Error; err != nil {
 		respondWithError(c, http.StatusNotFound, ErrScopeNotFound)
 		return
 	}
