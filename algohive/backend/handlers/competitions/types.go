@@ -22,6 +22,10 @@ const (
 	ErrInvalidRequest           = "Invalid request data"
 	ErrFailedAddGroup           = "Failed to add group to competition"
 	ErrFailedRemoveGroup        = "Failed to remove group from competition"
+	ErrNoPermissionFinish	  = "User does not have permission to finish competitions"
+	ErrFailedToggleFinished	  = "Failed to toggle competition finished status"
+	ErrNoPermissionVisibility	  = "User does not have permission to change competition visibility"
+	ErrFailedToggleVisibility	  = "Failed to toggle competition visibility"
 )
 
 // CreateCompetitionRequest modèle pour créer une compétition

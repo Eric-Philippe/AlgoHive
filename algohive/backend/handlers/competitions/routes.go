@@ -18,6 +18,8 @@ func RegisterRoutes(r *gin.RouterGroup) {
 		competitions.GET("/:id", GetCompetition)
 		competitions.POST("/", CreateCompetition)
 		competitions.PUT("/:id", UpdateCompetition)
+		competitions.PUT("/:id/finish", FinishCompetition)
+		competitions.PUT("/:id/visibility", ToggleCompetitionVisibility)
 		competitions.DELETE("/:id", DeleteCompetition)
 		
 		 // Competition group management routes

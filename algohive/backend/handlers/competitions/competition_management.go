@@ -4,7 +4,6 @@ import (
 	"api/database"
 	"api/middleware"
 	"api/models"
-	"api/utils"
 	"api/utils/permissions"
 	"log"
 	"net/http"
@@ -152,8 +151,6 @@ func CreateCompetition(c *gin.Context) {
 		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionCreate)
 		return
 	}
-
-	utils.DisplayBodyContent(c)
 
 	var req CreateCompetitionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -351,6 +348,90 @@ func DeleteCompetition(c *gin.Context) {
 	tx.Commit()
 
 	c.Status(http.StatusNoContent)
+}
+
+// FinishCompetition toggle the finished status of a competition
+// @Summary Finish a competition
+// @Description Toggle the finished status of a competition
+// @Tags Competitions
+// @Accept json
+// @Produce json
+// @Param id path string true "Competition ID"
+// @Success 200 {object} models.Competition
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /competitions/{id}/finish [put]
+// @Security Bearer
+func FinishCompetition(c *gin.Context) {
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
+
+	if !hasCompetitionPermission(user, permissions.COMPETITIONS) {
+		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionFinish)
+		return
+	}
+
+	competitionID := c.Param("id")
+	var competition models.Competition
+	if err := database.DB.Where("id = ?", competitionID).First(&competition).Error; err != nil {
+		respondWithError(c, http.StatusNotFound, ErrCompetitionNotFound)
+		return
+	}
+
+	// Toggle the finished status
+	competition.Finished = !competition.Finished
+
+	if err := database.DB.Save(&competition).Error; err != nil {
+		log.Printf("Error toggling finished status: %v", err)
+		respondWithError(c, http.StatusInternalServerError, ErrFailedToggleFinished)
+		return
+	}
+
+	c.JSON(http.StatusOK, competition)
+}
+
+// Toggle visibility of a competition
+// @Summary Toggle visibility of a competition
+// @Description Toggle visibility of a competition
+// @Tags Competitions
+// @Accept json
+// @Produce json
+// @Param id path string true "Competition ID"
+// @Success 200 {object} models.Competition
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /competitions/{id}/visibility [put]
+// @Security Bearer
+func ToggleCompetitionVisibility(c *gin.Context) {
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
+
+	if !hasCompetitionPermission(user, permissions.COMPETITIONS) {
+		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionView)
+		return
+	}
+
+	competitionID := c.Param("id")
+	var competition models.Competition
+	if err := database.DB.Where("id = ?", competitionID).First(&competition).Error; err != nil {
+		respondWithError(c, http.StatusNotFound, ErrCompetitionNotFound)
+		return
+	}
+
+	// Toggle the visibility status
+	competition.Show = !competition.Show
+
+	if err := database.DB.Save(&competition).Error; err != nil {
+		log.Printf("Error toggling visibility status: %v", err)
+		respondWithError(c, http.StatusInternalServerError, ErrFailedToggleVisibility)
+		return
+	}
+
+	c.JSON(http.StatusOK, competition)
 }
 
 // userHasAccessToCompetition checks if a user has access to a competition through their groups

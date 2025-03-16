@@ -761,6 +761,41 @@ paths:
       summary: Update a competition
       tags:
       - Competitions
+  /competitions/{id}/finish:
+    put:
+      consumes:
+      - application/json
+      description: Toggle the finished status of a competition
+      parameters:
+      - description: Competition ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Competition'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Finish a competition
+      tags:
+      - Competitions
   /competitions/{id}/groups:
     get:
       consumes:
@@ -1099,6 +1134,41 @@ paths:
       security:
       - Bearer: []
       summary: Get user tries for a competition
+      tags:
+      - Competitions
+  /competitions/{id}/visibility:
+    put:
+      consumes:
+      - application/json
+      description: Toggle visibility of a competition
+      parameters:
+      - description: Competition ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Competition'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Toggle visibility of a competition
       tags:
       - Competitions
   /competitions/user:
