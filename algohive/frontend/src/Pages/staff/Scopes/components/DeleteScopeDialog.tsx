@@ -36,7 +36,7 @@ const DeleteScopeDialog: React.FC<DeleteScopeDialogProps> = ({
         icon="pi pi-trash"
         onClick={onConfirm}
         className="p-button-danger"
-        loading={loading}
+        loading={loading || (scope.groups && scope.groups.length > 0)}
         autoFocus
       />
     </div>
@@ -58,6 +58,15 @@ const DeleteScopeDialog: React.FC<DeleteScopeDialogProps> = ({
         <p className="mb-0">
           {t("staffTabs.scopes.confirmDeleteMessage", { name: scope.name })}
         </p>
+
+        {scope.groups && scope.groups.length > 0 && (
+          <p className="text-center mt-3 text-danger-500">
+            {t("staffTabs.scopes.dangerGroupsAssigned", {
+              count: scope.groups.length,
+              groups: t("staffTabs.scopes.groups").toLowerCase(),
+            })}
+          </p>
+        )}
       </div>
     </Dialog>
   );

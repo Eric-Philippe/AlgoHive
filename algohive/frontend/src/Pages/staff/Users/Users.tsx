@@ -70,7 +70,7 @@ export default function UsersPage() {
           {isOwner(user) ? (
             <TabView>
               <TabPanel header={t("staffTabs.users.views.asAdmin")}>
-                <UsersTableAdmin />
+                <UsersTableAdmin toast={toast} />
               </TabPanel>
               <TabPanel header={t("staffTabs.users.views.asStaff")}>
                 <div className="mb-4">
@@ -91,13 +91,14 @@ export default function UsersPage() {
                   />
                 </div>
                 {selectedRoles && selectedRoles.length > 0 && (
-                  <UsersTableStaff rolesIds={selectedRoles} />
+                  <UsersTableStaff rolesIds={selectedRoles} toast={toast} />
                 )}
               </TabPanel>
             </TabView>
           ) : (
             <UsersTableStaff
               rolesIds={user?.roles.map((role) => role.id) || []}
+              toast={toast}
             />
           )}
         </div>

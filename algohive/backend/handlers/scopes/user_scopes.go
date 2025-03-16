@@ -31,7 +31,7 @@ func GetUserScopes(c *gin.Context) {
 	
 	// If the user has the SCOPES permission, return all scopes
 	if permissions.RolesHavePermission(user.Roles, permissions.SCOPES) {
-		if err := database.DB.Preload("Catalogs").Preload("Roles").Preload("Roles.Scopes").Preload("Roles.Scopes.Groups").Find(&scopes).Error; err != nil {
+		if err := database.DB.Preload("Catalogs").Preload("Roles").Preload("Roles.Scopes").Preload("Roles.Scopes.Groups").Preload("Groups").Find(&scopes).Error; err != nil {
 			respondWithError(c, http.StatusInternalServerError, ErrFailedGetScopes)
 			return
 		}

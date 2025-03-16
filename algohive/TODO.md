@@ -14,11 +14,11 @@
 
 - [x] Preload the Groups in order to display them correctly in the ScopesDetails
 - [ ] Plug the catalogs update on Scope update
-- [ ] Block user from deleting scope if groups are under
+- [x] Block user from deleting scope if groups are under
 
 ### Groups
 
-- [ ] Prevent a staff to delete a group if it has users
+- [x] Prevent a staff to delete a group if it has users
 
 ### Users
 
@@ -30,8 +30,8 @@
 - [x] Let only the possibility to BLOCK a staff only to the owner
 - [x] Remove the possibility for the owner to block himself
 - [x] AutoSelect when there are only one choice per select
-- [ ] Do not display the ID on view details roles (Owner)
-- [ ] staffTabs.users.confirmations.deleteUser edit traduction
+- [x] Do not display the ID on view details roles (Owner)
+- [x] staffTabs.users.confirmations.deleteUser edit traduction
 - [ ] Plug the edit user (students)
 
 ### Roles

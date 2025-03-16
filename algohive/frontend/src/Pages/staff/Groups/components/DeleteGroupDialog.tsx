@@ -39,7 +39,7 @@ const DeleteGroupDialog: React.FC<DeleteGroupDialogProps> = ({
           icon="pi pi-trash"
           className="p-button-danger"
           onClick={onConfirm}
-          loading={loading}
+          loading={loading || (group.users && group.users.length > 0)}
         />
       </div>
     );
@@ -68,8 +68,8 @@ const DeleteGroupDialog: React.FC<DeleteGroupDialogProps> = ({
         </p>
 
         {group.users && group.users.length > 0 && (
-          <p className="text-center mt-3 text-yellow-500">
-            {t("staffTabs.groups.warningUsersAssigned", {
+          <p className="text-center mt-3 text-danger-500">
+            {t("staffTabs.groups.dangerUsersAssigned", {
               count: group.users.length,
               users: t("staffTabs.groups.students").toLowerCase(),
             })}

@@ -4,6 +4,7 @@ import { confirmDialog } from "primereact/confirmdialog";
 import { Toast } from "primereact/toast";
 import { User } from "../models/User";
 import { resetPassword } from "../services/usersService";
+import { Role } from "../models/Role";
 
 /**
  * Custom hook for managing users in tables
@@ -55,7 +56,10 @@ export const useUserManagement = (fetchData: () => Promise<void>) => {
       firstName: user.firstname,
       lastName: user.lastname,
       email: user.email,
-      selectedRoles: user.roles?.map((role) => role.id) || [],
+      selectedRoles:
+        user.roles
+          ?.filter((role: Role) => role.name != "Owner")
+          ?.map((role) => role.id) || [],
       selectedGroup: null,
     });
     setEditMode(true);
@@ -127,10 +131,10 @@ export const useUserManagement = (fetchData: () => Promise<void>) => {
     deleteFunc: (userId: string) => Promise<void>
   ) => {
     confirmDialog({
-      message: t("staffTabs.users.confirmations.deleteUser", {
+      message: t("staffTabs.users.deleteUserMsg", {
         user: `${user.firstname} ${user.lastname}`,
       }),
-      header: t("common.confirmations.delete"),
+      header: t("staffTabs.users.deleteUser"),
       icon: "pi pi-exclamation-triangle",
       acceptClassName: "p-button-danger",
       accept: async () => {

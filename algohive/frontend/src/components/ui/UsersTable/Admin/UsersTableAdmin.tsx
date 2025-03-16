@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, RefObject } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
@@ -31,18 +31,21 @@ import {
 } from "../shared/TableTemplates";
 import { useUserManagement } from "../../../../hooks/useUserManagement";
 
+interface UsersTableAdminProps {
+  toast: RefObject<Toast | null>;
+}
+
 /**
  * Component that displays and manages staff users with administrative privileges.
  * Provides CRUD operations for staff users and their roles.
  */
-export default function UsersTableAdmin() {
+export default function UsersTableAdmin({ toast }: UsersTableAdminProps) {
   // State variables
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { user: currentUser } = useAuth();
-  const toast = useRef<Toast>(null);
 
   // Fetch data function for refreshing users
   const fetchData = async () => {

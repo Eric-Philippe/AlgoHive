@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { RefObject, useCallback, useEffect, useMemo, useState } from "react";
 import { User } from "../../../../models/User";
 import {
   fetchUsersFromRoles,
@@ -29,6 +29,7 @@ import {
 
 interface UsersTableStaffProps {
   rolesIds: string[];
+  toast: RefObject<Toast | null>;
 }
 
 /**
@@ -36,7 +37,10 @@ interface UsersTableStaffProps {
  * Users can be filtered by selecting a specific scope and then a group within that scope.
  * Provides CRUD operations for users within selected groups.
  */
-export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
+export default function UsersTableStaff({
+  rolesIds,
+  toast,
+}: UsersTableStaffProps) {
   // State for users, scopes, and UI control
   const [users, setUsers] = useState<User[]>([]);
   const [scopes, setScopes] = useState<Scope[]>([]);
@@ -72,7 +76,6 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
     editMode,
     selectedUser,
     formFields,
-    toast,
     updateFormField,
     resetForm,
     openNewUserDialog,
@@ -99,7 +102,7 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
         //   email: formFields.email,
         // });
 
-        toast.current?.show({
+        toast?.current?.show({
           severity: "success",
           summary: t("common.states.success"),
           detail: t("staffTabs.users.asStaff.messages.userUpdated"),
@@ -107,7 +110,7 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
         });
       } else {
         if (!selectedGroup) {
-          toast.current?.show({
+          toast?.current?.show({
             severity: "error",
             summary: t("common.states.validationError"),
             detail: t("staffTabs.users.asStaff.messages.groupRequired"),
@@ -122,7 +125,7 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
           selectedGroup
         );
 
-        toast.current?.show({
+        toast?.current?.show({
           severity: "success",
           summary: t("common.states.success"),
           detail: t("staffTabs.users.asStaff.messages.userCreated"),
@@ -136,7 +139,7 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
       resetForm();
     } catch (err) {
       console.error("Error saving user:", err);
-      toast.current?.show({
+      toast?.current?.show({
         severity: "error",
         summary: t("common.states.error"),
         detail: editMode
@@ -152,7 +155,7 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
     try {
       await toggleBlockUser(user.id);
       await fetchData();
-      toast.current?.show({
+      toast?.current?.show({
         severity: "success",
         summary: t("common.states.success"),
         detail: user.blocked
@@ -162,7 +165,7 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
       });
     } catch (err) {
       console.error("Error toggling user block status:", err);
-      toast.current?.show({
+      toast?.current?.show({
         severity: "error",
         summary: t("common.states.error"),
         detail: t("staffTabs.users.messages.errorBlocking"),
@@ -175,7 +178,7 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
   const handleResetPassword = async (user: User) => {
     try {
       await resetPassword(user.id);
-      toast.current?.show({
+      toast?.current?.show({
         severity: "success",
         summary: t("common.states.success"),
         detail: t("staffTabs.users.messages.passwordReset"),
@@ -183,7 +186,7 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
       });
     } catch (err) {
       console.error("Error resetting password:", err);
-      toast.current?.show({
+      toast?.current?.show({
         severity: "error",
         summary: t("common.states.error"),
         detail: t("staffTabs.users.messages.errorResettingPassword"),
