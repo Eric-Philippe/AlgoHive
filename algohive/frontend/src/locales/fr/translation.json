@@ -272,6 +272,26 @@
       "notFound": "Aucun catalogue trouvé."
     }
   },
+  "staff": {
+    "catalogs": {
+      "loading": "Chargement des catalogues...",
+      "errorFetchingCatalogs": "Erreur lors du chargement des catalogues",
+      "noCatalogs": "Aucun catalogue disponible",
+      "themes": "Thèmes",
+      "puzzles": "Énigmes",
+      "difficulty": "Difficulté",
+      "author": "Auteur",
+      "language": "Langue",
+      "createdAt": "Créé le",
+      "updatedAt": "Mis à jour le",
+      "back": "Retour aux catalogues",
+      "viewPuzzle": "Voir l'énigme",
+      "noThemes": "Aucun thème disponible pour ce catalogue",
+      "puzzleDetails": "Détails de l'énigme",
+      "puzzlesCount": "Énigmes",
+      "backToCatalog": "Retour au catalogue"
+    }
+  },
   "login": {
     "welcome": "Bienvenue sur",
     "description": "Connectez-vous pour accéder à la plateforme",

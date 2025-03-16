@@ -272,6 +272,26 @@
       "notFound": "No catalogs found."
     }
   },
+  "staff": {
+    "catalogs": {
+      "loading": "Loading catalogs...",
+      "errorFetchingCatalogs": "Error fetching catalogs",
+      "noCatalogs": "No catalogs available",
+      "themes": "Themes",
+      "puzzles": "Puzzles",
+      "difficulty": "Difficulty",
+      "author": "Author",
+      "language": "Language",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "back": "Back to catalogs",
+      "viewPuzzle": "View Puzzle",
+      "noThemes": "No themes available for this catalog",
+      "puzzleDetails": "Puzzle Details",
+      "puzzlesCount": "Puzzles",
+      "backToCatalog": "Back to catalog"
+    }
+  },
   "login": {
     "welcome": "Welcome to",
     "description": "Log in to access the platform",
