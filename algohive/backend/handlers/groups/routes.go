@@ -13,6 +13,7 @@ func RegisterRoutes(r *gin.RouterGroup) {
 	groups.Use(middleware.AuthMiddleware())
 	{
 		groups.GET("/", GetAllGroups)
+		groups.GET("/me", GetMyGroups)
 		groups.GET("/:group_id", GetGroup)
 		groups.GET("/scope/:scope_id", GetGroupsFromScope)
 		groups.PUT("/:group_id", UpdateGroup)

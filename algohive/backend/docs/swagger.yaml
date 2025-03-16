@@ -1371,6 +1371,31 @@ paths:
       summary: Add a user to a group
       tags:
       - Groups
+  /groups/me:
+    get:
+      consumes:
+      - application/json
+      description: Get all the groups that authenticated user has access to
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Group'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Get all the groups that authenticated user has access to
+      tags:
+      - Groups
   /groups/scope/{scope_id}:
     get:
       consumes:

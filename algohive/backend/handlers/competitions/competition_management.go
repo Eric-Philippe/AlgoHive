@@ -4,6 +4,7 @@ import (
 	"api/database"
 	"api/middleware"
 	"api/models"
+	"api/utils"
 	"api/utils/permissions"
 	"log"
 	"net/http"
@@ -74,7 +75,7 @@ func GetUserCompetitions(c *gin.Context) {
 	if err := database.DB.Raw(`
 		SELECT DISTINCT c.*
 		FROM competitions c
-		JOIN competition_accessible_to cat ON c.id = cat.competition_id
+		JOIN competition_groups cat ON c.id = cat.competition_id
 		JOIN user_groups ug ON cat.group_id = ug.group_id
 		WHERE ug.user_id = ? AND c.show = true
 	`, user.ID).Scan(&competitions).Error; err != nil {
@@ -111,7 +112,7 @@ func GetCompetition(c *gin.Context) {
 	competitionID := c.Param("id")
 	var competition models.Competition
 
-	if err := database.DB.Preload("ApiEnvironment").Preload("Groups").First(&competition, "id = ?", competitionID).Error; err != nil {
+	if err := database.DB.Preload("ApiEnvironment").Preload("Groups").Where("id = ?", competitionID).First(&competition).Error; err != nil {
 		respondWithError(c, http.StatusNotFound, ErrCompetitionNotFound)
 		return
 	}
@@ -151,6 +152,8 @@ func CreateCompetition(c *gin.Context) {
 		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionCreate)
 		return
 	}
+
+	utils.DisplayBodyContent(c)
 
 	var req CreateCompetitionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -205,7 +208,7 @@ func CreateCompetition(c *gin.Context) {
 	tx.Commit()
 
 	// Reload the competition with associations
-	database.DB.Preload("ApiEnvironment").Preload("Groups").First(&competition, competition.ID)
+	database.DB.Preload("ApiEnvironment").Preload("Groups").Where("id = ?", competition.ID).First(&competition)
 
 	c.JSON(http.StatusCreated, competition)
 }
@@ -237,7 +240,7 @@ func UpdateCompetition(c *gin.Context) {
 
 	competitionID := c.Param("id")
 	var competition models.Competition
-	if err := database.DB.First(&competition, "id = ?", competitionID).Error; err != nil {
+	if err := database.DB.Where("id = ?", competitionID).First(&competition).Error; err != nil {
 		respondWithError(c, http.StatusNotFound, ErrCompetitionNotFound)
 		return
 	}
@@ -283,7 +286,7 @@ func UpdateCompetition(c *gin.Context) {
 	}
 
 	// Reload the competition with associations
-	database.DB.Preload("ApiEnvironment").Preload("Groups").First(&competition, competition.ID)
+	database.DB.Preload("ApiEnvironment").Preload("Groups").Where("id = ?", competition.ID).First(&competition)
 
 	c.JSON(http.StatusOK, competition)
 }
@@ -313,7 +316,7 @@ func DeleteCompetition(c *gin.Context) {
 
 	competitionID := c.Param("id")
 	var competition models.Competition
-	if err := database.DB.First(&competition, "id = ?", competitionID).Error; err != nil {
+	if err := database.DB.Where("id = ?", competitionID).First(&competition).Error; err != nil {
 		respondWithError(c, http.StatusNotFound, ErrCompetitionNotFound)
 		return
 	}
@@ -330,7 +333,7 @@ func DeleteCompetition(c *gin.Context) {
 	}
 
 	// Remove associations with groups
-	if err := tx.Exec("DELETE FROM competition_accessible_to WHERE competition_id = ?", competitionID).Error; err != nil {
+	if err := tx.Exec("DELETE FROM competition_groups WHERE competition_id = ?", competitionID).Error; err != nil {
 		tx.Rollback()
 		log.Printf("Error removing group associations for competition: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedDeleteCompetition)
@@ -355,7 +358,7 @@ func userHasAccessToCompetition(userID string, competitionID string) bool {
 	var count int64
 	err := database.DB.Raw(`
 		SELECT COUNT(*)
-		FROM competition_accessible_to cat
+		FROM competition_groups cat
 		JOIN user_groups ug ON cat.group_id = ug.group_id
 		WHERE ug.user_id = ? AND cat.competition_id = ? AND (
 			SELECT show FROM competitions WHERE id = ?

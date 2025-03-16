@@ -27,17 +27,25 @@ func GetAllCatalogs(c *gin.Context) {
 		return
 	}
 	
-	// Vérifier les permissions
-	if !permissions.RolesHavePermission(user.Roles, permissions.API_ENV) {
-		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionView)
-		return
-	}
-
 	var catalogs []models.Catalog
-	if err := database.DB.Preload("Scopes").Find(&catalogs).Error; err != nil {
-		log.Printf("Error getting all catalogs: %v", err)
-		respondWithError(c, http.StatusInternalServerError, "Failed to fetch catalogs")
-		return
+	if permissions.RolesHavePermission(user.Roles, permissions.API_ENV) || permissions.RolesHavePermission(user.Roles, permissions.OWNER) {
+		if err := database.DB.Preload("Scopes").Find(&catalogs).Error; err != nil {
+			log.Printf("Error getting all catalogs: %v", err)
+			respondWithError(c, http.StatusInternalServerError, "Failed to fetch catalogs")
+			return
+		}
+	} else {
+		if err := database.DB.Raw(`
+			SELECT DISTINCT c.*
+			FROM public.catalogs c
+			JOIN public.scope_api_environments sae ON sae.catalog_id = c.id
+			JOIN public.role_scopes rs ON rs.scope_id = sae.scope_id
+			JOIN public.user_roles ur ON ur.role_id = rs.role_id
+			WHERE ur.user_id = ?`, user.ID).Scan(&catalogs).Error; err != nil {
+			log.Printf("Error getting all catalogs: %v", err)
+			respondWithError(c, http.StatusInternalServerError, "Failed to fetch catalogs")
+			return
+		}
 	}
 	
 	c.JSON(http.StatusOK, catalogs)

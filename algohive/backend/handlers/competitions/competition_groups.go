@@ -52,15 +52,12 @@ func AddGroupToCompetition(c *gin.Context) {
 	}
 
 	// Add the group to the competition
-	if err := database.DB.Exec("INSERT INTO competition_accessible_to (group_id, competition_id) VALUES (?, ?) ON CONFLICT DO NOTHING", 
+	if err := database.DB.Exec("INSERT INTO competition_groups (group_id, competition_id) VALUES (?, ?) ON CONFLICT DO NOTHING", 
 		groupID, competitionID).Error; err != nil {
 		log.Printf("Error adding group to competition: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedAddGroup)
 		return
 	}
-
-	// Reload the competition with its associations
-	database.DB.Preload("ApiEnvironment").Preload("Groups").First(&competition, competition.ID)
 
 	c.JSON(http.StatusOK, competition)
 }
@@ -106,7 +103,7 @@ func RemoveGroupFromCompetition(c *gin.Context) {
 	}
 
 	// Remove the group from the competition
-	if err := database.DB.Exec("DELETE FROM competition_accessible_to WHERE group_id = ? AND competition_id = ?", 
+	if err := database.DB.Exec("DELETE FROM competition_groups WHERE group_id = ? AND competition_id = ?", 
 		groupID, competitionID).Error; err != nil {
 		log.Printf("Error removing group from competition: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedRemoveGroup)
@@ -150,7 +147,7 @@ func GetCompetitionGroups(c *gin.Context) {
 	}
 
 	var groups []models.Group
-	if err := database.DB.Joins("JOIN competition_accessible_to cat ON cat.group_id = groups.id").
+	if err := database.DB.Joins("JOIN competition_groups cat ON cat.group_id = groups.id").
 		Where("cat.competition_id = ?", competitionID).
 		Find(&groups).Error; err != nil {
 		log.Printf("Error fetching competition groups: %v", err)

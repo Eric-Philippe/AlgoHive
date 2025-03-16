@@ -270,6 +270,81 @@
     "catalogs": {
       "details": "More details",
       "notFound": "No catalogs found."
+    },
+    "competitions": {
+      "title": "Competition Management",
+      "create": "Create Competition",
+      "edit": "Edit Competition",
+      "details": "Competition Details",
+      "noCompetitions": "No competitions found",
+      "loading": "Loading competitions...",
+      "errorLoading": "Error loading competitions",
+      "form": {
+        "title": "Title",
+        "description": "Description",
+        "apiTheme": "Catalog Theme",
+        "apiEnvironment": "Catalog",
+        "groups": "Accessible Groups",
+        "visible": "Visible to users",
+        "finished": "Mark as finished"
+      },
+      "status": {
+        "active": "Active",
+        "finished": "Finished",
+        "visible": "Visible",
+        "hidden": "Hidden"
+      },
+      "confirmDelete": "Are you sure you want to delete this competition?",
+      "confirmDeleteHeader": "Delete Competition",
+      "statistics": {
+        "title": "Statistics",
+        "totalUsers": "Total Users",
+        "activeUsers": "Active Users",
+        "completionRate": "Completion Rate",
+        "averageScore": "Average Score",
+        "highestScore": "Highest Score",
+        "participants": "Participants",
+        "groups": "Participating Groups",
+        "noParticipants": "No participants found",
+        "noGroups": "No groups assigned to this competition",
+        "viewTriesFor": "View tries for {{name}}"
+      },
+      "messages": {
+        "titleRequired": "Title is required",
+        "descriptionRequired": "Description is required",
+        "apiThemeRequired": "API Theme is required",
+        "apiEnvironmentRequired": "API Environment is required",
+        "createSuccess": "Competition created successfully",
+        "updateSuccess": "Competition updated successfully",
+        "deleteSuccess": "Competition deleted successfully",
+        "createError": "An error occurred while creating the competition",
+        "updateError": "An error occurred while updating the competition",
+        "deleteError": "An error occurred while deleting the competition",
+        "toggleVisibilitySuccess": "Competition visibility updated",
+        "toggleVisibilityError": "Error updating competition visibility",
+        "finishSuccess": "Competition marked as finished",
+        "finishError": "Error marking competition as finished",
+        "addGroupSuccess": "Group added to competition successfully",
+        "removeGroupSuccess": "Group removed from competition successfully",
+        "groupError": "Error managing group access"
+      },
+      "actions": {
+        "finish": "Mark as Finished",
+        "show": "Show",
+        "hide": "Hide",
+        "addGroup": "Add Group",
+        "removeGroup": "Remove Group"
+      },
+      "tries": {
+        "viewTries": "View Tries",
+        "noTries": "No tries found for this user",
+        "startTime": "Start Time",
+        "endTime": "End Time",
+        "attempts": "Attempts",
+        "score": "Score",
+        "puzzle": "Puzzle",
+        "loading": "Loading tries..."
+      }
     }
   },
   "staff": {

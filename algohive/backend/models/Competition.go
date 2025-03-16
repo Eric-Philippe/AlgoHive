@@ -9,6 +9,6 @@ type Competition struct {
 	ApiTheme        string    `gorm:"type:varchar(50);not null;column:api_theme" json:"api_theme"`
 	ApiEnvironmentID string    `gorm:"type:uuid;not null;column:api_environment_id" json:"api_environment_id"`
 	ApiEnvironment  *Catalog   `gorm:"foreignKey:ApiEnvironmentID" json:"api_environment,omitempty"`
-	Groups         []*Group   `gorm:"many2many:competition_accessible_to;" json:"groups,omitempty"`
+	Groups         []*Group   `gorm:"many2many:competition_groups;" json:"groups,omitempty"`
 	Tries          []*Try     `gorm:"foreignKey:CompetitionID" json:"tries,omitempty"`
 }

@@ -270,6 +270,81 @@
     "catalogs": {
       "details": "Plus de détails",
       "notFound": "Aucun catalogue trouvé."
+    },
+    "competitions": {
+      "title": "Gestion des compétitions",
+      "create": "Créer une compétition",
+      "edit": "Modifier la compétition",
+      "details": "Détails de la compétition",
+      "noCompetitions": "Aucune compétition trouvée",
+      "loading": "Chargement des compétitions...",
+      "errorLoading": "Erreur lors du chargement des compétitions",
+      "form": {
+        "title": "Titre",
+        "description": "Description",
+        "apiTheme": "Thème API",
+        "apiEnvironment": "Environnement API",
+        "groups": "Groupes accessibles",
+        "visible": "Visible pour les utilisateurs",
+        "finished": "Marquer comme terminée"
+      },
+      "status": {
+        "active": "Active",
+        "finished": "Terminée",
+        "visible": "Visible",
+        "hidden": "Cachée"
+      },
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette compétition ?",
+      "confirmDeleteHeader": "Supprimer la compétition",
+      "statistics": {
+        "title": "Statistiques",
+        "totalUsers": "Utilisateurs totaux",
+        "activeUsers": "Utilisateurs actifs",
+        "completionRate": "Taux d'achèvement",
+        "averageScore": "Score moyen",
+        "highestScore": "Score le plus élevé",
+        "participants": "Participants",
+        "groups": "Groupes participants",
+        "noParticipants": "Aucun participant trouvé",
+        "noGroups": "Aucun groupe assigné à cette compétition",
+        "viewTriesFor": "Voir les essais de {{name}}"
+      },
+      "messages": {
+        "titleRequired": "Le titre est requis",
+        "descriptionRequired": "La description est requise",
+        "apiThemeRequired": "Le thème API est requis",
+        "apiEnvironmentRequired": "L'environnement API est requis",
+        "createSuccess": "Compétition créée avec succès",
+        "updateSuccess": "Compétition mise à jour avec succès",
+        "deleteSuccess": "Compétition supprimée avec succès",
+        "createError": "Une erreur est survenue lors de la création de la compétition",
+        "updateError": "Une erreur est survenue lors de la mise à jour de la compétition",
+        "deleteError": "Une erreur est survenue lors de la suppression de la compétition",
+        "toggleVisibilitySuccess": "Visibilité de la compétition mise à jour",
+        "toggleVisibilityError": "Erreur lors de la mise à jour de la visibilité de la compétition",
+        "finishSuccess": "La compétition a été marquée comme terminée",
+        "finishError": "Erreur lors du marquage de la compétition comme terminée",
+        "addGroupSuccess": "Groupe ajouté à la compétition avec succès",
+        "removeGroupSuccess": "Groupe retiré de la compétition avec succès",
+        "groupError": "Erreur lors de la gestion de l'accès au groupe"
+      },
+      "actions": {
+        "finish": "Marquer comme terminée",
+        "show": "Afficher",
+        "hide": "Masquer",
+        "addGroup": "Ajouter un groupe",
+        "removeGroup": "Retirer un groupe"
+      },
+      "tries": {
+        "viewTries": "Voir les essais",
+        "noTries": "Aucun essai trouvé pour cet utilisateur",
+        "startTime": "Heure de début",
+        "endTime": "Heure de fin",
+        "attempts": "Tentatives",
+        "score": "Score",
+        "puzzle": "Énigme",
+        "loading": "Chargement des essais..."
+      }
     }
   },
   "staff": {

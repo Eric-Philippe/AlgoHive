@@ -84,3 +84,18 @@ export async function deleteGroup(groupId: string): Promise<void> {
     throw error;
   }
 }
+
+export async function fetchStaffGroups(): Promise<Group[]> {
+  try {
+    const response = await ApiClient.get("/groups/me");
+
+    if (response.status !== 200) {
+      throw new Error(`Error: ${response.status}`);
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching staff groups:", error);
+    throw error;
+  }
+}

@@ -279,3 +279,34 @@ func GetGroupsFromScope(c *gin.Context) {
 
 	c.JSON(http.StatusOK, groups)
 }
+
+// Get all the groups that authenticated user has access to
+// @Summary Get all the groups that authenticated user has access to
+// @Description Get all the groups that authenticated user has access to
+// @Tags Groups
+// @Accept json
+// @Produce json
+// @Success 200 {array} models.Group
+// @Failure 400 {object} map[string]string
+// @Router /groups/me [get]
+// @Security Bearer
+func GetMyGroups(c *gin.Context) {
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
+
+	var groups []models.Group
+	if err := database.DB.Raw(`
+		SELECT DISTINCT g.*
+		FROM public.groups g
+		JOIN public.scopes s ON g.scope_id = s.id
+		JOIN public.role_scopes rs ON rs.scope_id = s.id
+		JOIN public.user_roles ur ON ur.role_id = rs.role_id
+		WHERE ur.user_id = ?`, user.ID).Scan(&groups).Error; err != nil {
+		log.Printf("Error fetching groups: %v", err)
+		respondWithError(c, http.StatusBadRequest, ErrFetchingGroups)
+		return
+	}
+	c.JSON(http.StatusOK, groups)
+}
