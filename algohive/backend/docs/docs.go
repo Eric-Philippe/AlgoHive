@@ -2857,7 +2857,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/resetpass": {
+        "/user/resetpass/{id}": {
             "put": {
                 "security": [
                     {
@@ -2877,13 +2877,11 @@ const docTemplate = `{
                 "summary": "Reset Target User Password",
                 "parameters": [
                     {
-                        "description": "User Profile",
-                        "name": "user",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.User"
-                        }
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {

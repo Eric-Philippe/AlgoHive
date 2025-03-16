@@ -5,6 +5,7 @@ import {
   deleteUser,
   createUser,
   toggleBlockUser,
+  resetPassword,
 } from "../../../../services/usersService";
 import { t } from "i18next";
 import { ProgressSpinner } from "primereact/progressspinner";
@@ -78,7 +79,6 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
     openEditUserDialog,
     validateForm,
     confirmDeleteUser,
-    confirmResetPassword,
   } = useUserManagement(fetchData);
 
   // Fetch users and scopes on component mount or when rolesIds changes
@@ -171,6 +171,27 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
     }
   };
 
+  // Handle reset password for user
+  const handleResetPassword = async (user: User) => {
+    try {
+      await resetPassword(user.id);
+      toast.current?.show({
+        severity: "success",
+        summary: t("common.states.success"),
+        detail: t("staffTabs.users.messages.passwordReset"),
+        life: 3000,
+      });
+    } catch (err) {
+      console.error("Error resetting password:", err);
+      toast.current?.show({
+        severity: "error",
+        summary: t("common.states.error"),
+        detail: t("staffTabs.users.messages.errorResettingPassword"),
+        life: 3000,
+      });
+    }
+  };
+
   // Memoize scope options to prevent unnecessary recalculations
   const scopeOptions = useMemo(() => {
     return scopes.map((scope) => ({
@@ -206,6 +227,20 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
     setSelectedScope(value);
     setSelectedGroup(null); // Reset group selection when scope changes
   };
+
+  // Auto-select scope if there is only one
+  useEffect(() => {
+    if (scopes.length === 1 && !selectedScope) {
+      setSelectedScope(scopes[0].id);
+    }
+  }, [scopes, selectedScope]);
+
+  // Auto-select group if there is only one in the selected scope
+  useEffect(() => {
+    if (groupOptions.length === 1 && !selectedGroup) {
+      setSelectedGroup(groupOptions[0].value);
+    }
+  }, [groupOptions, selectedGroup]);
 
   // Define table columns
   const columns = [
@@ -309,7 +344,7 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
             rows={10}
             rowsPerPageOptions={[5, 10, 25]}
             tableStyle={{ minWidth: "50rem" }}
-            emptyMessage={t("staffTabs.users.noUsersInGroup")}
+            emptyMessage={t("staffTabs.users.asStaff.noUsersInGroup")}
             className="p-datatable-sm p-datatable-gridlines"
             sortField="lastname"
             sortOrder={1}
@@ -350,7 +385,7 @@ export default function UsersTableStaff({ rolesIds }: UsersTableStaffProps) {
                   user={rowData}
                   onEdit={openEditUserDialog}
                   onToggleBlock={handleToggleBlockUser}
-                  onResetPassword={(user) => confirmResetPassword(user)}
+                  onResetPassword={handleResetPassword}
                   onDelete={(user) => confirmDeleteUser(user, deleteUser)}
                 />
               )}

@@ -2272,18 +2272,17 @@ paths:
       summary: Update User Password
       tags:
       - Users
-  /user/resetpass:
+  /user/resetpass/{id}:
     put:
       consumes:
       - application/json
       description: Reset the password of the target user
       parameters:
-      - description: User Profile
-        in: body
-        name: user
+      - description: User ID
+        in: path
+        name: userId
         required: true
-        schema:
-          $ref: '#/definitions/models.User'
+        type: string
       produces:
       - application/json
       responses:

@@ -13,22 +13,31 @@
 ### Scopes
 
 - [x] Preload the Groups in order to display them correctly in the ScopesDetails
+- [ ] Plug the catalogs update on Scope update
+- [ ] Block user from deleting scope if groups are under
+
+### Groups
+
+- [ ] Prevent a staff to delete a group if it has users
 
 ### Users
 
-- [ ] Prevent the owner to delete its own account
-- [ ] Prevent a staff to delete a group if it has users
-- [ ] Plug the Reset password for the users
-- [ ] Plug the Reset password for the staff
-- [ ] Add traduction for "staffTabs.users.noUsersInGroup"
-- [ ] Put back the toast
-- [ ] Let only the possibility to BLOCK a staff only to the owner
-- [ ] Remove the possibility for the owner to block himself
-- [ ] AutoSelect when there are only one choice per select
+- [x] Prevent the owner to delete its own account
+- [x] Plug the Reset password for the users
+- [x] Plug the Reset password for the staff
+- [x] Add traduction for "staffTabs.users.noUsersInGroup"
+- [x] Put back the toast
+- [x] Let only the possibility to BLOCK a staff only to the owner
+- [x] Remove the possibility for the owner to block himself
+- [x] AutoSelect when there are only one choice per select
+- [ ] Do not display the ID on view details roles (Owner)
+- [ ] staffTabs.users.confirmations.deleteUser edit traduction
+- [ ] Plug the edit user (students)
 
 ### Roles
 
 - [x] Display the scopes and users having the role (probably preload them)
+- [ ] Plug the scopes update on roles update
 
 ### Competitions
 
@@ -36,6 +45,9 @@
 - [ ] Don't hide the "Finish" button when the competition is finished, display a "Reopen" button instead
 - [ ] Fix the display for participating groups / users
 - [ ] Fix the search icon bar
+- [ ] Plug the delete button
+- [ ] commmon.selects.themes to change / translate
+- [ ] Remove double title
 
 ### Login
 

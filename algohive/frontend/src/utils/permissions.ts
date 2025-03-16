@@ -51,6 +51,7 @@ export function isOwner(user: User | null): boolean {
 }
 
 export function roleIsOwner(role: Role): boolean {
+  if (!role) return false;
   return hasPermission(role.permissions, Permission.OWNER);
 }
 

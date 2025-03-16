@@ -21,7 +21,7 @@ func RegisterRoutes(r *gin.RouterGroup) {
         user.GET("/", GetUsers)
         user.DELETE("/:id", DeleteUser)
         user.PUT("/block/:id", ToggleBlockUser)
-        user.PUT("/resetpass", ResetUserPassword)
+        user.PUT("/resetpass/:id", ResetUserPassword)
         
         // User-role relationship routes
         user.GET("/roles", GetUsersFromRoles)

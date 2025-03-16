@@ -7,6 +7,7 @@ import (
 	"api/models"
 	"api/utils"
 	"api/utils/permissions"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -75,11 +76,11 @@ func UpdateUserProfile(c *gin.Context) {
 // @Tags Users
 // @Accept json
 // @Produce json
-// @Param user body models.User true "User Profile"
+// @Param userId path string true "User ID"
 // @Success 200 {object} models.User
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
-// @Router /user/resetpass [put]
+// @Router /user/resetpass/{id} [put]
 // @Security Bearer
 func ResetUserPassword(c *gin.Context) {
 	user, err := middleware.GetUserFromRequest(c)
@@ -87,12 +88,20 @@ func ResetUserPassword(c *gin.Context) {
 		return
 	}
 	
+	// Get the target user ID from the URL parameter
+	userId := c.Param("id")
+	if userId == "" {
+		respondWithError(c, http.StatusBadRequest, "User ID is required")
+		return
+	}
+	// Find the target user by ID
 	var userUpdate models.User
-	if err := c.ShouldBindJSON(&userUpdate); err != nil {
-		respondWithError(c, http.StatusBadRequest, err.Error())
+	if err := database.DB.Where("id = ?", userId).First(&userUpdate).Error; err != nil {
+		respondWithError(c, http.StatusNotFound, "User not found")
 		return
 	}
 
+	// Check if the authenticated user has permission to reset the target user's password
 	if !HasPermissionForUser(user, userUpdate.ID, permissions.GROUPS) {
 		respondWithError(c, http.StatusForbidden, "You do not have permission to reset this user's password")
 		return
@@ -103,6 +112,8 @@ func ResetUserPassword(c *gin.Context) {
 	if config.DefaultPassword != "" {
 		password = config.DefaultPassword
 	}
+	log.Println("Default password:", password)
+
 	password, err = utils.HashPassword(password)
 	if err != nil {
 		respondWithError(c, http.StatusInternalServerError, "Failed to hash password")
@@ -111,7 +122,7 @@ func ResetUserPassword(c *gin.Context) {
 
 	userUpdate.Password = password
 	
-	if err := database.DB.Save(&user).Error; err != nil {
+	if err := database.DB.Save(&userUpdate).Error; err != nil {
 		respondWithError(c, http.StatusInternalServerError, "Failed to update profile")
 		return
 	}

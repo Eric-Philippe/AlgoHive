@@ -1,42 +1,30 @@
 import { useState, useRef } from "react";
-import { User } from "../models/User";
-import { Toast } from "primereact/toast";
 import { t } from "i18next";
 import { confirmDialog } from "primereact/confirmdialog";
-import { UserFormFields } from "../components/ui/UsersTable/shared/UserForm";
+import { Toast } from "primereact/toast";
+import { User } from "../models/User";
+import { resetPassword } from "../services/usersService";
 
 /**
- * Custom hook for managing user operations (create, update, delete, block/unblock)
+ * Custom hook for managing users in tables
  */
-export const useUserManagement = (refreshDataCallback: () => Promise<void>) => {
-  // Form state
+export const useUserManagement = (fetchData: () => Promise<void>) => {
+  // State
   const [userDialog, setUserDialog] = useState<boolean>(false);
   const [editMode, setEditMode] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [formFields, setFormFields] = useState<UserFormFields>({
+  const toast = useRef<Toast>(null);
+
+  // Form fields state
+  const [formFields, setFormFields] = useState({
     firstName: "",
     lastName: "",
     email: "",
-    selectedRoles: [],
-    selectedGroup: null,
+    selectedRoles: [] as string[],
+    selectedGroup: null as string | null,
   });
 
-  // Reference to toast component
-  const toast = useRef<Toast>(null);
-
-  /**
-   * Updates a single form field value
-   */
-  const updateFormField = (
-    field: string,
-    value: string | number | string[] | null
-  ) => {
-    setFormFields((prev) => ({ ...prev, [field]: value }));
-  };
-
-  /**
-   * Resets form to initial state
-   */
+  // Reset form to initial state
   const resetForm = () => {
     setFormFields({
       firstName: "",
@@ -46,74 +34,85 @@ export const useUserManagement = (refreshDataCallback: () => Promise<void>) => {
       selectedGroup: null,
     });
     setSelectedUser(null);
-    setEditMode(false);
   };
 
-  /**
-   * Opens dialog for creating a new user
-   */
+  // Update a form field
+  const updateFormField = (field: string, value: string | string[] | null) => {
+    setFormFields((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Open dialog for new user
   const openNewUserDialog = () => {
     resetForm();
+    setEditMode(false);
     setUserDialog(true);
   };
 
-  /**
-   * Opens dialog for editing an existing user
-   */
+  // Open dialog for editing a user
   const openEditUserDialog = (user: User) => {
     setSelectedUser(user);
     setFormFields({
-      firstName: user.firstname || "",
-      lastName: user.lastname || "",
+      firstName: user.firstname,
+      lastName: user.lastname,
       email: user.email,
       selectedRoles: user.roles?.map((role) => role.id) || [],
-      selectedGroup: user.groups?.[0]?.id || null,
+      selectedGroup: null,
     });
     setEditMode(true);
     setUserDialog(true);
   };
 
-  /**
-   * Validates form fields
-   */
-  const validateForm = (requireRole: boolean = false): boolean => {
-    const { firstName, lastName, email, selectedRoles } = formFields;
-
-    if (!firstName.trim()) {
+  // Validate form
+  const validateForm = (requireRoles: boolean = false) => {
+    if (!formFields.firstName.trim()) {
       toast.current?.show({
-        severity: "error",
+        severity: "warn",
         summary: t("common.states.validationError"),
-        detail: t("staffTabs.users.messages.firstNameRequired"),
+        detail: t("staffTabs.users.validation.firstNameRequired"),
         life: 3000,
       });
       return false;
     }
 
-    if (!lastName.trim()) {
+    if (!formFields.lastName.trim()) {
       toast.current?.show({
-        severity: "error",
+        severity: "warn",
         summary: t("common.states.validationError"),
-        detail: t("staffTabs.users.messages.lastNameRequired"),
+        detail: t("staffTabs.users.validation.lastNameRequired"),
         life: 3000,
       });
       return false;
     }
 
-    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
+    if (!formFields.email.trim()) {
       toast.current?.show({
-        severity: "error",
+        severity: "warn",
         summary: t("common.states.validationError"),
-        detail: t("staffTabs.users.messages.validEmailRequired"),
+        detail: t("staffTabs.users.validation.emailRequired"),
         life: 3000,
       });
       return false;
     }
 
-    if (requireRole && selectedRoles?.length === 0) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formFields.email)) {
       toast.current?.show({
-        severity: "error",
+        severity: "warn",
         summary: t("common.states.validationError"),
-        detail: t("staffTabs.users.asAdmin.messages.roleRequired"),
+        detail: t("staffTabs.users.validation.validEmail"),
+        life: 3000,
+      });
+      return false;
+    }
+
+    if (
+      requireRoles &&
+      (!formFields.selectedRoles || formFields.selectedRoles.length === 0)
+    ) {
+      toast.current?.show({
+        severity: "warn",
+        summary: t("common.states.validationError"),
+        detail: t("staffTabs.users.validation.roleRequired"),
         life: 3000,
       });
       return false;
@@ -122,23 +121,22 @@ export const useUserManagement = (refreshDataCallback: () => Promise<void>) => {
     return true;
   };
 
-  /**
-   * Confirms and handles user deletion
-   */
+  // Confirm user deletion
   const confirmDeleteUser = (
     user: User,
-    deleteUserFn: (id: string) => Promise<void>
+    deleteFunc: (userId: string) => Promise<void>
   ) => {
     confirmDialog({
-      message: t("staffTabs.users.messages.confirmDeleteUser"),
-      header: t("staffTabs.users.messages.confirmDeleteHeader"),
+      message: t("staffTabs.users.confirmations.deleteUser", {
+        user: `${user.firstname} ${user.lastname}`,
+      }),
+      header: t("common.confirmations.delete"),
       icon: "pi pi-exclamation-triangle",
       acceptClassName: "p-button-danger",
       accept: async () => {
         try {
-          await deleteUserFn(user.id);
-          await refreshDataCallback();
-
+          await deleteFunc(user.id);
+          await fetchData();
           toast.current?.show({
             severity: "success",
             summary: t("common.states.success"),
@@ -158,26 +156,18 @@ export const useUserManagement = (refreshDataCallback: () => Promise<void>) => {
     });
   };
 
-  /**
-   * Handles password reset confirmation
-   */
-  const confirmResetPassword = (
-    user: User,
-    resetPasswordFn?: (id: string) => Promise<void>
-  ) => {
+  // Confirm reset password
+  const confirmResetPassword = (user: User) => {
     confirmDialog({
-      message: t("staffTabs.users.messages.confirmResetPass"),
-      header: t("staffTabs.users.messages.confirmResetPassHeader"),
+      message: t("staffTabs.users.confirmations.resetPassword", {
+        user: `${user.firstname} ${user.lastname}`,
+      }),
+      header: t("common.confirmations.resetPassword"),
       icon: "pi pi-exclamation-triangle",
-      acceptClassName: "p-button-danger",
+      acceptClassName: "p-button-info",
       accept: async () => {
         try {
-          if (resetPasswordFn) {
-            await resetPasswordFn(user.id);
-          } else {
-            console.log("Mock reset password for:", user.email);
-          }
-
+          await resetPassword(user.id);
           toast.current?.show({
             severity: "success",
             summary: t("common.states.success"),
@@ -189,7 +179,7 @@ export const useUserManagement = (refreshDataCallback: () => Promise<void>) => {
           toast.current?.show({
             severity: "error",
             summary: t("common.states.error"),
-            detail: t("staffTabs.users.messages.errorResetting"),
+            detail: t("staffTabs.users.messages.errorResettingPassword"),
             life: 3000,
           });
         }

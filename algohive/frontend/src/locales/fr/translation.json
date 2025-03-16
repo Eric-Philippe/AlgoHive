@@ -115,6 +115,7 @@
         "new": "Nouvel utilisateur",
         "newUser": "Créer un nouvel utilisateur",
         "editUser": "Modifier l'utilisateur",
+        "noUsersInGroup": "Aucun utilisateur trouvé dans ce groupe",
         "messages": {
           "userCreated": "L'utilisateur a été créé avec succès.",
           "userUpdated": "L'utilisateur a été mis à jour avec succès.",

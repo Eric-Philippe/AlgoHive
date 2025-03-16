@@ -54,7 +54,7 @@ export default function AppDock({ setPage }: AppDockProps) {
 
   const dockItems = [
     {
-      label: t("staff.menu.terminal"),
+      label: t("navigation.staff.terminal"),
       icon: () => createIconContainer("pi pi-angle-right", "#262626"),
       command: () => {
         setDisplayTerminal(true);

@@ -171,3 +171,18 @@ export async function changePassword(oldPassword: string, newPassword: string) {
     throw error;
   }
 }
+
+export async function resetPassword(userId: string) {
+  try {
+    const response = await ApiClient.put(`/user/resetpass/${userId}`);
+
+    if (response.status !== 200) {
+      throw new Error(`Error: ${response.status}`);
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    throw error;
+  }
+}

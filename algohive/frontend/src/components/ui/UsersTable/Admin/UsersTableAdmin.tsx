@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
@@ -13,11 +13,13 @@ import {
   createStaffUser,
   deleteUser,
   fetchUsers,
+  resetPassword,
   toggleBlockUser,
   updateUserRoles,
 } from "../../../../services/usersService";
 import { fetchRoles } from "../../../../services/rolesService";
 import { isStaff, roleIsOwner } from "../../../../utils/permissions";
+import { useAuth } from "../../../../contexts/AuthContext";
 
 // Importation des composants partagés
 import UserForm from "../shared/UserForm";
@@ -39,6 +41,8 @@ export default function UsersTableAdmin() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { user: currentUser } = useAuth();
+  const toast = useRef<Toast>(null);
 
   // Fetch data function for refreshing users
   const fetchData = async () => {
@@ -68,14 +72,12 @@ export default function UsersTableAdmin() {
     editMode,
     selectedUser,
     formFields,
-    toast,
     updateFormField,
     resetForm,
     openNewUserDialog,
     openEditUserDialog,
     validateForm,
     confirmDeleteUser,
-    confirmResetPassword,
   } = useUserManagement(fetchData);
 
   // Load users and roles on component mount
@@ -144,6 +146,17 @@ export default function UsersTableAdmin() {
 
   // Handle block/unblock user
   const handleToggleBlockUser = async (user: User) => {
+    // Prevent owner from blocking themselves
+    if (roleIsOwner(user.roles?.find((role) => role))) {
+      toast.current?.show({
+        severity: "warn",
+        summary: t("common.states.warning"),
+        detail: t("staffTabs.users.messages.cannotBlockOwner"),
+        life: 3000,
+      });
+      return;
+    }
+
     try {
       await toggleBlockUser(user.id);
       await fetchData();
@@ -162,6 +175,60 @@ export default function UsersTableAdmin() {
         severity: "error",
         summary: t("common.states.error"),
         detail: t("staffTabs.users.messages.errorBlocking"),
+        life: 3000,
+      });
+    }
+  };
+
+  // Handle reset password for user
+  const handleResetPassword = async (user: User) => {
+    try {
+      await resetPassword(user.id);
+      toast.current?.show({
+        severity: "success",
+        summary: t("common.states.success"),
+        detail: t("staffTabs.users.messages.passwordReset"),
+        life: 3000,
+      });
+    } catch (err) {
+      console.error("Error resetting password:", err);
+      toast.current?.show({
+        severity: "error",
+        summary: t("common.states.error"),
+        detail: t("staffTabs.users.messages.errorResettingPassword"),
+        life: 3000,
+      });
+    }
+  };
+
+  // Custom delete handler to check for owner deletion
+  const handleDeleteUser = async (userId: string) => {
+    // Prevent owner from deleting their own account
+    if (currentUser && currentUser.id === userId) {
+      toast.current?.show({
+        severity: "warn",
+        summary: t("common.states.warning"),
+        detail: t("staffTabs.users.messages.cannotDeleteOwnAccount"),
+        life: 3000,
+      });
+      return;
+    }
+
+    try {
+      await deleteUser(userId);
+      await fetchData();
+      toast.current?.show({
+        severity: "success",
+        summary: t("common.states.success"),
+        detail: t("staffTabs.users.messages.userDeleted"),
+        life: 3000,
+      });
+    } catch (err) {
+      console.error("Error deleting user:", err);
+      toast.current?.show({
+        severity: "error",
+        summary: t("common.states.error"),
+        detail: t("staffTabs.users.messages.errorDeleting"),
         life: 3000,
       });
     }
@@ -261,10 +328,11 @@ export default function UsersTableAdmin() {
           body={(rowData) => (
             <UserActions
               user={rowData}
+              currentUser={currentUser}
               onEdit={openEditUserDialog}
               onToggleBlock={handleToggleBlockUser}
-              onResetPassword={(user) => confirmResetPassword(user)}
-              onDelete={(user) => confirmDeleteUser(user, deleteUser)}
+              onResetPassword={handleResetPassword}
+              onDelete={(user) => confirmDeleteUser(user, handleDeleteUser)}
             />
           )}
           header={t("common.fields.actions")}
