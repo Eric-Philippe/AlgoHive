@@ -19,6 +19,7 @@ func RegisterRoutes(r *gin.RouterGroup) {
         
         // User management routes
         user.GET("/", GetUsers)
+        user.PUT("/:id", UpdateTargetUserProfile)
         user.DELETE("/:id", DeleteUser)
         user.PUT("/block/:id", ToggleBlockUser)
         user.PUT("/resetpass/:id", ResetUserPassword)

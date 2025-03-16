@@ -2,6 +2,8 @@ basePath: /api/v1
 definitions:
   auth.AuthResponse:
     properties:
+      blocked:
+        type: boolean
       email:
         type: string
       firstname:
@@ -353,6 +355,17 @@ definitions:
         type: array
     required:
     - name
+    type: object
+  roles.UpdateRoleRequest:
+    properties:
+      name:
+        type: string
+      permission:
+        type: integer
+      scopes_ids:
+        items:
+          type: string
+        type: array
     type: object
   scopes.CreateScopeRequest:
     properties:
@@ -1626,12 +1639,12 @@ paths:
         name: role_id
         required: true
         type: string
-      - description: Role Profile
+      - description: Role Update Data
         in: body
         name: role
         required: true
         schema:
-          $ref: '#/definitions/models.Role'
+          $ref: '#/definitions/roles.UpdateRoleRequest'
       produces:
       - application/json
       responses:
@@ -2082,6 +2095,46 @@ paths:
       security:
       - Bearer: []
       summary: Delete User
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Update the profile information of the target user
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: User Profile
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Update Target User Profile
       tags:
       - Users
   /user/block/{id}:

@@ -128,7 +128,7 @@ func GetRoleByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param role_id path string true "Role ID"
-// @Param role body models.Role true "Role Profile"
+// @Param role body UpdateRoleRequest true "Role Update Data"
 // @Success 200 {object} models.Role
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -149,19 +149,57 @@ func UpdateRoleByID(c *gin.Context) {
 	roleID := c.Param("role_id")
 
 	var role models.Role
-	if err := database.DB.Where("id = ?", roleID).First(&role).Error; err != nil {
+	if err := database.DB.Where("id = ?", roleID).Preload("Scopes").First(&role).Error; err != nil {
 		respondWithError(c, http.StatusNotFound, ErrRoleNotFound)
 		return
 	}
 
-	// Update the role with new values
-	if err := c.ShouldBindJSON(&role); err != nil {
+	// Parse the update request
+	var updateRequest UpdateRoleRequest
+	if err := c.ShouldBindJSON(&updateRequest); err != nil {
 		respondWithError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
+	// Update basic fields
+	role.Name = updateRequest.Name
+	role.Permissions = updateRequest.Permission
+
+	// If scopes are specified, update the scopes relationship
+	if updateRequest.ScopesIds != nil {
+		// Clear existing associations
+		if err := database.DB.Model(&role).Association("Scopes").Clear(); err != nil {
+			respondWithError(c, http.StatusInternalServerError, "Failed to clear existing scope associations")
+			return
+		}
+
+		// Add new scope associations if any scope IDs are provided
+		if len(updateRequest.ScopesIds) > 0 {
+			var scopes []models.Scope
+			if err := database.DB.Where("id IN (?)", updateRequest.ScopesIds).Find(&scopes).Error; err != nil {
+				respondWithError(c, http.StatusBadRequest, "Invalid scope IDs")
+				return
+			}
+
+			var scopePointers []*models.Scope
+			for i := range scopes {
+				scopePointers = append(scopePointers, &scopes[i])
+			}
+
+			// Set the new scopes
+			role.Scopes = scopePointers
+		}
+	}
+
+	// Save the updated role with its scope relationships
 	if err := database.DB.Save(&role).Error; err != nil {
 		respondWithError(c, http.StatusInternalServerError, "Failed to update role")
+		return
+	}
+
+	// Fetch the updated role with all its associations for the response
+	if err := database.DB.Preload("Users").Preload("Scopes").Where("id = ?", roleID).First(&role).Error; err != nil {
+		respondWithError(c, http.StatusInternalServerError, "Failed to fetch updated role")
 		return
 	}
 

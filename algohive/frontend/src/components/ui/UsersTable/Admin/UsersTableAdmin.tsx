@@ -15,6 +15,7 @@ import {
   fetchUsers,
   resetPassword,
   toggleBlockUser,
+  updateTargetUserProfile,
   updateUserRoles,
 } from "../../../../services/usersService";
 import { fetchRoles } from "../../../../services/rolesService";
@@ -96,11 +97,12 @@ export default function UsersTableAdmin({ toast }: UsersTableAdminProps) {
     try {
       if (editMode && selectedUser) {
         // Update existing user logic would go here
-        // await updateUser(selectedUser.id, {
-        //   firstname: formFields.firstName,
-        //   lastname: formFields.lastName,
-        //   email: formFields.email,
-        // });
+        await updateTargetUserProfile(
+          selectedUser.id,
+          formFields.firstName,
+          formFields.lastName,
+          formFields.email
+        );
 
         // Update roles if changed
         await updateUserRoles(selectedUser.id, formFields.selectedRoles || []);

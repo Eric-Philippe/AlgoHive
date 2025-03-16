@@ -27,6 +27,13 @@ type CreateRoleRequest struct {
 	ScopesIds  []string `json:"scopes_ids"`
 }
 
+// UpdateRoleRequest defines the structure for updating a role
+type UpdateRoleRequest struct {
+	Name       string   `json:"name"`
+	Permission int      `json:"permission"`
+	ScopesIds  []string `json:"scopes_ids"`
+}
+
 // respondWithError envoie une réponse d'erreur standardisée
 func respondWithError(c *gin.Context, status int, message string) {
 	c.JSON(status, gin.H{"error": message})

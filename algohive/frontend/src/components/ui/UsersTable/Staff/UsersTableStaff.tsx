@@ -6,6 +6,7 @@ import {
   createUser,
   toggleBlockUser,
   resetPassword,
+  updateTargetUserProfile,
 } from "../../../../services/usersService";
 import { t } from "i18next";
 import { ProgressSpinner } from "primereact/progressspinner";
@@ -96,11 +97,12 @@ export default function UsersTableStaff({
     try {
       if (editMode && selectedUser) {
         // Update existing user logic
-        // await updateUser(selectedUser.id, {
-        //   firstname: formFields.firstName,
-        //   lastname: formFields.lastName,
-        //   email: formFields.email,
-        // });
+        await updateTargetUserProfile(
+          selectedUser.id,
+          formFields.firstName,
+          formFields.lastName,
+          formFields.email
+        );
 
         toast?.current?.show({
           severity: "success",

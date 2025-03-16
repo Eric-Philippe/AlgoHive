@@ -154,6 +154,30 @@ export async function updateUserProfile(
   }
 }
 
+export async function updateTargetUserProfile(
+  userId: string,
+  firstname: string,
+  lastname: string,
+  email: string
+) {
+  try {
+    const response = await ApiClient.put(`/user/${userId}`, {
+      firstname,
+      lastname,
+      email,
+    });
+
+    if (response.status !== 200) {
+      throw new Error(`Error: ${response.status}`);
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating target user profile:", error);
+    throw error;
+  }
+}
+
 export async function changePassword(oldPassword: string, newPassword: string) {
   try {
     const response = await ApiClient.put("/user/profile/password", {

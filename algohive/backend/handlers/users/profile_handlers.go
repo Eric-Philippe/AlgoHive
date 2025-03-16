@@ -70,6 +70,60 @@ func UpdateUserProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// UpdateTargetUserProfile updates the target user's profile
+// @Summary Update Target User Profile
+// @Description Update the profile information of the target user
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param userId path string true "User ID"
+// @Param user body models.User true "User Profile"
+// @Success 200 {object} models.User
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /user/{id} [put]
+// @Security Bearer
+func UpdateTargetUserProfile(c *gin.Context) {
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
+	
+	// Get the target user ID from the URL parameter
+	userId := c.Param("id")
+	if userId == "" {
+		respondWithError(c, http.StatusBadRequest, "User ID is required")
+		return
+	}
+	
+	// Find the target user by ID
+	var userUpdate models.User
+	if err := database.DB.Where("id = ?", userId).First(&userUpdate).Error; err != nil {
+		respondWithError(c, http.StatusNotFound, "User not found")
+		return
+	}
+
+	// Check if the authenticated user has permission to update the target user's profile
+	if !HasPermissionForUser(user, userUpdate.ID, permissions.GROUPS) && !HasPermissionForUser(user, userUpdate.ID, permissions.OWNER) {
+		respondWithError(c, http.StatusForbidden, "You do not have permission to update this user's profile")
+		return
+	}
+	
+	if err := c.ShouldBindJSON(&userUpdate); err != nil {
+		respondWithError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	
+	userUpdate.ID = userId
+	
+	if err := database.DB.Save(&userUpdate).Error; err != nil {
+		respondWithError(c, http.StatusInternalServerError, "Failed to update profile")
+		return
+	}
+	
+	c.JSON(http.StatusOK, userUpdate)
+}
+
 // ResetUserPassword resets the target user's password
 // @Summary Reset Target User Password
 // @Description Reset the password of the target user

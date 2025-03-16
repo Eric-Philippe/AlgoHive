@@ -1967,12 +1967,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Role Profile",
+                        "description": "Role Update Data",
                         "name": "role",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Role"
+                            "$ref": "#/definitions/roles.UpdateRoleRequest"
                         }
                     }
                 ],
@@ -3054,6 +3054,68 @@ const docTemplate = `{
             }
         },
         "/user/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update the profile information of the target user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update Target User Profile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User Profile",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -3104,6 +3166,9 @@ const docTemplate = `{
         "auth.AuthResponse": {
             "type": "object",
             "properties": {
+                "blocked": {
+                    "type": "boolean"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -3620,6 +3685,23 @@ const docTemplate = `{
             "required": [
                 "name"
             ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "permission": {
+                    "type": "integer"
+                },
+                "scopes_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "roles.UpdateRoleRequest": {
+            "type": "object",
             "properties": {
                 "name": {
                     "type": "string"

@@ -13,7 +13,7 @@
 ### Scopes
 
 - [x] Preload the Groups in order to display them correctly in the ScopesDetails
-- [ ] Plug the catalogs update on Scope update
+- [x] Plug the catalogs update on Scope update
 - [x] Block user from deleting scope if groups are under
 
 ### Groups
@@ -32,12 +32,12 @@
 - [x] AutoSelect when there are only one choice per select
 - [x] Do not display the ID on view details roles (Owner)
 - [x] staffTabs.users.confirmations.deleteUser edit traduction
-- [ ] Plug the edit user (students)
+- [x] Plug the edit user (students)
 
 ### Roles
 
 - [x] Display the scopes and users having the role (probably preload them)
-- [ ] Plug the scopes update on roles update
+- [x] Plug the scopes update on roles update
 
 ### Competitions
 
