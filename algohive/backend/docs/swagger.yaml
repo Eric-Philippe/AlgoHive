@@ -368,6 +368,13 @@ definitions:
     - catalogs_ids
     - name
     type: object
+  users.PasswordUpdate:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
+    type: object
   users.UserIdWithRoles:
     properties:
       roles:
@@ -2132,6 +2139,78 @@ paths:
       security:
       - Bearer: []
       summary: Update User Profile
+      tags:
+      - Users
+  /user/profile/password:
+    put:
+      consumes:
+      - application/json
+      description: Update the password of the current user
+      parameters:
+      - description: Password Update
+        in: body
+        name: passwords
+        required: true
+        schema:
+          $ref: '#/definitions/users.PasswordUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Update User Password
+      tags:
+      - Users
+  /user/resetpass:
+    put:
+      consumes:
+      - application/json
+      description: Reset the password of the target user
+      parameters:
+      - description: User Profile
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Reset Target User Password
       tags:
       - Users
   /user/roles:

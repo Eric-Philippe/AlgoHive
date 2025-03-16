@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Constantes pour les messages d'erreur
+// Error message constants
 const (
 	ErrCatalogNotFound    = "API not found"
 	ErrAPIReachFailed     = "Error while reaching the API"
@@ -12,7 +12,7 @@ const (
 	ErrNoPermissionView   = "User does not have permission to view Catalogs"
 )
 
-// PuzzleResponse représente la réponse d'un puzzle de l'API
+// PuzzleResponse represents the API puzzle response
 type PuzzleResponse struct {
 	Author          string `json:"author"`
 	Cipher          string `json:"cipher"`
@@ -27,7 +27,7 @@ type PuzzleResponse struct {
 	UpdatedAt       string `json:"updatedAt"`
 }
 
-// ThemeResponse représente la réponse d'un thème de l'API
+// ThemeResponse represents the API theme response
 type ThemeResponse struct {
 	EnigmesCount int             `json:"enigmes_count"`
 	Name         string          `json:"name"`
@@ -35,7 +35,7 @@ type ThemeResponse struct {
 	Size         int             `json:"size"`
 }
 
-// respondWithError envoie une réponse d'erreur standardisée
+// respondWithError sends a standardized error response
 func respondWithError(c *gin.Context, status int, message string) {
 	c.JSON(status, gin.H{"error": message})
 }

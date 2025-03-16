@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CreateRole crée un nouveau rôle
+// CreateRole creates a new role
 // @Summary Create a new Role
 // @Description Create a new Role
 // @Tags Roles
@@ -28,7 +28,7 @@ func CreateRole(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les permissions
+	// Check permissions
 	if !permissions.RolesHavePermission(user.Roles, permissions.ROLES) {
 		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionCreate)
 		return
@@ -40,7 +40,7 @@ func CreateRole(c *gin.Context) {
 		return
 	}
 
-	// Si des scopes sont spécifiés, les récupérer
+	// If scopes are specified, retrieve them
 	var scopePointers []*models.Scope
 	if len(createRoleRequest.ScopesIds) > 0 {
 		var scopes []models.Scope
@@ -55,7 +55,7 @@ func CreateRole(c *gin.Context) {
 		}
 	}
 
-	// Créer le rôle
+	// Create the role
 	role := models.Role{
 		Name:        createRoleRequest.Name,
 		Permissions: createRoleRequest.Permission,
@@ -71,7 +71,7 @@ func CreateRole(c *gin.Context) {
 	c.JSON(http.StatusCreated, role)
 }
 
-// GetAllRoles récupère tous les rôles
+// GetAllRoles retrieves all roles
 // @Summary Get all Roles
 // @Description Get all Roles
 // @Tags Roles
@@ -86,7 +86,7 @@ func GetAllRoles(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les permissions
+	// Check permissions
 	if !permissions.RolesHavePermission(user.Roles, permissions.ROLES) {
 		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionView)
 		return
@@ -102,7 +102,7 @@ func GetAllRoles(c *gin.Context) {
 	c.JSON(http.StatusOK, roles)
 }
 
-// GetRoleByID récupère un rôle par son ID
+// GetRoleByID retrieves a role by its ID
 // @Summary Get a Role by ID
 // @Description Get a Role by ID
 // @Tags Roles
@@ -125,7 +125,7 @@ func GetRoleByID(c *gin.Context) {
 	c.JSON(http.StatusOK, role)
 }
 
-// UpdateRoleByID met à jour un rôle par son ID
+// UpdateRoleByID updates a role by its ID
 // @Summary Update a Role by ID
 // @Description Update a Role by ID
 // @Tags Roles
@@ -144,7 +144,7 @@ func UpdateRoleByID(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les permissions
+	// Check permissions
 	if !permissions.RolesHavePermission(user.Roles, permissions.ROLES) {
 		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionUpdate)
 		return
@@ -158,7 +158,7 @@ func UpdateRoleByID(c *gin.Context) {
 		return
 	}
 
-	// Mettre à jour le rôle avec les nouvelles valeurs
+	// Update the role with new values
 	if err := c.ShouldBindJSON(&role); err != nil {
 		respondWithError(c, http.StatusBadRequest, err.Error())
 		return
@@ -173,7 +173,7 @@ func UpdateRoleByID(c *gin.Context) {
 	c.JSON(http.StatusOK, role)
 }
 
-// DeleteRole supprime un rôle et ses associations
+// DeleteRole deletes a role and its associations
 // @Summary delete a role
 // @Description delete a role and cascade first to roles_scopes and user_roles
 // @Tags Roles
@@ -190,7 +190,7 @@ func DeleteRole(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les permissions
+	// Check permissions
     if !permissions.RolesHavePermission(user.Roles, permissions.ROLES) {
         respondWithError(c, http.StatusUnauthorized, ErrNoPermissionDelete)
         return
@@ -204,10 +204,10 @@ func DeleteRole(c *gin.Context) {
         return
     }
 
-    // Commencer une transaction pour assurer l'atomicité des opérations
+    // Start a transaction to ensure atomicity of operations
     tx := database.DB.Begin()
 
-    // Supprimer le rôle de tous les utilisateurs qui l'ont (user_roles)
+    // Remove the role from all users who have it (user_roles)
     if err := tx.Exec("DELETE FROM user_roles WHERE role_id = ?", roleID).Error; err != nil {
         tx.Rollback()
         log.Printf("Error removing role from users: %v", err)
@@ -215,7 +215,7 @@ func DeleteRole(c *gin.Context) {
         return
     }
 
-    // Supprimer toutes les associations avec les scopes (role_scopes)
+    // Remove all associations with scopes (role_scopes)
     if err := tx.Exec("DELETE FROM role_scopes WHERE role_id = ?", roleID).Error; err != nil {
         tx.Rollback()
         log.Printf("Error removing role from scopes: %v", err)
@@ -223,7 +223,7 @@ func DeleteRole(c *gin.Context) {
         return
     }
 
-    // Enfin, supprimer le rôle lui-même
+    // Finally, delete the role itself
     if err := tx.Delete(&role).Error; err != nil {
         tx.Rollback()
         log.Printf("Error deleting role: %v", err)
@@ -231,7 +231,7 @@ func DeleteRole(c *gin.Context) {
         return
     }
 
-    // Valider la transaction
+    // Commit the transaction
     if err := tx.Commit().Error; err != nil {
         log.Printf("Error committing transaction: %v", err)
         respondWithError(c, http.StatusInternalServerError, ErrFailedTxCommit)

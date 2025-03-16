@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// AttachRoleToUser attache un rôle à un utilisateur
+// AttachRoleToUser attaches a role to a user
 // @Summary Attach a Role to a User
 // @Description Attach a Role to a User
 // @Tags Roles
@@ -29,13 +29,13 @@ func AttachRoleToUser(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les permissions
+	// Check permissions
     if !permissions.RolesHavePermission(user.Roles, permissions.ROLES) {
         respondWithError(c, http.StatusUnauthorized, ErrNoPermissionAttach)
         return
     }
 
-	// Récupérer l'utilisateur cible
+	// Get target user
 	targetUserId := c.Param("user_id")
 	var targetUser models.User
 	
@@ -44,7 +44,7 @@ func AttachRoleToUser(c *gin.Context) {
 		return
 	}
 
-	// Récupérer le rôle à attacher
+	// Get role to attach
 	roleID := c.Param("role_id")
 	
 	var role models.Role
@@ -53,7 +53,7 @@ func AttachRoleToUser(c *gin.Context) {
 		return
 	}
 	
-	// Attacher le rôle à l'utilisateur
+	// Attach role to user
 	targetUser.Roles = append(targetUser.Roles, &role)
 	if err := database.DB.Save(&targetUser).Error; err != nil {
 		log.Printf("Error attaching role to user: %v", err)
@@ -64,7 +64,7 @@ func AttachRoleToUser(c *gin.Context) {
 	c.JSON(http.StatusOK, targetUser)
 }
 
-// DetachRoleFromUser détache un rôle d'un utilisateur
+// DetachRoleFromUser detaches a role from a user
 // @Summary Detach a Role from a User
 // @Description Detach a Role from a User
 // @Tags Roles
@@ -82,13 +82,13 @@ func DetachRoleFromUser(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les permissions
+	// Check permissions
 	if !permissions.RolesHavePermission(user.Roles, permissions.ROLES) {
 		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionDetach)
 		return
 	}
 
-	// Récupérer l'utilisateur cible
+	// Get target user
 	targetUserId := c.Param("user_id")
 	var targetUser models.User
 	
@@ -97,7 +97,7 @@ func DetachRoleFromUser(c *gin.Context) {
 		return
 	}
 	
-	// Récupérer le rôle à détacher
+	// Get role to detach
 	roleID := c.Param("role_id")
 
 	var role models.Role
@@ -106,7 +106,7 @@ func DetachRoleFromUser(c *gin.Context) {
 		return
 	}
 	
-	// Rechercher et retirer le rôle de l'utilisateur
+	// Find and remove role from user
 	for i, r := range targetUser.Roles {
 		if r.ID == role.ID {
 			targetUser.Roles = append(targetUser.Roles[:i], targetUser.Roles[i+1:]...)

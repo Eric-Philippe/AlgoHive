@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Constantes pour les messages d'erreur
+// Constants for error messages
 const (
 	ErrInvalidCredentials  = "Invalid credentials"
 	ErrAccountBlocked      = "Your account has been blocked"
@@ -24,13 +24,13 @@ const (
 	ErrLogoutSuccess       = "Successfully logged out"
 )
 
-// LoginRequest modèle pour les endpoints de login
+// LoginRequest model for login endpoints
 type LoginRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
 }
 
-// RegisterRequest modèle pour l'inscription
+// RegisterRequest model for registration
 type RegisterRequest struct {
 	Email     string `json:"email" binding:"required,email"`
 	Password  string `json:"password" binding:"required,min=8"`
@@ -38,7 +38,7 @@ type RegisterRequest struct {
 	Lastname  string `json:"lastname" binding:"required"`
 }
 
-// AuthResponse modèle pour les réponses d'authentification
+// AuthResponse model for authentication responses
 type AuthResponse struct {
 	Token         string        `json:"token"`
 	UserID        string        `json:"user_id"`
@@ -51,24 +51,24 @@ type AuthResponse struct {
 	Groups        []models.Group `json:"groups"`
 }
 
-// respondWithError envoie une réponse d'erreur standardisée
+// respondWithError sends a standardized error response
 func respondWithError(c *gin.Context, status int, message string) {
 	c.JSON(status, gin.H{"error": message})
 }
 
-// setCookieToken définit le token d'authentification comme un cookie HTTP-only sécurisé
+// setCookieToken sets the authentication token as a secure HTTP-only cookie
 func setCookieToken(c *gin.Context, token string) {
-	// Définit le temps d'expiration pour correspondre à la validité du JWT (généralement 24 heures)
-	cookieMaxAge := 24 * 3600 // 24 heures en secondes
-	
+	// Set the expiration time to match the JWT validity (usually 24 hours)
+	cookieMaxAge := 24 * 3600 // 24 hours in seconds
+
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(
-		"auth_token",   // nom
-		token,          // valeur
-		cookieMaxAge,   // âge max
-		"/",            // chemin
-		"",             // domaine
-		true,           // secure (HTTPS seulement)
-		true,           // httpOnly (non accessible via JavaScript)
+		"auth_token",   // name
+		token,          // value
+		cookieMaxAge,   // max age
+		"/",            // path
+		"",             // domain
+		true,           // secure (HTTPS only)
+		true,           // httpOnly (not accessible via JavaScript)
 	)
 }

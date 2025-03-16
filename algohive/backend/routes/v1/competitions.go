@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterCompetitionsRoutes enregistre les routes pour l'API v1 des compétitions
-// Cette fonction sert de proxy vers le package de handlers dédié
+// RegisterCompetitionsRoutes registers routes for the competitions v1 API
+// This function serves as a proxy to the dedicated handlers package
 func RegisterCompetitionsRoutes(r *gin.RouterGroup) {
 	competitions.RegisterRoutes(r)
 }

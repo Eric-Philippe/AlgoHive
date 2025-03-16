@@ -11,12 +11,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// hasCompetitionPermission vérifie si l'utilisateur a une permission spécifique
+// hasCompetitionPermission checks if the user has a specific permission
 func hasCompetitionPermission(user models.User, permission int) bool {
 	return permissions.IsStaff(user) || permissions.RolesHavePermission(user.Roles, permission)
 }
 
-// GetAllCompetitions récupère toutes les compétitions
+// GetAllCompetitions retrieves all competitions
 // @Summary Get all competitions
 // @Description Get all competitions, only accessible to users with the COMPETITIONS permission
 // @Tags Competitions
@@ -47,7 +47,7 @@ func GetAllCompetitions(c *gin.Context) {
 	c.JSON(http.StatusOK, competitions)
 }
 
-// GetUserCompetitions récupère toutes les compétitions accessibles à l'utilisateur
+// GetUserCompetitions retrieves competitions accessible to the current user
 // @Summary Get user accessible competitions
 // @Description Get all competitions accessible to the current user through their groups
 // @Tags Competitions
@@ -63,14 +63,14 @@ func GetUserCompetitions(c *gin.Context) {
 		return
 	}
 
-	// Si l'utilisateur a la permission COMPETITIONS ou est OWNER, il voit toutes les compétitions
+	// If the user has the COMPETITIONS permission or is OWNER, then show all competitions
 	if hasCompetitionPermission(user, permissions.COMPETITIONS) || permissions.IsOwner(user) {
 		GetAllCompetitions(c)
 		return
 	}
 
 	var competitions []models.Competition
-	// Récupérer les compétitions accessibles via les groupes de l'utilisateur
+	// Retrieve competitions accessible through the user's groups
 	if err := database.DB.Raw(`
 		SELECT DISTINCT c.*
 		FROM competitions c
@@ -83,7 +83,7 @@ func GetUserCompetitions(c *gin.Context) {
 		return
 	}
 
-	// Charger les associations
+	// Preload associations
 	for i := range competitions {
 		database.DB.Preload("ApiEnvironment").Preload("Groups").First(&competitions[i], competitions[i].ID)
 	}
@@ -91,7 +91,7 @@ func GetUserCompetitions(c *gin.Context) {
 	c.JSON(http.StatusOK, competitions)
 }
 
-// GetCompetition récupère une compétition par ID
+// GetCompetition retrieves a competition by ID
 // @Summary Get a competition by ID
 // @Description Get a competition by ID
 // @Tags Competitions
@@ -116,7 +116,7 @@ func GetCompetition(c *gin.Context) {
 		return
 	}
 
-	// Vérifier si l'utilisateur a accès à cette compétition
+	// Check if the user has access to this competition
 	hasAccess := hasCompetitionPermission(user, permissions.COMPETITIONS) || 
 				permissions.IsOwner(user) ||
 				userHasAccessToCompetition(user.ID, competitionID)
@@ -129,7 +129,7 @@ func GetCompetition(c *gin.Context) {
 	c.JSON(http.StatusOK, competition)
 }
 
-// CreateCompetition crée une nouvelle compétition
+// CreateCompetition creates a new competition
 // @Summary Create a competition
 // @Description Create a new competition
 // @Tags Competitions
@@ -158,14 +158,14 @@ func CreateCompetition(c *gin.Context) {
 		return
 	}
 
-	// Vérifier que l'environnement API existe
+	// Check that the API environment exists
 	var apiEnv models.Catalog
 	if err := database.DB.First(&apiEnv, "id = ?", req.ApiEnvironmentID).Error; err != nil {
 		respondWithError(c, http.StatusBadRequest, ErrCatalogNotFound)
 		return
 	}
 
-	// Créer la compétition
+	// Create the competition
 	competition := models.Competition{
 		Title:           req.Title,
 		Description:     req.Description,
@@ -175,7 +175,7 @@ func CreateCompetition(c *gin.Context) {
 		Show:            req.Show,
 	}
 
-	// Transaction pour assurer l'atomicité des opérations
+	// Transaction to ensure atomic operations
 	tx := database.DB.Begin()
 
 	if err := tx.Create(&competition).Error; err != nil {
@@ -185,7 +185,7 @@ func CreateCompetition(c *gin.Context) {
 		return
 	}
 
-	// Ajouter les groupes si spécifiés
+	// Append groups if specified
 	if len(req.GroupIds) > 0 {
 		var groups []models.Group
 		if err := database.DB.Where("id IN ?", req.GroupIds).Find(&groups).Error; err != nil {
@@ -204,13 +204,13 @@ func CreateCompetition(c *gin.Context) {
 
 	tx.Commit()
 
-	// Recharger la compétition avec ses associations
+	// Reload the competition with associations
 	database.DB.Preload("ApiEnvironment").Preload("Groups").First(&competition, competition.ID)
 
 	c.JSON(http.StatusCreated, competition)
 }
 
-// UpdateCompetition met à jour une compétition existante
+// UpdateCompetition updates an existing competition
 // @Summary Update a competition
 // @Description Update an existing competition
 // @Tags Competitions
@@ -248,7 +248,7 @@ func UpdateCompetition(c *gin.Context) {
 		return
 	}
 
-	// Mettre à jour les champs fournis
+	// Update provided fields
 	updateData := make(map[string]interface{})
 	
 	if req.Title != "" {
@@ -261,7 +261,7 @@ func UpdateCompetition(c *gin.Context) {
 		updateData["api_theme"] = req.ApiTheme
 	}
 	if req.ApiEnvironmentID != "" {
-		// Vérifier que l'environnement API existe
+		// Check that the API environment exists
 		var apiEnv models.Catalog
 		if err := database.DB.First(&apiEnv, "id = ?", req.ApiEnvironmentID).Error; err != nil {
 			respondWithError(c, http.StatusBadRequest, ErrCatalogNotFound)
@@ -282,13 +282,13 @@ func UpdateCompetition(c *gin.Context) {
 		return
 	}
 
-	// Recharger la compétition avec ses associations
+	// Reload the competition with associations
 	database.DB.Preload("ApiEnvironment").Preload("Groups").First(&competition, competition.ID)
 
 	c.JSON(http.StatusOK, competition)
 }
 
-// DeleteCompetition supprime une compétition
+// DeleteCompetition deletes a competition and all related data
 // @Summary Delete a competition
 // @Description Delete a competition and all related data
 // @Tags Competitions
@@ -318,10 +318,10 @@ func DeleteCompetition(c *gin.Context) {
 		return
 	}
 
-	// Transaction pour assurer l'atomicité des opérations
+	// Transaction to ensure atomic operations
 	tx := database.DB.Begin()
 
-	// Supprimer d'abord les essais liés à cette compétition
+	// First, delete tries related to this competition
 	if err := tx.Where("competition_id = ?", competitionID).Delete(&models.Try{}).Error; err != nil {
 		tx.Rollback()
 		log.Printf("Error deleting tries for competition: %v", err)
@@ -329,7 +329,7 @@ func DeleteCompetition(c *gin.Context) {
 		return
 	}
 
-	// Supprimer les associations avec les groupes
+	// Remove associations with groups
 	if err := tx.Exec("DELETE FROM competition_accessible_to WHERE competition_id = ?", competitionID).Error; err != nil {
 		tx.Rollback()
 		log.Printf("Error removing group associations for competition: %v", err)
@@ -337,7 +337,7 @@ func DeleteCompetition(c *gin.Context) {
 		return
 	}
 
-	// Supprimer la compétition
+	// Delete the competition
 	if err := tx.Delete(&competition).Error; err != nil {
 		tx.Rollback()
 		log.Printf("Error deleting competition: %v", err)
@@ -350,7 +350,7 @@ func DeleteCompetition(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-// userHasAccessToCompetition vérifie si un utilisateur a accès à une compétition via ses groupes
+// userHasAccessToCompetition checks if a user has access to a competition through their groups
 func userHasAccessToCompetition(userID string, competitionID string) bool {
 	var count int64
 	err := database.DB.Raw(`

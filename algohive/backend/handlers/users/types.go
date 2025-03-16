@@ -46,6 +46,13 @@ type UserIdWithRoles struct {
 	Roles  []string `json:"roles"`
 }
 
+
+// PasswordUpdate represents a password update request
+type PasswordUpdate struct {
+	OldPassword string `json:"old_password"`
+	NewPassword string `json:"new_password"`
+}
+
 // respondWithError sends a JSON response with an error message
 func respondWithError(c *gin.Context, status int, message string) {
     c.JSON(status, gin.H{"error": message})

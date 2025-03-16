@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Login gère l'authentification d'un utilisateur et retourne un token JWT
+// Login handles user authentication and returns a JWT token
 // @Summary User Login
 // @Description Authenticate a user and return a JWT token
 // @Tags Auth
@@ -38,21 +38,21 @@ func Login(c *gin.Context) {
 		return
 	}
 	
-	// Vérifier si l'utilisateur est bloqué
+	// Check if the user is blocked
 	if user.Blocked {
 		log.Printf("Login attempt for blocked account: %s", loginReq.Email)
 		respondWithError(c, http.StatusUnauthorized, ErrAccountBlocked)
 		return
 	}
 	
-	// Vérifier le mot de passe
+	// Verify the password
 	if !utils.CheckPasswordHash(loginReq.Password, user.Password) {
 		log.Printf("Login failed for %s: invalid password", loginReq.Email)
 		respondWithError(c, http.StatusUnauthorized, ErrInvalidCredentials)
 		return
 	}
 	
-	// Générer un token JWT
+	// Generate a JWT token
 	token, err := utils.GenerateJWT(user.ID, user.Email)
 	if err != nil {
 		log.Printf("Failed to generate token for user %s: %v", user.ID, err)
@@ -60,10 +60,10 @@ func Login(c *gin.Context) {
 		return
 	}
 	
-	// Définir le token comme un cookie HTTP-only
+	// Set the token as an HTTP-only cookie
 	setCookieToken(c, token)
 	
-	// Mettre à jour le temps de dernière connexion
+	// Update the last connection time
 	now := time.Now()
 	user.LastConnected = &now
 	if err := database.DB.Save(&user).Error; err != nil {

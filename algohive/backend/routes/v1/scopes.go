@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterScopesRoutes enregistre les routes pour l'API v1 des scopes
-// Cette fonction sert maintenant de simple proxy vers le package de handlers dédié
+// RegisterScopesRoutes registers the routes for API v1 scopes
+// This function now acts as a simple proxy to the dedicated handlers package
 func RegisterScopesRoutes(r *gin.RouterGroup) {
 	scopes.RegisterRoutes(r)
 }

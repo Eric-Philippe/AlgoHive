@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CreateUserAndAttachGroup crée un utilisateur et lui attache des groupes
+// CreateUserAndAttachGroup creates a user and attaches groups to it
 // @Summary Create a user and attach one or more groups
 // @Description Create a new user and attach one or more roles to it
 // @Tags Users
@@ -29,7 +29,7 @@ func CreateUserAndAttachGroup(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les permissions
+	// Check permissions
 	if !permissions.IsStaff(user) && !permissions.RolesHavePermission(user.Roles, permissions.OWNER) {
 		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionGroups)
 		return
@@ -41,7 +41,7 @@ func CreateUserAndAttachGroup(c *gin.Context) {
 		return
 	}
 
-	// Vérifier que les groupes existent
+	// Check that groups exist
 	var groups []models.Group
 	if err := database.DB.Where("id IN (?)", userWithGroups.Group).Find(&groups).Error; err != nil {
 		log.Printf("Error finding groups: %v", err)
@@ -54,7 +54,7 @@ func CreateUserAndAttachGroup(c *gin.Context) {
 		return
 	}
 
-	// Créer l'utilisateur
+	// Create the user
 	targetUser, err := createUser(userWithGroups.FirstName, userWithGroups.LastName, userWithGroups.Email)
 	if err != nil {
 		log.Printf("Error creating user: %v", err)
@@ -62,7 +62,7 @@ func CreateUserAndAttachGroup(c *gin.Context) {
 		return
 	}
 
-	// Associer les groupes à l'utilisateur
+	// Associate groups to the user
 	for i := range groups {
 		if err := database.DB.Model(targetUser).Association("Groups").Append(&groups[i]); err != nil {
 			log.Printf("Error attaching group to user: %v", err)
@@ -74,7 +74,7 @@ func CreateUserAndAttachGroup(c *gin.Context) {
 	c.JSON(http.StatusCreated, targetUser)
 }
 
-// CreateBulkUsersAndAttachGroup crée plusieurs utilisateurs et leur attache un groupe
+// CreateBulkUsersAndAttachGroup creates multiple users and attaches a group to them
 // @Summary Create Bulk Users and attach a Group
 // @Description Create multiple new users and attach a group to them
 // @Tags Users
@@ -94,27 +94,27 @@ func CreateBulkUsersAndAttachGroup(c *gin.Context) {
 
 	groupID := c.Param("group_id")
 
-	// Vérifier les permissions
+	// Check permissions
 	if !UserOwnsTargetGroups(user.ID, groupID) {
 		respondWithError(c, http.StatusUnauthorized, "User does not have permission to create users")
 		return
 	}
 	
-	// Vérifier que le groupe existe
+	// Check that the group exists
 	var group models.Group
 	if err := database.DB.Where("id = ?", groupID).First(&group).Error; err != nil {
 		respondWithError(c, http.StatusNotFound, ErrGroupNotFound)
 		return
 	}
 	
-	// Récupérer les utilisateurs à créer
+	// Retrieve users to be created
 	var users []models.User
 	if err := c.ShouldBindJSON(&users); err != nil {
 		respondWithError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	
-	// Créer les utilisateurs et leur associer le groupe
+	// Create the users and associate the group
 	for i := range users {
 		users[i].Groups = append(users[i].Groups, &group)
 		hashedPassword, err := utils.HashPassword(users[i].Password)

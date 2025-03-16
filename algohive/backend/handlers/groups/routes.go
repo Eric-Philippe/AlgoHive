@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterRoutes enregistre toutes les routes liées à la gestion des groupes
-// r: le RouterGroup auquel ajouter les routes
+// RegisterRoutes registers all routes related to group management
+// r: the RouterGroup to which the routes are added
 func RegisterRoutes(r *gin.RouterGroup) {
 	groups := r.Group("/groups")
 	groups.Use(middleware.AuthMiddleware())

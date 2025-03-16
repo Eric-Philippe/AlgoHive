@@ -12,23 +12,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// createUser crée un nouvel utilisateur avec les informations de base
-// firstName, lastName, email: informations de base de l'utilisateur
-// retourne: l'utilisateur créé et une erreur éventuelle
+// createUser creates a new user with basic information
+// firstName, lastName, email: basic user information
+// returns: the created user and any error
 func createUser(firstName, lastName, email string) (*models.User, error) {
 	var user models.User
 	user.Firstname = firstName
 	user.Lastname = lastName
 	user.Email = email
 	
-	// Générer un mot de passe par défaut
+	// Generate a default password
 	hashedPassword, err := utils.CreateDefaultPassword()
 	if err != nil {
 		return nil, err
 	}
 	user.Password = hashedPassword
 	
-	// Créer l'utilisateur
+	// Create the user
 	if err := database.DB.Create(&user).Error; err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func createUser(firstName, lastName, email string) (*models.User, error) {
 	return &user, nil
 }
 
-// GetUsers récupère tous les utilisateurs accessibles à l'utilisateur authentifié
+// GetUsers retrieves all users accessible to the authenticated user
 // @Summary Get All users that the curren user has access to 
 // @Description Get all users that the current user has access to from his roles -> scopes -> groups
 // @Tags Users
@@ -51,7 +51,7 @@ func GetUsers(c *gin.Context) {
 
 	var users []models.User
 	
-	// Les propriétaires peuvent voir tous les utilisateurs
+	// Owners can see all users
 	if permissions.RolesHavePermission(user.Roles, permissions.OWNER) {
 		if err := database.DB.Preload("Roles").Preload("Groups").Find(&users).Error; err != nil {
 			log.Printf("Error getting all users: %v", err)
@@ -59,7 +59,7 @@ func GetUsers(c *gin.Context) {
 			return
 		}
 	} else {
-		// Pour les utilisateurs sans rôles, uniquement ceux dans les mêmes groupes
+			// For users without roles, only those in the same groups
 		if len(user.Roles) == 0 {
 			if err := getUsersInSameGroups(user.ID, &users); err != nil {
 				log.Printf("Error getting users in same groups: %v", err)
@@ -67,7 +67,7 @@ func GetUsers(c *gin.Context) {
 				return
 			}
 		} else {
-			// Pour les utilisateurs avec des rôles, utiliser la hiérarchie role->scope->group
+				// For users with roles, use the role->scope->group hierarchy
 			if err := getUsersFromRoleScopes(user.ID, &users); err != nil {
 				log.Printf("Error getting users from role scopes: %v", err)
 				respondWithError(c, http.StatusInternalServerError, ErrFailedToGetUsers)
@@ -79,10 +79,10 @@ func GetUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
-// getUsersInSameGroups récupère tous les utilisateurs qui sont dans les mêmes groupes que l'utilisateur
-// userID: ID de l'utilisateur
-// users: pointeur vers la slice d'utilisateurs à remplir
-// retourne: une erreur éventuelle
+// getUsersInSameGroups retrieves all users who are in the same groups as the user
+// userID: ID of the user
+// users: pointer to the slice of users to fill
+// returns: any error
 func getUsersInSameGroups(userID string, users *[]models.User) error {
 	return database.DB.Raw(`
 		SELECT DISTINCT u.*
@@ -95,10 +95,10 @@ func getUsersInSameGroups(userID string, users *[]models.User) error {
 	`, userID).Scan(users).Error
 }
 
-// getUsersFromRoleScopes récupère tous les utilisateurs accessibles via les rôles->scopes->groupes
-// userID: ID de l'utilisateur
-// users: pointeur vers la slice d'utilisateurs à remplir
-// retourne: une erreur éventuelle
+// getUsersFromRoleScopes retrieves all users accessible via roles->scopes->groups
+// userID: ID of the user
+// users: pointer to the slice of users to fill
+// returns: any error
 func getUsersFromRoleScopes(userID string, users *[]models.User) error {
 	var userIDs []string
 	if err := database.DB.Raw(`
@@ -115,17 +115,17 @@ func getUsersFromRoleScopes(userID string, users *[]models.User) error {
 		return err
 	}
 	
-	// Si aucun utilisateur n'est trouvé, retourner une slice vide
+	// If no users found, return empty slice
 	if len(userIDs) == 0 {
 		*users = []models.User{}
 		return nil
 	}
 	
-	// Récupérer les utilisateurs avec leurs associations
+	// Retrieve users with their associations
 	return database.DB.Preload("Roles").Preload("Groups").Where("id IN ?", userIDs).Find(users).Error
 }
 
-// DeleteUser supprime un utilisateur par ID
+// DeleteUser deletes a user by ID
 // @Summary Delete User
 // @Description Delete a user by ID, if user isStaff, required ownership permission
 // @Tags Users
@@ -144,22 +144,22 @@ func DeleteUser(c *gin.Context) {
     userID := c.Param("id")
     var targetUser models.User
     
-    // Vérifier que l'utilisateur cible existe
+    // Check if target user exists
     if err := database.DB.Where("id = ?", userID).First(&targetUser).Error; err != nil {
         respondWithError(c, http.StatusNotFound, ErrNotFound)
         return
     }
 
-    // Vérifier les permissions
+    // Check permissions
     if !HasPermissionForUser(user, targetUser.ID, permissions.OWNER) {
         respondWithError(c, http.StatusUnauthorized, ErrNoPermissionDelete)
         return
     }
 
-    // Commencer une transaction pour assurer l'atomicité des opérations
+    // Start a transaction to ensure atomicity of operations
     tx := database.DB.Begin()
 
-    // Supprimer les associations d'abord
+    // Delete associations first
     if err := tx.Model(&targetUser).Association("Roles").Clear(); err != nil {
         tx.Rollback()
         log.Printf("Error clearing user roles: %v", err)
@@ -174,7 +174,7 @@ func DeleteUser(c *gin.Context) {
         return
     }
 
-    // Supprimer l'utilisateur
+    // Delete the user
     if err := tx.Delete(&targetUser).Error; err != nil {
         tx.Rollback()
         log.Printf("Error deleting user: %v", err)
@@ -182,13 +182,13 @@ func DeleteUser(c *gin.Context) {
         return
     }
 
-    // Valider la transaction
+    // Commit the transaction
     tx.Commit()
     
     c.Status(http.StatusNoContent)
 }
 
-// ToggleBlockUser change le statut de blocage d'un utilisateur
+// ToggleBlockUser toggles the block status of a user
 // @Summary Toggle block user
 // @Description Toggle the block status of a user
 // @Tags Users
@@ -207,19 +207,19 @@ func ToggleBlockUser(c *gin.Context) {
 	userID := c.Param("id")
 	var targetUser models.User
 	
-	// Vérifier que l'utilisateur cible existe
+	// Check if target user exists
 	if err := database.DB.Where("id = ?", userID).First(&targetUser).Error; err != nil {
 		respondWithError(c, http.StatusNotFound, ErrNotFound)
 		return
 	}
 
-	// Vérifier les permissions
+	// Check permissions
 	if !HasPermissionForUser(user, targetUser.ID, permissions.OWNER) {
 		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionBlock)
 		return
 	}
 
-	// Inverser le statut de blocage
+	// Toggle block status
 	targetUser.Blocked = !targetUser.Blocked
 	if err := database.DB.Save(&targetUser).Error; err != nil {
 		log.Printf("Error toggling user block status: %v", err)

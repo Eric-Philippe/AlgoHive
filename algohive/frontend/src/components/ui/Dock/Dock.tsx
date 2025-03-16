@@ -1,4 +1,4 @@
-import { useState, useEffect, Dispatch, SetStateAction } from "react";
+import { useState, useEffect } from "react";
 import { Dock } from "primereact/dock";
 import { Dialog } from "primereact/dialog";
 import { Terminal } from "primereact/terminal";
@@ -11,7 +11,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { getStaffMenuItems } from "../../../config/StaffMenuItem";
 
 interface AppDockProps {
-  setPage: Dispatch<SetStateAction<string>>;
+  setPage: (page: string) => void;
 }
 
 export default function AppDock({ setPage }: AppDockProps) {

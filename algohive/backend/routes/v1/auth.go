@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterAuthRoutes enregistre les routes pour l'API v1 d'authentification
-// Cette fonction sert maintenant de simple proxy vers le package de handlers dédié
+// RegisterAuthRoutes registers the routes for the v1 API of authentication
+// This function now acts as a simple proxy to the dedicated handlers package
 func RegisterAuthRoutes(r *gin.RouterGroup) {
 	auth.RegisterRoutes(r)
 }

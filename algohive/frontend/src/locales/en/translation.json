@@ -59,6 +59,46 @@
     }
   },
   "staffTabs": {
+    "home": {
+      "welcome": "Welcome",
+      "profileInfo": "Profile Information",
+      "resetPassword": "Reset Password",
+      "oldPassword": "Old Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "updatePassword": "Update Password",
+      "passwordStrength": "Password Strength",
+      "passwordRequirements": "Password should be at least 8 characters and include uppercase, lowercase, numbers, and special characters.",
+      "enterPassword": "Enter password",
+      "enterOldPassword": "Enter old password",
+      "weak": "Weak",
+      "medium": "Medium",
+      "strong": "Strong",
+      "lastLogin": "Last login",
+      "neverConnected": "Never connected",
+      "logout": "Logout",
+      "logoutHeader": "Confirm Logout",
+      "accountInfo": "Account Information",
+      "status": "Status",
+      "activeRoles": "Active Roles",
+      "rolesDescription": "These are the roles assigned to your account that define your permissions.",
+      "quickActions": "Quick Actions",
+      "lastActivity": "Last Activity",
+      "viewFullActivity": "View full activity history",
+      "updateProfile": "Update Profile",
+      "saveChanges": "Save Changes",
+      "messages": {
+        "error": "Error",
+        "success": "Success",
+        "passwordMismatch": "Passwords do not match",
+        "passwordTooShort": "Password must be at least 8 characters",
+        "passwordResetSuccess": "Password has been reset successfully",
+        "passwordResetError": "Error resetting password",
+        "confirmLogout": "Are you sure you want to log out?",
+        "profileUpdateSuccess": "Profile updated successfully",
+        "profileUpdateError": "Error updating profile"
+      }
+    },
     "users": {
       "views": {
         "asAdmin": "Admin view",

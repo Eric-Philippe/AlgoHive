@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterGroupsRoutes enregistre les routes pour l'API v1 des groupes
-// Cette fonction sert maintenant de simple proxy vers le package de handlers dédié
+// RegisterGroupsRoutes registers the routes for the v1 API of groups
+// This function now acts as a simple proxy to the dedicated handlers package
 func RegisterGroupsRoutes(r *gin.RouterGroup) {
 	groups.RegisterRoutes(r)
 }

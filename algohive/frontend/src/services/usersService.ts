@@ -130,3 +130,44 @@ export async function updateUserRoles(
     throw error;
   }
 }
+
+export async function updateUserProfile(
+  firstname: string,
+  lastname: string,
+  email: string
+) {
+  try {
+    const response = await ApiClient.put("/user/profile", {
+      firstname,
+      lastname,
+      email,
+    });
+
+    if (response.status !== 200) {
+      throw new Error(`Error: ${response.status}`);
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    throw error;
+  }
+}
+
+export async function changePassword(oldPassword: string, newPassword: string) {
+  try {
+    const response = await ApiClient.put("/user/profile/password", {
+      old_password: oldPassword,
+      new_password: newPassword,
+    });
+
+    if (response.status !== 200) {
+      throw new Error(`Error: ${response.status}`);
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error changing password:", error);
+    throw error;
+  }
+}

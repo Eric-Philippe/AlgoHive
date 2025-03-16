@@ -172,7 +172,6 @@ export const useUserManagement = (refreshDataCallback: () => Promise<void>) => {
       acceptClassName: "p-button-danger",
       accept: async () => {
         try {
-          // Use mock if no function provided (for demo)
           if (resetPasswordFn) {
             await resetPasswordFn(user.id);
           } else {

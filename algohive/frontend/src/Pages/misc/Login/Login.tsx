@@ -48,7 +48,7 @@ const LoginPage = () => {
       <Toast ref={toast} />
 
       <div className="flex flex-col md:flex-row rounded-lg shadow-lg w-full md:w-3/4 overflow-hidden">
-        {/* Section droite (login) - en haut sur mobile */}
+        {/* Right section (login) - top on mobile */}
         <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col justify-center rounded-b-lg md:rounded-b-none md:rounded-r-lg border-2 border-white bg-transparent order-1 md:order-2">
           <h1 className="text-2xl font-semibold mb-4 text-center">
             {t("login.title")}
@@ -107,7 +107,7 @@ const LoginPage = () => {
           </p>
         </div>
 
-        {/* Section gauche (features) - en bas sur mobile */}
+        {/* Left section (features) - bottom on mobile */}
         <div
           className="w-full md:w-1/2 p-6 md:p-10 text-black flex flex-col justify-center order-2 md:order-1"
           style={{ backgroundColor: "rgba(255, 255, 255, 0.7)" }}

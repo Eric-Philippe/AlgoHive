@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterRoutes enregistre toutes les routes liées aux catalogues
-// r: le RouterGroup auquel ajouter les routes
+// RegisterRoutes registers all routes related to catalogs
+// r: the RouterGroup to which the routes are added
 func RegisterRoutes(r *gin.RouterGroup) {
 	catalogs := r.Group("/catalogs")
 	catalogs.Use(middleware.AuthMiddleware())

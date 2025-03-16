@@ -7,11 +7,11 @@ import (
 	"log"
 )
 
-// UserOwnsTargetGroups vérifie si l'utilisateur authentifié possède au moins un groupe
-// auquel appartient l'utilisateur cible
-// userID: ID de l'utilisateur authentifié
-// targetUserID: ID de l'utilisateur cible
-// retourne: true si l'utilisateur authentifié possède au moins un groupe de l'utilisateur cible
+// UserOwnsTargetGroups checks if the authenticated user owns at least one group
+// to which the target user belongs
+// userID: ID of the authenticated user
+// targetUserID: ID of the target user
+// returns: true if the authenticated user owns at least one group of the target user
 func UserOwnsTargetGroups(userID string, targetUserID string) bool {
     var count int64
     err := database.DB.Raw(`
@@ -38,17 +38,17 @@ func UserOwnsTargetGroups(userID string, targetUserID string) bool {
     return count > 0
 }
 
-// hasPermissionForUser vérifie si l'utilisateur a les permissions nécessaires pour agir sur l'utilisateur cible
-// user: l'utilisateur authentifié
-// targetUserID: ID de l'utilisateur cible
-// requiredPermission: permission requise si l'utilisateur n'est pas propriétaire du groupe
+// HasPermissionForUser checks if the user has the necessary permissions to act on the target user
+// user: the authenticated user
+// targetUserID: ID of the target user
+// requiredPermission: required permission if the user is not the owner of the group
 func HasPermissionForUser(user models.User, targetUserID string, requiredPermission int) bool {
-    // Les propriétaires ont toutes les permissions
+    // Owners have all permissions
     if permissions.RolesHavePermission(user.Roles, permissions.OWNER) {
         return true
     }
     
-    // Sinon vérifier si l'utilisateur possède un groupe de l'utilisateur cible
+    // Otherwise check if the user owns a group of the target user
     return UserOwnsTargetGroups(user.ID, targetUserID) || 
            permissions.RolesHavePermission(user.Roles, requiredPermission)
 }

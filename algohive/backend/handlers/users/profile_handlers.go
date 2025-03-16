@@ -1,16 +1,19 @@
 package users
 
 import (
+	"api/config"
 	"api/database"
 	"api/middleware"
 	"api/models"
+	"api/utils"
+	"api/utils/permissions"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-// GetUserProfile récupère le profil de l'utilisateur authentifié
+// GetUserProfile retrieves the authenticated user's profile
 // @Summary Get User Profile
 // @Description Get the profile information of the authenticated user
 // @Tags Users
@@ -30,7 +33,7 @@ func GetUserProfile(c *gin.Context) {
     c.JSON(http.StatusOK, user)
 }
 
-// UpdateUserProfile met à jour le profil de l'utilisateur authentifié
+// UpdateUserProfile updates the authenticated user's profile
 // @Summary Update User Profile
 // @Description Update the profile information of the authenticated user
 // @Tags Users
@@ -66,4 +69,102 @@ func UpdateUserProfile(c *gin.Context) {
 	}
 	
 	c.JSON(http.StatusOK, user)
+}
+
+// ResetUserPassword resets the target user's password
+// @Summary Reset Target User Password
+// @Description Reset the password of the target user
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param user body models.User true "User Profile"
+// @Success 200 {object} models.User
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /user/resetpass [put]
+// @Security Bearer
+func ResetUserPassword(c *gin.Context) {
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
+	
+	var userUpdate models.User
+	if err := c.ShouldBindJSON(&userUpdate); err != nil {
+		respondWithError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if !HasPermissionForUser(user, userUpdate.ID, permissions.GROUPS) {
+		respondWithError(c, http.StatusForbidden, "You do not have permission to reset this user's password")
+		return
+	}
+	
+	// Create a default admin user with a default hashed password from either the .env file or the DefaultPassword constant
+	password := config.DefaultPassword
+	if config.DefaultPassword != "" {
+		password = config.DefaultPassword
+	}
+	password, err = utils.HashPassword(password)
+	if err != nil {
+		respondWithError(c, http.StatusInternalServerError, "Failed to hash password")
+		return
+	}
+
+	userUpdate.Password = password
+	
+	if err := database.DB.Save(&user).Error; err != nil {
+		log.Printf("Error updating user profile: %v", err)
+		respondWithError(c, http.StatusInternalServerError, "Failed to update profile")
+		return
+	}
+	
+	c.JSON(http.StatusOK, user)
+}
+
+// UpdateUserPassword updates the current user's password
+// @Summary Update User Password
+// @Description Update the password of the current user
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param passwords body PasswordUpdate true "Password Update"
+// @Success 200 {object} models.User
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /user/profile/password [put]
+// @Security Bearer
+func UpdateUserPassword(c *gin.Context) {
+	user, err := middleware.GetUserFromRequest(c)
+	if err != nil {
+		return
+	}
+	
+	var passwordUpdate PasswordUpdate
+	if err := c.ShouldBindJSON(&passwordUpdate); err != nil {
+		respondWithError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	
+	if !utils.CheckPasswordHash(passwordUpdate.OldPassword, user.Password) {
+		respondWithError(c, http.StatusUnauthorized, "Old password is incorrect")
+		return
+	}
+	
+	hashedPassword, err := utils.HashPassword(passwordUpdate.NewPassword)
+	if err != nil {
+		log.Printf("Error hashing new password: %v", err)
+		respondWithError(c, http.StatusInternalServerError, "Failed to hash new password")
+		return
+	}
+	
+	user.Password = hashedPassword
+	
+	if err := database.DB.Save(&user).Error; err != nil {
+		log.Printf("Error updating user password: %v", err)
+		respondWithError(c, http.StatusInternalServerError, "Failed to update password")
+		return
+	}
+	
+	c.JSON(http.StatusOK, gin.H{"message": "Password updated successfully"})
 }

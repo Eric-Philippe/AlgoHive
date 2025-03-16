@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterRoutes enregistre toutes les routes liées à l'authentification
-// r: le RouterGroup auquel ajouter les routes
+// RegisterRoutes registers all routes related to authentication
+// r: the RouterGroup to which routes are added
 func RegisterRoutes(r *gin.RouterGroup) {
 	auth := r.Group("/auth")
 	{

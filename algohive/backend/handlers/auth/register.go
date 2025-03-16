@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterUser gère l'inscription d'un nouvel utilisateur
+// RegisterUser handles registration of a new user
 // @Summary User Register
 // @Description Register a new user
 // @Tags Auth
@@ -30,7 +30,7 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 	
-	// Vérifier si l'email existe déjà
+	// Check if the email already exists
 	var existingUser models.User
 	if err := database.DB.Where("email = ?", registerReq.Email).First(&existingUser).Error; err == nil {
 		log.Printf("Registration failed: email already in use: %s", registerReq.Email)
@@ -38,7 +38,7 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 	
-	// Hasher le mot de passe
+	// Hash the password
 	hashedPassword, err := utils.HashPassword(registerReq.Password)
 	if err != nil {
 		log.Printf("Failed to hash password during registration: %v", err)
@@ -46,7 +46,7 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 	
-	// Créer un nouvel utilisateur
+	// Create a new user
 	user := models.User{
 		Email:     registerReq.Email,
 		Password:  hashedPassword,
@@ -61,7 +61,7 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 	
-	// Générer un token JWT
+	// Generate a JWT token
 	token, err := utils.GenerateJWT(user.ID, user.Email)
 	if err != nil {
 		log.Printf("Failed to generate token for new user %s: %v", user.ID, err)
@@ -69,7 +69,7 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 	
-	// Définir le token comme un cookie HTTP-only
+	// Set the token as an HTTP-only cookie
 	setCookieToken(c, token)
 	
 	c.JSON(http.StatusCreated, AuthResponse{

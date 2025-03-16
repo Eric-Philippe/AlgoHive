@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetAllGroups récupère tous les groupes
+// GetAllGroups retrieves all groups
 // @Summary Get all groups
 // @Description Get all groups, only accessible to users with the GROUPS permission
 // @Tags Groups
@@ -42,7 +42,7 @@ func GetAllGroups(c *gin.Context) {
 	c.JSON(http.StatusOK, groups)
 }
 
-// GetGroup récupère un groupe par ID
+// GetGroup retrieves a group by ID
 // @Summary Get a group
 // @Description Get a group
 // @Tags Groups
@@ -74,7 +74,7 @@ func GetGroup(c *gin.Context) {
 	c.JSON(http.StatusOK, group)
 }
 
-// CreateGroup crée un nouveau groupe
+// CreateGroup creates a new group
 // @Summary Create a group
 // @Description Create a group, only accessible to users with the GROUPS permission
 // @Tags Groups
@@ -92,7 +92,7 @@ func CreateGroup(c *gin.Context) {
 		return
 	}
 
-	// Vérifier que l'utilisateur est staff
+	// Verify that the user is staff
 	if !permissions.IsStaff(user) {
 		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionCreate)
 		return
@@ -104,7 +104,7 @@ func CreateGroup(c *gin.Context) {
 		return
 	}
 
-	// Vérifier que le scope existe
+	// Verify that the scope exists
 	var scopes []models.Scope
 	if err := database.DB.Where("id = ?", req.ScopeId).Find(&scopes).Error; err != nil {
 		log.Printf("Error finding scope: %v", err)
@@ -117,7 +117,7 @@ func CreateGroup(c *gin.Context) {
 		return
 	}
 
-	// Créer le groupe
+	// Create the group
 	group := models.Group{
 		Name:        req.Name,
 		Description: req.Description,
@@ -133,7 +133,7 @@ func CreateGroup(c *gin.Context) {
 	c.JSON(http.StatusCreated, group)
 }
 
-// DeleteGroup supprime un groupe et tous ses utilisateurs et compétitions
+// DeleteGroup deletes a group and cascades deletion of all its users and competitions
 // @Summary Delete a group and cascade delete all users and competitions associated with the group
 // @Description Delete a group and cascade delete all users and competitions associated with the group
 // @Tags Groups
@@ -163,10 +163,10 @@ func DeleteGroup(c *gin.Context) {
 		return
 	}
 
-	// Supprimer le groupe
+	// Delete the group
 	tx := database.DB.Begin()
 	
-	// Supprimer les associations d'abord
+	// First remove the associations
 	if err := tx.Model(&group).Association("Users").Clear(); err != nil {
 		tx.Rollback()
 		log.Printf("Error clearing group users: %v", err)
@@ -192,7 +192,7 @@ func DeleteGroup(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-// UpdateGroup met à jour un groupe
+// UpdateGroup updates a group's name and description
 // @Summary Update a group name and description
 // @Description Update a group name and description
 // @Tags Groups
@@ -229,7 +229,7 @@ func UpdateGroup(c *gin.Context) {
 		return
 	}
 
-	// Mettre à jour uniquement les champs non vides
+	// Update only non-empty fields
 	updates := models.Group{}
 	if req.Name != "" {
 		updates.Name = req.Name
@@ -247,7 +247,7 @@ func UpdateGroup(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-// GetGroupsFromScope récupère tous les groupes d'un scope
+// GetGroupsFromScope retrieves all groups from a given scope
 // @Summary Get all the groups from a given scope
 // @Description Get all the groups from a given scope and list the users in each group
 // @Tags Groups

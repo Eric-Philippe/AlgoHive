@@ -6,27 +6,29 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterRoutes enregistre toutes les routes liées à la gestion des utilisateurs
-// r: le RouterGroup auquel ajouter les routes
+// RegisterRoutes registers all routes related to user management
+// r: the RouterGroup to which the routes are added
 func RegisterRoutes(r *gin.RouterGroup) {    
     user := r.Group("/user")
     user.Use(middleware.AuthMiddleware())
     {
-        // Routes pour le profil utilisateur
+        // User profile routes
         user.GET("/profile", GetUserProfile)
         user.PUT("/profile", UpdateUserProfile)
+        user.PUT("/profile/password", UpdateUserPassword)
         
-        // Routes pour la gestion des utilisateurs
+        // User management routes
         user.GET("/", GetUsers)
         user.DELETE("/:id", DeleteUser)
         user.PUT("/block/:id", ToggleBlockUser)
+        user.PUT("/resetpass", ResetUserPassword)
         
-        // Routes pour les relations utilisateurs-rôles
+        // User-role relationship routes
         user.GET("/roles", GetUsersFromRoles)
         user.POST("/roles", CreateUserAndAttachRoles)
         user.PUT("/roles", UpdateUserRoles)
         
-        // Routes pour les relations utilisateurs-groupes
+        // User-group relationship routes
         user.POST("/groups", CreateUserAndAttachGroup)
         user.POST("/group/:group_id/bulk", CreateBulkUsersAndAttachGroup)
     }

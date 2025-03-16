@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// AddGroupToCompetition ajoute un groupe à une compétition
+// AddGroupToCompetition adds a group to a competition
 // @Summary Add a group to a competition
 // @Description Allow users in a group to access a competition
 // @Tags Competitions
@@ -51,7 +51,7 @@ func AddGroupToCompetition(c *gin.Context) {
 		return
 	}
 
-	// Ajouter le groupe à la compétition
+	// Add the group to the competition
 	if err := database.DB.Exec("INSERT INTO competition_accessible_to (group_id, competition_id) VALUES (?, ?) ON CONFLICT DO NOTHING", 
 		groupID, competitionID).Error; err != nil {
 		log.Printf("Error adding group to competition: %v", err)
@@ -59,13 +59,13 @@ func AddGroupToCompetition(c *gin.Context) {
 		return
 	}
 
-	// Recharger la compétition avec ses associations
+	// Reload the competition with its associations
 	database.DB.Preload("ApiEnvironment").Preload("Groups").First(&competition, competition.ID)
 
 	c.JSON(http.StatusOK, competition)
 }
 
-// RemoveGroupFromCompetition supprime un groupe d'une compétition
+// RemoveGroupFromCompetition removes a group from a competition
 // @Summary Remove a group from a competition
 // @Description Remove group access to a competition
 // @Tags Competitions
@@ -105,7 +105,7 @@ func RemoveGroupFromCompetition(c *gin.Context) {
 		return
 	}
 
-	// Supprimer le groupe de la compétition
+	// Remove the group from the competition
 	if err := database.DB.Exec("DELETE FROM competition_accessible_to WHERE group_id = ? AND competition_id = ?", 
 		groupID, competitionID).Error; err != nil {
 		log.Printf("Error removing group from competition: %v", err)
@@ -113,13 +113,13 @@ func RemoveGroupFromCompetition(c *gin.Context) {
 		return
 	}
 
-	// Recharger la compétition avec ses associations
+	// Reload the competition with its associations
 	database.DB.Preload("ApiEnvironment").Preload("Groups").First(&competition, competition.ID)
 
 	c.JSON(http.StatusOK, competition)
 }
 
-// GetCompetitionGroups récupère tous les groupes ayant accès à une compétition
+// GetCompetitionGroups retrieves all groups with access to a competition
 // @Summary Get all groups with access to a competition
 // @Description Get all groups that have access to the specified competition
 // @Tags Competitions

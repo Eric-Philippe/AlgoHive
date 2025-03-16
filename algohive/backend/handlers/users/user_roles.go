@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CreateUserAndAttachRoles crée un utilisateur et lui attache des rôles
+// CreateUserAndAttachRoles creates a user and attaches roles to it
 // @Summary Create a user and attach one or more roles
 // @Description Create a new user and attach one or more roles to it
 // @Tags Users
@@ -29,7 +29,7 @@ func CreateUserAndAttachRoles(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les permissions
+	// Check permissions
 	if !permissions.RolesHavePermission(user.Roles, permissions.ROLES) {
 		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionRoles)
 		return
@@ -41,7 +41,7 @@ func CreateUserAndAttachRoles(c *gin.Context) {
 		return
 	}
 
-	// Vérifier que les rôles existent
+	// Check that the roles exist
 	var roles []models.Role
 	if err := database.DB.Where("id IN (?)", userWithRoles.Roles).Find(&roles).Error; err != nil {
 		log.Printf("Error finding roles: %v", err)
@@ -54,7 +54,7 @@ func CreateUserAndAttachRoles(c *gin.Context) {
 		return
 	}
 
-	// Créer l'utilisateur
+	// Create the user
 	targetUser, err := createUser(userWithRoles.FirstName, userWithRoles.LastName, userWithRoles.Email)
 	if err != nil {
 		log.Printf("Error creating user: %v", err)
@@ -62,7 +62,7 @@ func CreateUserAndAttachRoles(c *gin.Context) {
 		return
 	}
 
-	// Associer les rôles à l'utilisateur
+	// Attach roles to the user
 	for i := range roles {
 		if err := database.DB.Model(targetUser).Association("Roles").Append(&roles[i]); err != nil {
 			log.Printf("Error attaching role to user: %v", err)
@@ -74,7 +74,7 @@ func CreateUserAndAttachRoles(c *gin.Context) {
 	c.JSON(http.StatusCreated, targetUser)
 }
 
-// GetUsersFromRoles récupère tous les utilisateurs accessibles via des rôles spécifiques
+// GetUsersFromRoles retrieves all users accessible via specific roles
 // @Summary Get All users that the given roles have access to
 // @Description Get all users that the given roles have access to from their roles -> scopes -> groups -> users
 // @Tags Users
@@ -88,16 +88,16 @@ func GetUsersFromRoles(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les permissions
+	// Check permissions
 	if !permissions.IsStaff(user) {
 		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionUsersRoles)
 		return
 	}
 
-    // Récupérer les IDs des rôles depuis les paramètres de requête
+    // Retrieve role IDs from query parameters
     rolesParam := c.QueryArray("roles")
     
-    // Si on a reçu une seule chaîne avec des valeurs séparées par des virgules, la diviser
+    // If a single comma-separated string is received, split it
     var roles []string
     if len(rolesParam) == 1 && strings.Contains(rolesParam[0], ",") {
         roles = strings.Split(rolesParam[0], ",")
@@ -105,13 +105,13 @@ func GetUsersFromRoles(c *gin.Context) {
         roles = rolesParam
     }
 
-    // Vérifier qu'on a au moins un rôle
+    // Ensure that at least one role is provided
     if len(roles) == 0 {
         respondWithError(c, http.StatusBadRequest, ErrRolesRequired)
         return
     }
 
-    // Récupérer les utilisateurs accessibles via ces rôles
+    // Retrieve users accessible via these roles
 	users, err := getUsersFromRoleIDs(roles)
 	if err != nil {
 		log.Printf("Error getting users from roles: %v", err)
@@ -122,9 +122,9 @@ func GetUsersFromRoles(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
-// getUsersFromRoleIDs récupère tous les utilisateurs accessibles via les rôles spécifiés
-// roleIDs: IDs des rôles
-// retourne: la liste des utilisateurs et une erreur éventuelle
+// getUsersFromRoleIDs retrieves all users accessible via the specified roles
+// roleIDs: IDs of the roles
+// returns: the list of users and any error
 func getUsersFromRoleIDs(roleIDs []string) ([]models.User, error) {
 	var userIDs []string
 	if err := database.DB.Raw(`
@@ -150,7 +150,7 @@ func getUsersFromRoleIDs(roleIDs []string) ([]models.User, error) {
 	return users, nil
 }
 
-// UpdateUserRoles met à jour les rôles d'un utilisateur
+// UpdateUserRoles updates a user's roles
 // @Summary Update the roles of a user
 // @Description Update the roles of a user
 // @Tags Users
@@ -168,7 +168,7 @@ func UpdateUserRoles(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les permissions
+	// Check permissions
 	if !permissions.IsStaff(user) {
 		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionUsersRoles)
 		return
@@ -185,7 +185,7 @@ func UpdateUserRoles(c *gin.Context) {
 		respondWithError(c, http.StatusNotFound, ErrUserNotFound)
 		return
 	}
-	// Vérifier que les rôles existent
+	// Check that the roles exist
 	var roles []models.Role
 	if err := database.DB.Where("id IN (?)", userIdWithRoles.Roles).Find(&roles).Error; err != nil {
 		respondWithError(c, http.StatusNotFound, ErrRoleNotFound)
@@ -195,12 +195,12 @@ func UpdateUserRoles(c *gin.Context) {
 		respondWithError(c, http.StatusNotFound, ErrRoleNotFound)
 		return
 	}
-	// Supprimer les associations existantes
+	// Remove existing associations
 	if err := database.DB.Model(&targetUser).Association("Roles").Clear(); err != nil {
 		respondWithError(c, http.StatusInternalServerError, "Failed to clear user roles")
 		return
 	}
-	// Associer les nouveaux rôles à l'utilisateur
+	// Attach new roles to the user
 	for i := range roles {
 		if err := database.DB.Model(&targetUser).Association("Roles").Append(&roles[i]); err != nil {
 			respondWithError(c, http.StatusInternalServerError, "Failed to attach role to user")

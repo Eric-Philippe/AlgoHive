@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CreateTryRequest modèle pour créer un essai
+// CreateTryRequest model for creating a try
 type CreateTryRequest struct {
 	PuzzleID    string `json:"puzzle_id" binding:"required"`
 	PuzzleIndex int    `json:"puzzle_index" binding:"required"`
@@ -20,14 +20,14 @@ type CreateTryRequest struct {
 	Step        int    `json:"step" binding:"required"`
 }
 
-// UpdateTryRequest modèle pour mettre à jour un essai
+// UpdateTryRequest model for updating a try
 type UpdateTryRequest struct {
 	EndTime  string  `json:"end_time" binding:"required"`
 	Attempts int     `json:"attempts" binding:"required"`
 	Score    float64 `json:"score" binding:"required"`
 }
 
-// StartCompetitionTry démarre un essai pour une compétition
+// StartCompetitionTry starts a try for a competition
 // @Summary Start a competition try
 // @Description Start a new try for a puzzle in a competition
 // @Tags Competitions
@@ -49,7 +49,7 @@ func StartCompetitionTry(c *gin.Context) {
 
 	competitionID := c.Param("id")
 	
-	// Vérifier si l'utilisateur a accès à la compétition
+	// Check if user has access to the competition
 	if !userHasAccessToCompetition(user.ID, competitionID) && !hasCompetitionPermission(user, permissions.COMPETITIONS) {
 		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionView)
 		return
@@ -61,7 +61,7 @@ func StartCompetitionTry(c *gin.Context) {
 		return
 	}
 
-	// Vérifier si la compétition est terminée
+	// Check if competition is finished
 	if competition.Finished {
 		respondWithError(c, http.StatusBadRequest, "Competition is already finished")
 		return
@@ -73,7 +73,7 @@ func StartCompetitionTry(c *gin.Context) {
 		return
 	}
 
-	// Créer un nouveau try
+	// Create a new try
 	now := time.Now()
 	try := models.Try{
 		PuzzleID:      req.PuzzleID,
@@ -96,7 +96,7 @@ func StartCompetitionTry(c *gin.Context) {
 	c.JSON(http.StatusCreated, try)
 }
 
-// FinishCompetitionTry termine un essai pour une compétition
+// FinishCompetitionTry finishes a try for a competition
 // @Summary Finish a competition try
 // @Description Complete an ongoing try for a puzzle in a competition
 // @Tags Competitions
@@ -127,7 +127,7 @@ func FinishCompetitionTry(c *gin.Context) {
 		return
 	}
 
-	// Vérifier si l'essai est déjà terminé
+	// Check if try is already finished
 	if try.EndTime != nil {
 		respondWithError(c, http.StatusBadRequest, "Try is already finished")
 		return
@@ -139,7 +139,7 @@ func FinishCompetitionTry(c *gin.Context) {
 		return
 	}
 
-	// Mettre à jour l'essai
+	// Update the try
 	try.EndTime = &req.EndTime
 	try.Attempts = req.Attempts
 	try.Score = req.Score
@@ -153,7 +153,7 @@ func FinishCompetitionTry(c *gin.Context) {
 	c.JSON(http.StatusOK, try)
 }
 
-// GetCompetitionTries récupère tous les essais d'une compétition
+// GetCompetitionTries retrieves all tries for a competition
 // @Summary Get all tries for a competition
 // @Description Get all tries for the specified competition
 // @Tags Competitions
@@ -173,10 +173,10 @@ func GetCompetitionTries(c *gin.Context) {
 
 	competitionID := c.Param("id")
 
-	// Vérifier si l'utilisateur a la permission de voir tous les essais ou seulement les siens
+	// Check if user has permission to see all tries or only their own
 	var tries []models.Try
 	if hasCompetitionPermission(user, permissions.COMPETITIONS) {
-		// Les administrateurs peuvent voir tous les essais
+		// Administrators can see all tries
 		if err := database.DB.Where("competition_id = ?", competitionID).
 			Preload("User").Find(&tries).Error; err != nil {
 			log.Printf("Error fetching competition tries: %v", err)
@@ -184,7 +184,7 @@ func GetCompetitionTries(c *gin.Context) {
 			return
 		}
 	} else {
-		// Les utilisateurs normaux peuvent voir seulement leurs essais
+		// Normal users can only see their own tries
 		if err := database.DB.Where("competition_id = ? AND user_id = ?", 
 			competitionID, user.ID).Find(&tries).Error; err != nil {
 			log.Printf("Error fetching user competition tries: %v", err)
@@ -196,7 +196,7 @@ func GetCompetitionTries(c *gin.Context) {
 	c.JSON(http.StatusOK, tries)
 }
 
-// GetCompetitionStatistics récupère les statistiques d'une compétition
+// GetCompetitionStatistics retrieves statistics for a competition
 // @Summary Get competition statistics
 // @Description Get statistics for the specified competition
 // @Tags Competitions
@@ -216,7 +216,7 @@ func GetCompetitionStatistics(c *gin.Context) {
 
 	competitionID := c.Param("id")
 
-	// Vérifier si l'utilisateur a accès à la compétition
+	// Check if user has access to the competition
 	if !userHasAccessToCompetition(user.ID, competitionID) && !hasCompetitionPermission(user, permissions.COMPETITIONS) {
 		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionView)
 		return
@@ -228,36 +228,36 @@ func GetCompetitionStatistics(c *gin.Context) {
 		return
 	}
 
-	// Calculer les statistiques
+	// Calculate statistics
 	var totalUsers int64
 	var activeUsers int64
 	var completionRate float64
 	var averageScore float64
 	var highestScore float64
 
-	// Nombre total d'utilisateurs qui ont au moins un essai
+	// Total number of users who have at least one try
 	database.DB.Model(&models.Try{}).
 		Select("COUNT(DISTINCT user_id)").
 		Where("competition_id = ?", competitionID).
 		Count(&totalUsers)
 
-	// Nombre d'utilisateurs actifs (qui ont au moins un essai terminé)
+	// Number of active users (who have at least one completed try)
 	database.DB.Model(&models.Try{}).
 		Select("COUNT(DISTINCT user_id)").
 		Where("competition_id = ? AND end_time IS NOT NULL", competitionID).
 		Count(&activeUsers)
 
-	// Calcul du taux de complétion, de la moyenne des scores et du score le plus élevé
+	// Calculate completion rate, average score, and highest score
 	if totalUsers > 0 {
 		completionRate = float64(activeUsers) / float64(totalUsers) * 100
 		
-		// Score moyen
+		// Average score
 		database.DB.Model(&models.Try{}).
 			Select("COALESCE(AVG(score), 0)").
 			Where("competition_id = ? AND end_time IS NOT NULL", competitionID).
 			Scan(&averageScore)
 		
-		// Score le plus élevé
+		// Highest score
 		database.DB.Model(&models.Try{}).
 			Select("COALESCE(MAX(score), 0)").
 			Where("competition_id = ? AND end_time IS NOT NULL", competitionID).
@@ -277,7 +277,7 @@ func GetCompetitionStatistics(c *gin.Context) {
 	c.JSON(http.StatusOK, stats)
 }
 
-// GetUserCompetitionTries récupère tous les essais d'un utilisateur pour une compétition
+// GetUserCompetitionTries retrieves all tries for a user in a competition
 // @Summary Get user tries for a competition
 // @Description Get all tries for a specific user in the specified competition
 // @Tags Competitions
@@ -299,7 +299,7 @@ func GetUserCompetitionTries(c *gin.Context) {
 	competitionID := c.Param("id")
 	targetUserID := c.Param("user_id")
 
-	// Vérifier si l'utilisateur a la permission de voir les essais des autres
+	// Check if user has permission to view others' tries
 	if user.ID != targetUserID && !hasCompetitionPermission(user, permissions.COMPETITIONS) {
 		respondWithError(c, http.StatusUnauthorized, ErrNoPermissionViewTries)
 		return

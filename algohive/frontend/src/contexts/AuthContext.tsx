@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = async () => {
     try {
-      // Appeler l'API pour supprimer le cookie
+      // Call the API to remove the cookie
       await ApiClient.post("/auth/logout");
       setUser(null);
     } catch (error) {
@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
 
       setIsLoading(true);
-      // Le cookie sera envoyé automatiquement avec la requête
+      // The cookie will be sent automatically with the request
       const response = await ApiClient.get("/auth/check");
 
       setUser({

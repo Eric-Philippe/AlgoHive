@@ -6,12 +6,13 @@ import (
 	"api/utils/permissions"
 )
 
-// userCanManageGroup vérifie si au moins un des rôles de l'utilisateur possède un scope qui contient le groupe spécifié
-// userID: ID de l'utilisateur
-// group: pointeur vers le groupe à vérifier
-// retourne: true si l'utilisateur peut gérer le groupe, false sinon
+// userCanManageGroup check if the user can manage the group
+// userID: User ID
+// group: Group object
+// return: true if the user can manage the group
+//         false if the user cannot manage the group
 func userCanManageGroup(userID string, group *models.Group) bool {
-	// Récupérer la cascade user -> roles -> scopes -> groups depuis la base de données
+	// Fetch in cascade the user with roles and scopes
 	var user models.User
 	if err := database.DB.Where("id = ?", userID).Preload("Roles.Scopes.Groups").First(&user).Error; err != nil {
 		return false
@@ -30,11 +31,12 @@ func userCanManageGroup(userID string, group *models.Group) bool {
 	return false
 }
 
-// UserOwnsTargetGroups vérifie si l'utilisateur authentifié possède au moins un groupe
-// auquel appartient l'utilisateur cible ou le groupe cible
-// userID: ID de l'utilisateur authentifié
-// targetID: ID de l'utilisateur cible ou du groupe cible
-// retourne: true si l'utilisateur authentifié possède au moins un groupe contenant la cible
+// UserOwnsTargetGroups check if the user owns the target groups
+// userID: User ID
+// targetID: Target ID
+// return: true if the user owns the target groups
+//         false if the user does not own the target groups
+//         false if there is an error
 func UserOwnsTargetGroups(userID string, targetID string) bool {
     var count int64
     err := database.DB.Raw(`
@@ -60,10 +62,10 @@ func UserOwnsTargetGroups(userID string, targetID string) bool {
     return count > 0
 }
 
-// checkGroupPermission vérifie si l'utilisateur a les permissions nécessaires sur le groupe
-// userID: ID de l'utilisateur
-// groupID: ID du groupe
-// retourne: le groupe et un booléen indiquant si l'utilisateur a les permissions
+// checkGroupPermission check if the user has permission to manage the group
+// userID: User ID
+// groupID: Group ID
+// return: Group object and a boolean indicating if the user can manage the group
 func checkGroupPermission(userID string, groupID string) (*models.Group, bool) {
 	var group models.Group
 	if err := database.DB.Where("id = ?", groupID).First(&group).Error; err != nil {
@@ -73,10 +75,10 @@ func checkGroupPermission(userID string, groupID string) (*models.Group, bool) {
 	return &group, userCanManageGroup(userID, &group)
 }
 
-// hasGroupPermission vérifie si l'utilisateur a une permission spécifique
-// user: utilisateur à vérifier
-// permission: permission requise
-// retourne: true si l'utilisateur a la permission
+// hasGroupPermission check if the user has the required permission
+// user: User object
+// permission: Required permission
+// return: true if the user has the permission
 func hasGroupPermission(user models.User, permission int) bool {
 	return permissions.IsStaff(user) || permissions.RolesHavePermission(user.Roles, permission)
 }

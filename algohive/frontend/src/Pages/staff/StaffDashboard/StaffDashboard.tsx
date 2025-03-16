@@ -1,7 +1,8 @@
 import AppDock from "../../../components/ui/Dock/Dock";
 import LayoutContent from "../../../components/ui/layouts/LayoutContent/LayoutContent";
 import LayoutTopBar from "../../../components/ui/layouts/LayoutTopbar/LayoutTopBar";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
+import { useActivePage } from "../../../contexts/ActivePageContext";
 
 import "./StaffDashboard.css";
 import { getStaffMenuItems } from "../../../config/StaffMenuItem";
@@ -9,7 +10,7 @@ import { useTranslation } from "react-i18next";
 
 export default function StaffDashboard() {
   const { t } = useTranslation();
-  const [activePage, setActivePage] = useState("home");
+  const { activePage, setActivePage } = useActivePage();
 
   const StaffMenuItems = getStaffMenuItems(t);
 
@@ -40,7 +41,7 @@ export default function StaffDashboard() {
           </Suspense>
         </div>
       </LayoutContent>
-      <AppDock setPage={setActivePage} />
+      <AppDock setPage={(page: string) => setActivePage(page)} />
     </div>
   );
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// AttachScopeToRole attache un scope à un rôle
+// AttachScopeToRole attaches a scope to a role
 // @Summary Attach the scope to a role
 // @Description Attach the scope to a role, only accessible to users with the SCOPES permission
 // @Tags Scopes
@@ -59,7 +59,7 @@ func AttachScopeToRole(c *gin.Context) {
 	c.JSON(http.StatusOK, scope)
 }
 
-// DetachScopeFromRole détache un scope d'un rôle
+// DetachScopeFromRole detaches a scope from a role
 // @Summary Detach the scope from a role
 // @Description Detach the scope from a role, only accessible to users with the SCOPES permission
 // @Tags Scopes
@@ -106,7 +106,7 @@ func DetachScopeFromRole(c *gin.Context) {
 	c.JSON(http.StatusOK, scope)
 }
 
-// GetRoleScopes récupère tous les scopes auxquels un rôle a accès
+// GetRoleScopes retrieves all scopes that a role has access to
 // @Summary Get all the scopes that a role has access to
 // @Description Get all the scopes that a role has access to, only accessible to users with the SCOPES permission
 // @Tags Scopes
@@ -129,10 +129,10 @@ func GetRoleScopes(c *gin.Context) {
 		return
 	}
 
-	// Récupérer les IDs des rôles depuis les paramètres de requête
+	// Get role IDs from the request parameters
 	rolesParam := c.QueryArray("roles")
 	
-	// Si on a reçu une seule chaîne avec des valeurs séparées par des virgules, la diviser
+	// If we received a single string with comma-separated values, split it
 	var roles []string
 	if len(rolesParam) == 1 && strings.Contains(rolesParam[0], ",") {
 		roles = strings.Split(rolesParam[0], ",")
@@ -145,7 +145,7 @@ func GetRoleScopes(c *gin.Context) {
 		return
 	}
 
-	// Charger les rôles pour vérifier les permissions
+	// Load roles to check permissions
 	var loadedRoles []*models.Role
 	if err := database.DB.Where("id IN ?", roles).Find(&loadedRoles).Error; err != nil {
 		log.Printf("Error loading roles: %v", err)
@@ -153,7 +153,7 @@ func GetRoleScopes(c *gin.Context) {
 		return
 	}
 
-	// Si les rôles ont la permission OWNER, retourner tous les scopes
+	// If roles have the OWNER permission, return all scopes
 	if permissions.RolesHavePermission(loadedRoles, permissions.OWNER) {
 		var scopes []models.Scope
 		if err := database.DB.Preload("Groups").Find(&scopes).Error; err != nil {
@@ -166,7 +166,7 @@ func GetRoleScopes(c *gin.Context) {
 		return
 	}
 
-	// Sinon, récupérer seulement les scopes associés aux rôles spécifiés
+	// Otherwise, retrieve only the scopes associated with the specified roles
 	var scopesIDs []string
 	if err := database.DB.Raw(`
 		SELECT DISTINCT s.id

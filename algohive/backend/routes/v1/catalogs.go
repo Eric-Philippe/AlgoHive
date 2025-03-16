@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterApisRoutes enregistre les routes pour l'API v1 des catalogues
-// Cette fonction sert maintenant de simple proxy vers le package de handlers dédié
+// RegisterApisRoutes registers the routes for the v1 API of catalogs
+// This function now acts as a simple proxy to the dedicated handlers package
 func RegisterApisRoutes(r *gin.RouterGroup) {
 	catalogs.RegisterRoutes(r)
 }

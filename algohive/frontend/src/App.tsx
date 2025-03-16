@@ -4,6 +4,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 import RedirectIfAuthenticated from "./components/RedirectIfAuthenticated";
 import StaffDashboard from "./Pages/staff/StaffDashboard/StaffDashboard";
+import { ActivePageProvider } from "./contexts/ActivePageContext";
 
 const App = () => {
   return (
@@ -13,7 +14,9 @@ const App = () => {
           path="/"
           element={
             <ProtectedRoute target="staff">
-              <StaffDashboard />
+              <ActivePageProvider>
+                <StaffDashboard />
+              </ActivePageProvider>
             </ProtectedRoute>
           }
         />

@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetAllScopes récupère tous les scopes
+// GetAllScopes retrieves all scopes
 // @Summary Get all scopes
 // @Description Get all scopes, only accessible to users with the SCOPES permission
 // @Tags Scopes
@@ -42,7 +42,7 @@ func GetAllScopes(c *gin.Context) {
 	c.JSON(http.StatusOK, scopes)
 }
 
-// GetScope récupère un scope par ID
+// GetScope retrieves a scope by ID
 // @Summary Get a scope
 // @Description Get a scope, only accessible to users with the SCOPES permission
 // @Tags Scopes
@@ -76,7 +76,7 @@ func GetScope(c *gin.Context) {
 	c.JSON(http.StatusOK, scope)
 }
 
-// CreateScope crée un nouveau scope
+// CreateScope creates a new scope
 // @Summary Create a scope
 // @Description Create a scope, only accessible to users with the SCOPES permission
 // @Tags Scopes
@@ -105,7 +105,7 @@ func CreateScope(c *gin.Context) {
 		return
 	}
 
-	// Vérifier que les catalogues existent
+	// Check that catalogs exist
 	var catalogs []*models.Catalog
 	if err := database.DB.Where("id IN (?)", createScopeReq.CatalogsIds).Find(&catalogs).Error; err != nil {
 		log.Printf("Error finding catalogs: %v", err)
@@ -118,13 +118,13 @@ func CreateScope(c *gin.Context) {
 		return
 	}
 
-	// Créer le scope
+	// Create the scope
 	scope := models.Scope{
 		Name:        createScopeReq.Name,
 		Description: createScopeReq.Description,
 	}
 
-	// Transaction pour assurer l'atomicité
+	// Transaction to ensure atomicity
 	tx := database.DB.Begin()
 
 	if err := tx.Create(&scope).Error; err != nil {
@@ -147,7 +147,7 @@ func CreateScope(c *gin.Context) {
 	c.JSON(http.StatusCreated, scope)
 }
 
-// UpdateScope met à jour un scope existant
+// UpdateScope updates an existing scope
 // @Summary Update a scope
 // @Description Update a scope, only accessible to users with the SCOPES permission
 // @Tags Scopes
@@ -184,7 +184,7 @@ func UpdateScope(c *gin.Context) {
 		return
 	}
 
-	// Vérifier que les catalogues existent
+	// Check that catalogs exist
 	var catalogs []*models.Catalog
 	if err := database.DB.Where("id IN (?)", updateScopeReq.CatalogsIds).Find(&catalogs).Error; err != nil {
 		log.Printf("Error finding catalogs: %v", err)
@@ -197,10 +197,10 @@ func UpdateScope(c *gin.Context) {
 		return
 	}
 
-	// Transaction pour assurer l'atomicité
+	// Transaction to ensure atomicity
 	tx := database.DB.Begin()
 
-	// Mettre à jour le scope
+	// Update the scope
 	scope.Name = updateScopeReq.Name
 	scope.Description = updateScopeReq.Description
 	
@@ -211,7 +211,7 @@ func UpdateScope(c *gin.Context) {
 		return
 	}
 
-	// Mettre à jour les catalogues associés
+	// Update the associated catalogs
 	if err := tx.Model(&scope).Association("Catalogs").Replace(catalogs); err != nil {
 		tx.Rollback()
 		log.Printf("Error updating scope associations: %v", err)
@@ -223,7 +223,7 @@ func UpdateScope(c *gin.Context) {
 	c.JSON(http.StatusOK, scope)
 }
 
-// DeleteScope supprime un scope
+// DeleteScope deletes a scope
 // @Summary Delete a scope
 // @Description Delete a scope, only accessible to users with the SCOPES permission
 // @Tags Scopes
@@ -253,7 +253,7 @@ func DeleteScope(c *gin.Context) {
         return
     }
 
-    // Vérifier si des groupes utilisent ce scope
+    // Check if any groups use this scope
     var groupCount int64
     if err := database.DB.Model(&models.Group{}).Where("scope_id = ?", scope.ID).Count(&groupCount).Error; err != nil {
         log.Printf("Error checking for groups with scope: %v", err)
@@ -266,10 +266,10 @@ func DeleteScope(c *gin.Context) {
         return
     }
 
-    // Transaction pour assurer l'atomicité
+    // Transaction to ensure atomicity
     tx := database.DB.Begin()
 
-    // Supprimer les associations avant de supprimer le scope
+    // Delete associations before deleting the scope
     if err := tx.Model(&scope).Association("Catalogs").Clear(); err != nil {
         tx.Rollback()
         log.Printf("Error clearing scope catalog associations: %v", err)
@@ -277,7 +277,7 @@ func DeleteScope(c *gin.Context) {
         return
     }
 
-    // Supprimer les associations avec les rôles
+    // Delete role associations
     if err := tx.Model(&scope).Association("Roles").Clear(); err != nil {
         tx.Rollback()
         log.Printf("Error clearing scope role associations: %v", err)
@@ -285,7 +285,7 @@ func DeleteScope(c *gin.Context) {
         return
     }
 
-    // Supprimer le scope
+    // Delete the scope
     if err := tx.Delete(&scope).Error; err != nil {
         tx.Rollback()
         log.Printf("Error deleting scope: %v", err)
