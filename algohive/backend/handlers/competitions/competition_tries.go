@@ -5,7 +5,6 @@ import (
 	"api/middleware"
 	"api/models"
 	"api/utils/permissions"
-	"log"
 	"net/http"
 	"time"
 
@@ -88,7 +87,6 @@ func StartCompetitionTry(c *gin.Context) {
 	}
 
 	if err := database.DB.Create(&try).Error; err != nil {
-		log.Printf("Error creating try: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to create try")
 		return
 	}
@@ -145,7 +143,6 @@ func FinishCompetitionTry(c *gin.Context) {
 	try.Score = req.Score
 
 	if err := database.DB.Save(&try).Error; err != nil {
-		log.Printf("Error updating try: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to update try")
 		return
 	}
@@ -179,7 +176,6 @@ func GetCompetitionTries(c *gin.Context) {
 		// Administrators can see all tries
 		if err := database.DB.Where("competition_id = ?", competitionID).
 			Preload("User").Find(&tries).Error; err != nil {
-			log.Printf("Error fetching competition tries: %v", err)
 			respondWithError(c, http.StatusInternalServerError, "Failed to fetch tries")
 			return
 		}
@@ -187,7 +183,6 @@ func GetCompetitionTries(c *gin.Context) {
 		// Normal users can only see their own tries
 		if err := database.DB.Where("competition_id = ? AND user_id = ?", 
 			competitionID, user.ID).Find(&tries).Error; err != nil {
-			log.Printf("Error fetching user competition tries: %v", err)
 			respondWithError(c, http.StatusInternalServerError, "Failed to fetch tries")
 			return
 		}
@@ -308,7 +303,6 @@ func GetUserCompetitionTries(c *gin.Context) {
 	var tries []models.Try
 	if err := database.DB.Where("competition_id = ? AND user_id = ?", 
 		competitionID, targetUserID).Find(&tries).Error; err != nil {
-		log.Printf("Error fetching user competition tries: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to fetch tries")
 		return
 	}

@@ -21,6 +21,7 @@ import {
   updateUserProfile,
 } from "../../../services/usersService";
 import { useActivePage } from "../../../contexts/ActivePageContext";
+import LanguageSwitcher from "../../../components/LanguageSwitcher";
 
 export default function HomePage() {
   const { t } = useTranslation();
@@ -385,7 +386,7 @@ export default function HomePage() {
               {t("staffTabs.home.quickActions")}
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col gap-4">
             <Button
               label={t("navigation.staff.users")}
               icon="pi pi-users"
@@ -404,6 +405,15 @@ export default function HomePage() {
               className="p-button-sm p-button-outlined"
               onClick={() => setActivePage("competitions")}
             />
+
+            <div className="">
+              <label className="block text-sm font-medium mb-1">
+                {t("staffTabs.home.language")}
+              </label>
+              <Button>
+                <LanguageSwitcher />
+              </Button>
+            </div>
           </div>
         </Card>
 

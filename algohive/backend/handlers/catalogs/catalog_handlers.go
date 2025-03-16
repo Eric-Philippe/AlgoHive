@@ -5,7 +5,6 @@ import (
 	"api/middleware"
 	"api/models"
 	"api/utils/permissions"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -30,7 +29,6 @@ func GetAllCatalogs(c *gin.Context) {
 	var catalogs []models.Catalog
 	if permissions.RolesHavePermission(user.Roles, permissions.API_ENV) || permissions.RolesHavePermission(user.Roles, permissions.OWNER) {
 		if err := database.DB.Preload("Scopes").Find(&catalogs).Error; err != nil {
-			log.Printf("Error getting all catalogs: %v", err)
 			respondWithError(c, http.StatusInternalServerError, "Failed to fetch catalogs")
 			return
 		}
@@ -42,7 +40,6 @@ func GetAllCatalogs(c *gin.Context) {
 			JOIN public.role_scopes rs ON rs.scope_id = sae.scope_id
 			JOIN public.user_roles ur ON ur.role_id = rs.role_id
 			WHERE ur.user_id = ?`, user.ID).Scan(&catalogs).Error; err != nil {
-			log.Printf("Error getting all catalogs: %v", err)
 			respondWithError(c, http.StatusInternalServerError, "Failed to fetch catalogs")
 			return
 		}

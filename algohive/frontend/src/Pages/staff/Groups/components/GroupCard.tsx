@@ -33,7 +33,7 @@ const GroupCard: React.FC<GroupCardProps> = ({
         <span className="text-gray-300">{group.users?.length || 0}</span>
       </p>
 
-      <div className="flex justify-end mt-4 space-x-2">
+      <div className="flex justify mt-12 gap-2">
         <Button
           icon="pi pi-pencil"
           className="p-button-outlined p-button-sm"

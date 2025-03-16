@@ -6,7 +6,6 @@ import (
 	"api/utils"
 	"api/utils/permissions"
 	"context"
-	"log"
 	"net/http"
 	"time"
 
@@ -64,7 +63,7 @@ func Logout(c *gin.Context) {
 	redisKey := "token:blacklist:" + token
 	err = database.REDIS.Set(ctx, redisKey, "1", remainingTime).Err()
 	if err != nil {
-		log.Printf("Failed to add token to blacklist: %v", err)
+		
 		respondWithError(c, http.StatusInternalServerError, ErrLogoutFailed)
 		return
 	}
@@ -103,7 +102,6 @@ func CheckAuth(c *gin.Context) {
 	// Retrieve user data
 	var user models.User
 	if err := database.DB.Where("id = ?", claims.UserID).Preload("Roles").Preload("Groups").First(&user).Error; err != nil {
-		log.Printf("User not found during auth check: %s", claims.UserID)
 		respondWithError(c, http.StatusNotFound, ErrUserNotFound)
 		return
 	}

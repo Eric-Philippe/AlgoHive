@@ -5,7 +5,6 @@ import (
 	"api/middleware"
 	"api/models"
 	"api/utils/permissions"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -54,7 +53,6 @@ func AddGroupToCompetition(c *gin.Context) {
 	// Add the group to the competition
 	if err := database.DB.Exec("INSERT INTO competition_groups (group_id, competition_id) VALUES (?, ?) ON CONFLICT DO NOTHING", 
 		groupID, competitionID).Error; err != nil {
-		log.Printf("Error adding group to competition: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedAddGroup)
 		return
 	}
@@ -105,7 +103,6 @@ func RemoveGroupFromCompetition(c *gin.Context) {
 	// Remove the group from the competition
 	if err := database.DB.Exec("DELETE FROM competition_groups WHERE group_id = ? AND competition_id = ?", 
 		groupID, competitionID).Error; err != nil {
-		log.Printf("Error removing group from competition: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedRemoveGroup)
 		return
 	}
@@ -150,7 +147,6 @@ func GetCompetitionGroups(c *gin.Context) {
 	if err := database.DB.Joins("JOIN competition_groups cat ON cat.group_id = groups.id").
 		Where("cat.competition_id = ?", competitionID).
 		Find(&groups).Error; err != nil {
-		log.Printf("Error fetching competition groups: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to fetch groups")
 		return
 	}

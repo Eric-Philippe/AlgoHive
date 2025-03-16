@@ -5,7 +5,6 @@ import (
 	"api/middleware"
 	"api/models"
 	"api/utils/permissions"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -34,7 +33,6 @@ func GetAllGroups(c *gin.Context) {
 
 	var groups []models.Group
 	if err := database.DB.Find(&groups).Error; err != nil {
-		log.Printf("Error getting all groups: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFetchingGroups)
 		return
 	}
@@ -107,7 +105,6 @@ func CreateGroup(c *gin.Context) {
 	// Verify that the scope exists
 	var scopes []models.Scope
 	if err := database.DB.Where("id = ?", req.ScopeId).Find(&scopes).Error; err != nil {
-		log.Printf("Error finding scope: %v", err)
 		respondWithError(c, http.StatusBadRequest, ErrInvalidScopeIDs)
 		return
 	}
@@ -125,7 +122,6 @@ func CreateGroup(c *gin.Context) {
 	}
 	
 	if err := database.DB.Create(&group).Error; err != nil {
-		log.Printf("Error creating group: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to create group")
 		return
 	}
@@ -169,21 +165,18 @@ func DeleteGroup(c *gin.Context) {
 	// First remove the associations
 	if err := tx.Model(&group).Association("Users").Clear(); err != nil {
 		tx.Rollback()
-		log.Printf("Error clearing group users: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to clear group associations")
 		return
 	}
 	
 	if err := tx.Model(&group).Association("Competitions").Clear(); err != nil {
 		tx.Rollback()
-		log.Printf("Error clearing group competitions: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to clear group competitions")
 		return
 	}
 	
 	if err := tx.Delete(&group).Error; err != nil {
 		tx.Rollback()
-		log.Printf("Error deleting group: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to delete group")
 		return
 	}
@@ -239,7 +232,6 @@ func UpdateGroup(c *gin.Context) {
 	}
 
 	if err := database.DB.Model(&group).Updates(updates).Error; err != nil {
-		log.Printf("Error updating group: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to update group")
 		return
 	}
@@ -272,7 +264,6 @@ func GetGroupsFromScope(c *gin.Context) {
 
 	var groups []models.Group
 	if err := database.DB.Where("scope_id = ?", scopeID).Preload("Users").Find(&groups).Error; err != nil {
-		log.Printf("Error fetching groups from scope: %v", err)
 		respondWithError(c, http.StatusBadRequest, ErrFetchingGroups)
 		return
 	}
@@ -304,7 +295,6 @@ func GetMyGroups(c *gin.Context) {
 		JOIN public.role_scopes rs ON rs.scope_id = s.id
 		JOIN public.user_roles ur ON ur.role_id = rs.role_id
 		WHERE ur.user_id = ?`, user.ID).Scan(&groups).Error; err != nil {
-		log.Printf("Error fetching groups: %v", err)
 		respondWithError(c, http.StatusBadRequest, ErrFetchingGroups)
 		return
 	}

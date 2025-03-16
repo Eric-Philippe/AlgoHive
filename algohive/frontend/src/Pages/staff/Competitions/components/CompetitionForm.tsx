@@ -176,7 +176,6 @@ export default function CompetitionForm({
 
     try {
       setSubmitting(true);
-      console.log(selectCatalogTheme);
 
       const competitionData = {
         title,

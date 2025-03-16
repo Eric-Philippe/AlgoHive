@@ -5,7 +5,6 @@ import (
 	"api/middleware"
 	"api/models"
 	"api/utils/permissions"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -39,7 +38,6 @@ func GetAllCompetitions(c *gin.Context) {
 
 	var competitions []models.Competition
 	if err := database.DB.Preload("ApiEnvironment").Preload("Groups").Find(&competitions).Error; err != nil {
-		log.Printf("Error getting all competitions: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedFetchCompetitions)
 		return
 	}
@@ -78,7 +76,6 @@ func GetUserCompetitions(c *gin.Context) {
 		JOIN user_groups ug ON cat.group_id = ug.group_id
 		WHERE ug.user_id = ? AND c.show = true
 	`, user.ID).Scan(&competitions).Error; err != nil {
-		log.Printf("Error getting user competitions: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedFetchCompetitions)
 		return
 	}
@@ -180,7 +177,6 @@ func CreateCompetition(c *gin.Context) {
 
 	if err := tx.Create(&competition).Error; err != nil {
 		tx.Rollback()
-		log.Printf("Error creating competition: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedCreateCompetition)
 		return
 	}
@@ -196,7 +192,6 @@ func CreateCompetition(c *gin.Context) {
 
 		if err := tx.Model(&competition).Association("Groups").Append(groups); err != nil {
 			tx.Rollback()
-			log.Printf("Error attaching groups to competition: %v", err)
 			respondWithError(c, http.StatusInternalServerError, ErrFailedAddGroup)
 			return
 		}
@@ -277,7 +272,6 @@ func UpdateCompetition(c *gin.Context) {
 	}
 
 	if err := database.DB.Model(&competition).Updates(updateData).Error; err != nil {
-		log.Printf("Error updating competition: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedUpdateCompetition)
 		return
 	}
@@ -324,7 +318,6 @@ func DeleteCompetition(c *gin.Context) {
 	// First, delete tries related to this competition
 	if err := tx.Where("competition_id = ?", competitionID).Delete(&models.Try{}).Error; err != nil {
 		tx.Rollback()
-		log.Printf("Error deleting tries for competition: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedDeleteCompetition)
 		return
 	}
@@ -332,7 +325,6 @@ func DeleteCompetition(c *gin.Context) {
 	// Remove associations with groups
 	if err := tx.Exec("DELETE FROM competition_groups WHERE competition_id = ?", competitionID).Error; err != nil {
 		tx.Rollback()
-		log.Printf("Error removing group associations for competition: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedDeleteCompetition)
 		return
 	}
@@ -340,7 +332,6 @@ func DeleteCompetition(c *gin.Context) {
 	// Delete the competition
 	if err := tx.Delete(&competition).Error; err != nil {
 		tx.Rollback()
-		log.Printf("Error deleting competition: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedDeleteCompetition)
 		return
 	}
@@ -384,7 +375,6 @@ func FinishCompetition(c *gin.Context) {
 	competition.Finished = !competition.Finished
 
 	if err := database.DB.Save(&competition).Error; err != nil {
-		log.Printf("Error toggling finished status: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedToggleFinished)
 		return
 	}
@@ -426,7 +416,6 @@ func ToggleCompetitionVisibility(c *gin.Context) {
 	competition.Show = !competition.Show
 
 	if err := database.DB.Save(&competition).Error; err != nil {
-		log.Printf("Error toggling visibility status: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedToggleVisibility)
 		return
 	}
@@ -447,7 +436,6 @@ func userHasAccessToCompetition(userID string, competitionID string) bool {
 	`, userID, competitionID, competitionID).Count(&count).Error
 
 	if err != nil {
-		log.Printf("Error checking user access to competition: %v", err)
 		return false
 	}
 

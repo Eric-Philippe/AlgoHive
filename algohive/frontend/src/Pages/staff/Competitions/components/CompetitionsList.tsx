@@ -6,8 +6,7 @@ import { Tag } from "primereact/tag";
 import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
 import { useState } from "react";
-
-import { Competition } from "../../../../services/competitionsService";
+import { Competition } from "../../../../models/Competition";
 
 interface CompetitionsListProps {
   competitions: Competition[];

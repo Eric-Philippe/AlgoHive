@@ -4,6 +4,7 @@ import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { Group } from "../../../../models/Group";
 import { t } from "i18next";
+import { User } from "../../../../models/User";
 
 interface GroupDetailsDialogProps {
   visible: boolean;
@@ -94,9 +95,9 @@ const GroupDetailsDialog: React.FC<GroupDetailsDialogProps> = ({
 
           {group.users && group.users.length > 0 ? (
             <ul className="list-disc pl-5">
-              {group.users.map((user) => (
+              {group.users.map((user: User) => (
                 <li key={user.id} className="mb-1">
-                  {user.first_name} {user.last_name}
+                  {user.firstname} {user.lastname}
                 </li>
               ))}
             </ul>

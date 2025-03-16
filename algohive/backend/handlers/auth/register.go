@@ -5,7 +5,6 @@ import (
 	"api/models"
 	"api/utils"
 	"api/utils/permissions"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -33,7 +32,6 @@ func RegisterUser(c *gin.Context) {
 	// Check if the email already exists
 	var existingUser models.User
 	if err := database.DB.Where("email = ?", registerReq.Email).First(&existingUser).Error; err == nil {
-		log.Printf("Registration failed: email already in use: %s", registerReq.Email)
 		respondWithError(c, http.StatusConflict, ErrEmailInUse)
 		return
 	}
@@ -41,7 +39,6 @@ func RegisterUser(c *gin.Context) {
 	// Hash the password
 	hashedPassword, err := utils.HashPassword(registerReq.Password)
 	if err != nil {
-		log.Printf("Failed to hash password during registration: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrHashPasswordFailed)
 		return
 	}
@@ -56,7 +53,6 @@ func RegisterUser(c *gin.Context) {
 	}
 	
 	if err := database.DB.Create(&user).Error; err != nil {
-		log.Printf("Failed to create user: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrUserCreateFailed)
 		return
 	}
@@ -64,7 +60,6 @@ func RegisterUser(c *gin.Context) {
 	// Generate a JWT token
 	token, err := utils.GenerateJWT(user.ID, user.Email)
 	if err != nil {
-		log.Printf("Failed to generate token for new user %s: %v", user.ID, err)
 		respondWithError(c, http.StatusInternalServerError, ErrTokenGenerateFailed)
 		return
 	}

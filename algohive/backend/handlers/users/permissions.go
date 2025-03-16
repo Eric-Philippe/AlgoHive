@@ -4,7 +4,6 @@ import (
 	"api/database"
 	"api/models"
 	"api/utils/permissions"
-	"log"
 )
 
 // UserOwnsTargetGroups checks if the authenticated user owns at least one group
@@ -31,7 +30,6 @@ func UserOwnsTargetGroups(userID string, targetUserID string) bool {
     `, targetUserID, userID).Count(&count).Error
 
     if err != nil {
-        log.Printf("Error checking if user owns target groups: %v", err)
         return false
     }
     

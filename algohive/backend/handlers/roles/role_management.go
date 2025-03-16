@@ -5,7 +5,6 @@ import (
 	"api/middleware"
 	"api/models"
 	"api/utils/permissions"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -45,7 +44,6 @@ func CreateRole(c *gin.Context) {
 	if len(createRoleRequest.ScopesIds) > 0 {
 		var scopes []models.Scope
 		if err := database.DB.Where("id IN (?)", createRoleRequest.ScopesIds).Find(&scopes).Error; err != nil {
-			log.Printf("Error finding scopes: %v", err)
 			respondWithError(c, http.StatusBadRequest, "Invalid scope IDs")
 			return
 		}
@@ -63,7 +61,6 @@ func CreateRole(c *gin.Context) {
 	}
 
 	if err := database.DB.Create(&role).Error; err != nil {
-		log.Printf("Error creating role: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to create role")
 		return
 	}
@@ -94,7 +91,6 @@ func GetAllRoles(c *gin.Context) {
 
 	var roles []models.Role
 	if err := database.DB.Preload("Users").Preload("Scopes").Find(&roles).Error; err != nil {
-		log.Printf("Error getting all roles: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to fetch roles")
 		return
 	}
@@ -165,7 +161,6 @@ func UpdateRoleByID(c *gin.Context) {
 	}
 
 	if err := database.DB.Save(&role).Error; err != nil {
-		log.Printf("Error updating role: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to update role")
 		return
 	}
@@ -210,7 +205,6 @@ func DeleteRole(c *gin.Context) {
     // Remove the role from all users who have it (user_roles)
     if err := tx.Exec("DELETE FROM user_roles WHERE role_id = ?", roleID).Error; err != nil {
         tx.Rollback()
-        log.Printf("Error removing role from users: %v", err)
         respondWithError(c, http.StatusInternalServerError, ErrFailedRoleUserRemove)
         return
     }
@@ -218,7 +212,6 @@ func DeleteRole(c *gin.Context) {
     // Remove all associations with scopes (role_scopes)
     if err := tx.Exec("DELETE FROM role_scopes WHERE role_id = ?", roleID).Error; err != nil {
         tx.Rollback()
-        log.Printf("Error removing role from scopes: %v", err)
         respondWithError(c, http.StatusInternalServerError, ErrFailedRoleScopeRemove)
         return
     }
@@ -226,14 +219,12 @@ func DeleteRole(c *gin.Context) {
     // Finally, delete the role itself
     if err := tx.Delete(&role).Error; err != nil {
         tx.Rollback()
-        log.Printf("Error deleting role: %v", err)
         respondWithError(c, http.StatusInternalServerError, ErrFailedRoleDelete)
         return
     }
 
     // Commit the transaction
     if err := tx.Commit().Error; err != nil {
-        log.Printf("Error committing transaction: %v", err)
         respondWithError(c, http.StatusInternalServerError, ErrFailedTxCommit)
         return
     }

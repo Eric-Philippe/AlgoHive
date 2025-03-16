@@ -6,7 +6,6 @@ import (
 	"api/models"
 	"api/utils"
 	"api/utils/permissions"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -54,7 +53,6 @@ func GetUsers(c *gin.Context) {
 	// Owners can see all users
 	if permissions.RolesHavePermission(user.Roles, permissions.OWNER) {
 		if err := database.DB.Preload("Roles").Preload("Groups").Find(&users).Error; err != nil {
-			log.Printf("Error getting all users: %v", err)
 			respondWithError(c, http.StatusInternalServerError, ErrFailedToGetUsers)
 			return
 		}
@@ -62,14 +60,12 @@ func GetUsers(c *gin.Context) {
 			// For users without roles, only those in the same groups
 		if len(user.Roles) == 0 {
 			if err := getUsersInSameGroups(user.ID, &users); err != nil {
-				log.Printf("Error getting users in same groups: %v", err)
 				respondWithError(c, http.StatusInternalServerError, ErrFailedToGetUsers)
 				return
 			}
 		} else {
 				// For users with roles, use the role->scope->group hierarchy
 			if err := getUsersFromRoleScopes(user.ID, &users); err != nil {
-				log.Printf("Error getting users from role scopes: %v", err)
 				respondWithError(c, http.StatusInternalServerError, ErrFailedToGetUsers)
 				return
 			}
@@ -162,14 +158,12 @@ func DeleteUser(c *gin.Context) {
     // Delete associations first
     if err := tx.Model(&targetUser).Association("Roles").Clear(); err != nil {
         tx.Rollback()
-        log.Printf("Error clearing user roles: %v", err)
         respondWithError(c, http.StatusInternalServerError, ErrFailedAssociationRoles)
         return
     }
     
     if err := tx.Model(&targetUser).Association("Groups").Clear(); err != nil {
         tx.Rollback()
-        log.Printf("Error clearing user groups: %v", err)
         respondWithError(c, http.StatusInternalServerError, ErrFailedAssociationGroups)
         return
     }
@@ -177,7 +171,6 @@ func DeleteUser(c *gin.Context) {
     // Delete the user
     if err := tx.Delete(&targetUser).Error; err != nil {
         tx.Rollback()
-        log.Printf("Error deleting user: %v", err)
         respondWithError(c, http.StatusInternalServerError, ErrFailedToDeleteUser)
         return
     }
@@ -222,7 +215,6 @@ func ToggleBlockUser(c *gin.Context) {
 	// Toggle block status
 	targetUser.Blocked = !targetUser.Blocked
 	if err := database.DB.Save(&targetUser).Error; err != nil {
-		log.Printf("Error toggling user block status: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to update user")
 		return
 	}

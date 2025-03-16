@@ -83,6 +83,7 @@
       "activeRoles": "Active Roles",
       "rolesDescription": "These are the roles assigned to your account that define your permissions.",
       "quickActions": "Quick Actions",
+      "language": "Change Language: ",
       "lastActivity": "Last Activity",
       "viewFullActivity": "View full activity history",
       "updateProfile": "Update Profile",

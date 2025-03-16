@@ -5,7 +5,6 @@ import (
 	"api/middleware"
 	"api/models"
 	"api/utils/permissions"
-	"log"
 	"net/http"
 	"strings"
 
@@ -44,7 +43,6 @@ func CreateUserAndAttachRoles(c *gin.Context) {
 	// Check that the roles exist
 	var roles []models.Role
 	if err := database.DB.Where("id IN (?)", userWithRoles.Roles).Find(&roles).Error; err != nil {
-		log.Printf("Error finding roles: %v", err)
 		respondWithError(c, http.StatusNotFound, ErrRoleNotFound)
 		return
 	}
@@ -57,7 +55,6 @@ func CreateUserAndAttachRoles(c *gin.Context) {
 	// Create the user
 	targetUser, err := createUser(userWithRoles.FirstName, userWithRoles.LastName, userWithRoles.Email)
 	if err != nil {
-		log.Printf("Error creating user: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedToHashPassword)
 		return
 	}
@@ -65,7 +62,6 @@ func CreateUserAndAttachRoles(c *gin.Context) {
 	// Attach roles to the user
 	for i := range roles {
 		if err := database.DB.Model(targetUser).Association("Roles").Append(&roles[i]); err != nil {
-			log.Printf("Error attaching role to user: %v", err)
 			respondWithError(c, http.StatusInternalServerError, "Failed to attach role to user")
 			return
 		}
@@ -114,7 +110,6 @@ func GetUsersFromRoles(c *gin.Context) {
     // Retrieve users accessible via these roles
 	users, err := getUsersFromRoleIDs(roles)
 	if err != nil {
-		log.Printf("Error getting users from roles: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedToGetUsers)
 		return
 	}

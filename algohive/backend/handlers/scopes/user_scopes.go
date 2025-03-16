@@ -6,7 +6,6 @@ import (
 	"api/models"
 	"api/utils"
 	"api/utils/permissions"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -33,14 +32,12 @@ func GetUserScopes(c *gin.Context) {
 	// If the user has the SCOPES permission, return all scopes
 	if permissions.RolesHavePermission(user.Roles, permissions.SCOPES) {
 		if err := database.DB.Preload("Catalogs").Preload("Roles").Find(&scopes).Error; err != nil {
-			log.Printf("Error getting all scopes: %v", err)
 			respondWithError(c, http.StatusInternalServerError, ErrFailedGetScopes)
 			return
 		}
 	} else {
 			// Otherwise, retrieve only the scopes they have access to via their roles
 		if err := database.DB.Model(&user).Preload("Roles").Preload("Roles.Scopes").First(&user).Error; err != nil {
-			log.Printf("Error loading user with roles and scopes: %v", err)
 			respondWithError(c, http.StatusInternalServerError, "Failed to load user data")
 			return
 		}

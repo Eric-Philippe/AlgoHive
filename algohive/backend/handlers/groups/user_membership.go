@@ -4,7 +4,6 @@ import (
 	"api/database"
 	"api/middleware"
 	"api/models"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -55,7 +54,6 @@ func AddUserToGroup(c *gin.Context) {
 
 	// Ajouter l'utilisateur au groupe
 	if err := database.DB.Model(&group).Association("Users").Append(&targetUser); err != nil {
-		log.Printf("Error adding user to group: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to add user to group")
 		return
 	}
@@ -108,7 +106,6 @@ func RemoveUserFromGroup(c *gin.Context) {
 
 	// Retirer l'utilisateur du groupe
 	if err := database.DB.Model(&group).Association("Users").Delete(&targetUser); err != nil {
-		log.Printf("Error removing user from group: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to remove user from group")
 		return
 	}

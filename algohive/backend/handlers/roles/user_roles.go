@@ -5,7 +5,6 @@ import (
 	"api/middleware"
 	"api/models"
 	"api/utils/permissions"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -56,7 +55,6 @@ func AttachRoleToUser(c *gin.Context) {
 	// Attach role to user
 	targetUser.Roles = append(targetUser.Roles, &role)
 	if err := database.DB.Save(&targetUser).Error; err != nil {
-		log.Printf("Error attaching role to user: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to attach role to user")
 		return
 	}
@@ -115,7 +113,6 @@ func DetachRoleFromUser(c *gin.Context) {
 	}
 	
 	if err := database.DB.Save(&targetUser).Error; err != nil {
-		log.Printf("Error detaching role from user: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to detach role from user")
 		return
 	}

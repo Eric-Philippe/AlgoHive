@@ -36,9 +36,6 @@ export async function createRole(
   permissions: number,
   scopes_ids: string[]
 ): Promise<Role> {
-  console.log("Creating role with name:", name);
-  console.log("Permissions:", permissions);
-
   if (permissions > 31) permissions = 0;
 
   const body = {

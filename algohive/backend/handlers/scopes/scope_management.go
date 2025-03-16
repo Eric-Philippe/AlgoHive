@@ -5,7 +5,6 @@ import (
 	"api/middleware"
 	"api/models"
 	"api/utils/permissions"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -34,7 +33,6 @@ func GetAllScopes(c *gin.Context) {
 
 	var scopes []models.Scope
 	if err := database.DB.Find(&scopes).Error; err != nil {
-		log.Printf("Error getting all scopes: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedGetScopes)
 		return
 	}
@@ -108,7 +106,6 @@ func CreateScope(c *gin.Context) {
 	// Check that catalogs exist
 	var catalogs []*models.Catalog
 	if err := database.DB.Where("id IN (?)", createScopeReq.CatalogsIds).Find(&catalogs).Error; err != nil {
-		log.Printf("Error finding catalogs: %v", err)
 		respondWithError(c, http.StatusBadRequest, ErrInvalidAPIEnvIDs)
 		return
 	}
@@ -129,7 +126,6 @@ func CreateScope(c *gin.Context) {
 
 	if err := tx.Create(&scope).Error; err != nil {
 		tx.Rollback()
-		log.Printf("Error creating scope: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedCreateScope+err.Error())
 		return
 	}
@@ -137,7 +133,6 @@ func CreateScope(c *gin.Context) {
 	if len(catalogs) > 0 {
 		if err := tx.Model(&scope).Association("Catalogs").Append(catalogs); err != nil {
 			tx.Rollback()
-			log.Printf("Error associating catalogs: %v", err)
 			respondWithError(c, http.StatusInternalServerError, ErrFailedAssociateAPIEnv+err.Error())
 			return
 		}
@@ -187,7 +182,6 @@ func UpdateScope(c *gin.Context) {
 	// Check that catalogs exist
 	var catalogs []*models.Catalog
 	if err := database.DB.Where("id IN (?)", updateScopeReq.CatalogsIds).Find(&catalogs).Error; err != nil {
-		log.Printf("Error finding catalogs: %v", err)
 		respondWithError(c, http.StatusBadRequest, ErrInvalidAPIEnvIDs)
 		return
 	}
@@ -206,7 +200,6 @@ func UpdateScope(c *gin.Context) {
 	
 	if err := tx.Save(&scope).Error; err != nil {
 		tx.Rollback()
-		log.Printf("Error updating scope: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedUpdateScope+err.Error())
 		return
 	}
@@ -214,7 +207,6 @@ func UpdateScope(c *gin.Context) {
 	// Update the associated catalogs
 	if err := tx.Model(&scope).Association("Catalogs").Replace(catalogs); err != nil {
 		tx.Rollback()
-		log.Printf("Error updating scope associations: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedUpdateAssoc+err.Error())
 		return
 	}
@@ -256,7 +248,6 @@ func DeleteScope(c *gin.Context) {
     // Check if any groups use this scope
     var groupCount int64
     if err := database.DB.Model(&models.Group{}).Where("scope_id = ?", scope.ID).Count(&groupCount).Error; err != nil {
-        log.Printf("Error checking for groups with scope: %v", err)
         respondWithError(c, http.StatusInternalServerError, "Failed to check for associated groups: "+err.Error())
         return
     }
@@ -272,7 +263,6 @@ func DeleteScope(c *gin.Context) {
     // Delete associations before deleting the scope
     if err := tx.Model(&scope).Association("Catalogs").Clear(); err != nil {
         tx.Rollback()
-        log.Printf("Error clearing scope catalog associations: %v", err)
         respondWithError(c, http.StatusInternalServerError, ErrFailedClearAssoc+err.Error())
         return
     }
@@ -280,7 +270,6 @@ func DeleteScope(c *gin.Context) {
     // Delete role associations
     if err := tx.Model(&scope).Association("Roles").Clear(); err != nil {
         tx.Rollback()
-        log.Printf("Error clearing scope role associations: %v", err)
         respondWithError(c, http.StatusInternalServerError, ErrFailedClearAssoc+err.Error())
         return
     }
@@ -288,7 +277,6 @@ func DeleteScope(c *gin.Context) {
     // Delete the scope
     if err := tx.Delete(&scope).Error; err != nil {
         tx.Rollback()
-        log.Printf("Error deleting scope: %v", err)
         respondWithError(c, http.StatusInternalServerError, ErrFailedDeleteScope+err.Error())
         return
     }

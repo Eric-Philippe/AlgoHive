@@ -5,7 +5,6 @@ import (
 	"api/middleware"
 	"api/models"
 	"api/utils/permissions"
-	"log"
 	"net/http"
 	"strings"
 
@@ -51,7 +50,6 @@ func AttachScopeToRole(c *gin.Context) {
 	}
 
 	if err := database.DB.Model(&scope).Association("Roles").Append(&role); err != nil {
-		log.Printf("Error attaching scope to role: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedAttachRole+err.Error())
 		return
 	}
@@ -98,7 +96,6 @@ func DetachScopeFromRole(c *gin.Context) {
 	}
 
 	if err := database.DB.Model(&scope).Association("Roles").Delete(&role); err != nil {
-		log.Printf("Error detaching scope from role: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedDetachRole+err.Error())
 		return
 	}
@@ -148,7 +145,6 @@ func GetRoleScopes(c *gin.Context) {
 	// Load roles to check permissions
 	var loadedRoles []*models.Role
 	if err := database.DB.Where("id IN ?", roles).Find(&loadedRoles).Error; err != nil {
-		log.Printf("Error loading roles: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to get roles")
 		return
 	}
@@ -157,7 +153,6 @@ func GetRoleScopes(c *gin.Context) {
 	if permissions.RolesHavePermission(loadedRoles, permissions.OWNER) {
 		var scopes []models.Scope
 		if err := database.DB.Preload("Groups").Find(&scopes).Error; err != nil {
-			log.Printf("Error getting all scopes: %v", err)
 			respondWithError(c, http.StatusInternalServerError, ErrFailedGetScopes)
 			return
 		}
@@ -175,7 +170,6 @@ func GetRoleScopes(c *gin.Context) {
 			JOIN roles r ON rs.role_id = r.id
 			WHERE r.id IN ?
 	`, roles).Pluck("id", &scopesIDs).Error; err != nil {
-		log.Printf("Error getting scope IDs: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedGetScopes)
 		return
 	}
@@ -183,7 +177,6 @@ func GetRoleScopes(c *gin.Context) {
 	var scopes []models.Scope
 	if len(scopesIDs) > 0 {
 		if err := database.DB.Preload("Groups").Where("id IN ?", scopesIDs).Find(&scopes).Error; err != nil {
-			log.Printf("Error getting scopes by IDs: %v", err)
 			respondWithError(c, http.StatusInternalServerError, ErrFailedGetScopes)
 			return
 		}

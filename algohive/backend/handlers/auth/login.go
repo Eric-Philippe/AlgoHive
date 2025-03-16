@@ -5,7 +5,6 @@ import (
 	"api/models"
 	"api/utils"
 	"api/utils/permissions"
-	"log"
 	"net/http"
 	"time"
 
@@ -33,21 +32,18 @@ func Login(c *gin.Context) {
 	
 	var user models.User
 	if err := database.DB.Where("email = ?", loginReq.Email).Preload("Roles").Preload("Groups").First(&user).Error; err != nil {
-		log.Printf("Login failed for %s: user not found", loginReq.Email)
 		respondWithError(c, http.StatusUnauthorized, ErrInvalidCredentials)
 		return
 	}
 	
 	// Check if the user is blocked
 	if user.Blocked {
-		log.Printf("Login attempt for blocked account: %s", loginReq.Email)
 		respondWithError(c, http.StatusUnauthorized, ErrAccountBlocked)
 		return
 	}
 	
 	// Verify the password
 	if !utils.CheckPasswordHash(loginReq.Password, user.Password) {
-		log.Printf("Login failed for %s: invalid password", loginReq.Email)
 		respondWithError(c, http.StatusUnauthorized, ErrInvalidCredentials)
 		return
 	}
@@ -55,7 +51,6 @@ func Login(c *gin.Context) {
 	// Generate a JWT token
 	token, err := utils.GenerateJWT(user.ID, user.Email)
 	if err != nil {
-		log.Printf("Failed to generate token for user %s: %v", user.ID, err)
 		respondWithError(c, http.StatusInternalServerError, ErrTokenGenerateFailed)
 		return
 	}
@@ -67,7 +62,8 @@ func Login(c *gin.Context) {
 	now := time.Now()
 	user.LastConnected = &now
 	if err := database.DB.Save(&user).Error; err != nil {
-		log.Printf("Failed to update last connection time for user %s: %v", user.ID, err)
+		respondWithError(c, http.StatusInternalServerError, ErrTokenGenerateFailed)
+		return
 	}
 
 	c.JSON(http.StatusOK, AuthResponse{

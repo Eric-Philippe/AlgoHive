@@ -7,7 +7,6 @@ import (
 	"api/models"
 	"api/utils"
 	"api/utils/permissions"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -63,7 +62,6 @@ func UpdateUserProfile(c *gin.Context) {
 	user.Lastname = userUpdate.Lastname
 	
 	if err := database.DB.Save(&user).Error; err != nil {
-		log.Printf("Error updating user profile: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to update profile")
 		return
 	}
@@ -114,7 +112,6 @@ func ResetUserPassword(c *gin.Context) {
 	userUpdate.Password = password
 	
 	if err := database.DB.Save(&user).Error; err != nil {
-		log.Printf("Error updating user profile: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to update profile")
 		return
 	}
@@ -153,7 +150,6 @@ func UpdateUserPassword(c *gin.Context) {
 	
 	hashedPassword, err := utils.HashPassword(passwordUpdate.NewPassword)
 	if err != nil {
-		log.Printf("Error hashing new password: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to hash new password")
 		return
 	}
@@ -161,7 +157,6 @@ func UpdateUserPassword(c *gin.Context) {
 	user.Password = hashedPassword
 	
 	if err := database.DB.Save(&user).Error; err != nil {
-		log.Printf("Error updating user password: %v", err)
 		respondWithError(c, http.StatusInternalServerError, "Failed to update password")
 		return
 	}

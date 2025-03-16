@@ -55,7 +55,7 @@ const DeleteGroupDialog: React.FC<DeleteGroupDialogProps> = ({
       closable={!loading}
       dismissableMask={!loading}
     >
-      <div className="flex flex-column align-items-center p-4">
+      <div className="align-items-center p-5 text-center">
         <i
           className="pi pi-exclamation-triangle text-6xl text-yellow-500 mb-4"
           style={{ fontSize: "3rem" }}

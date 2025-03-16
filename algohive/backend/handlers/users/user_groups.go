@@ -6,7 +6,6 @@ import (
 	"api/models"
 	"api/utils"
 	"api/utils/permissions"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -44,7 +43,6 @@ func CreateUserAndAttachGroup(c *gin.Context) {
 	// Check that groups exist
 	var groups []models.Group
 	if err := database.DB.Where("id IN (?)", userWithGroups.Group).Find(&groups).Error; err != nil {
-		log.Printf("Error finding groups: %v", err)
 		respondWithError(c, http.StatusNotFound, ErrGroupNotFound)
 		return
 	}
@@ -57,7 +55,6 @@ func CreateUserAndAttachGroup(c *gin.Context) {
 	// Create the user
 	targetUser, err := createUser(userWithGroups.FirstName, userWithGroups.LastName, userWithGroups.Email)
 	if err != nil {
-		log.Printf("Error creating user: %v", err)
 		respondWithError(c, http.StatusInternalServerError, ErrFailedToHashPassword)
 		return
 	}
@@ -65,7 +62,6 @@ func CreateUserAndAttachGroup(c *gin.Context) {
 	// Associate groups to the user
 	for i := range groups {
 		if err := database.DB.Model(targetUser).Association("Groups").Append(&groups[i]); err != nil {
-			log.Printf("Error attaching group to user: %v", err)
 			respondWithError(c, http.StatusInternalServerError, "Failed to attach group to user")
 			return
 		}
@@ -124,7 +120,6 @@ func CreateBulkUsersAndAttachGroup(c *gin.Context) {
 		}
 		users[i].Password = hashedPassword
 		if err := database.DB.Create(&users[i]).Error; err != nil {
-			log.Printf("Error creating bulk users: %v", err)
 			respondWithError(c, http.StatusInternalServerError, "Failed to create users")
 			return
 		}
