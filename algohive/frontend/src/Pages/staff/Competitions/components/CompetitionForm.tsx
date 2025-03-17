@@ -98,7 +98,7 @@ export default function CompetitionForm({
   useEffect(() => {
     if (mode === "edit" && competition) {
       const selectedCatalog = catalogs.find(
-        (catalog) => catalog.id === competition.api_environment_id
+        (catalog) => catalog.id === competition.catalog_id
       );
 
       const selectedGroups = availableGroups.filter((group) =>
@@ -108,7 +108,7 @@ export default function CompetitionForm({
       setTitle(competition.title || "");
       setDescription(competition.description || "");
       setSelectedCatalog(selectedCatalog as Catalog);
-      setSelectedTheme(competition.api_theme || "");
+      setSelectedTheme(competition.catalog_theme || "");
       setIsVisible(competition.show);
       setIsFinished(competition.finished);
     } else {
@@ -182,7 +182,10 @@ export default function CompetitionForm({
       return;
     }
     if (!selectedTheme) {
-      showToast("error", t("staffTabs.competitions.messages.apiThemeRequired"));
+      showToast(
+        "error",
+        t("staffTabs.competitions.messages.catalogThemeRequired")
+      );
       return;
     }
     if (!selectedCatalog) {
@@ -199,8 +202,8 @@ export default function CompetitionForm({
       const competitionData = {
         title,
         description,
-        api_theme: selectedTheme,
-        api_environment_id: selectedCatalog.id,
+        catalog_theme: selectedTheme,
+        catalog_id: selectedCatalog.id,
         show: isVisible,
         finished: isFinished,
       };
@@ -346,11 +349,11 @@ export default function CompetitionForm({
 
           {selectedCatalog && (
             <div className="field mb-4">
-              <label htmlFor="apiTheme">
-                {t("staffTabs.competitions.form.apiTheme")}
+              <label htmlFor="catalogTheme">
+                {t("staffTabs.competitions.form.catalogTheme")}
               </label>
               <Dropdown
-                id="apiTheme"
+                id="catalogTheme"
                 value={selectedTheme}
                 onChange={(e) => {
                   setSelectedTheme(e.value);
@@ -363,7 +366,7 @@ export default function CompetitionForm({
               />
               {!selectedTheme && (
                 <small className="p-error">
-                  {t("staffTabs.competitions.messages.apiThemeRequired")}
+                  {t("staffTabs.competitions.messages.catalogThemeRequired")}
                 </small>
               )}
             </div>

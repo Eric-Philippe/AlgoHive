@@ -3330,16 +3330,16 @@ const docTemplate = `{
         "competitions.CreateCompetitionRequest": {
             "type": "object",
             "required": [
-                "api_environment_id",
-                "api_theme",
+                "catalog_id",
+                "catalog_theme",
                 "description",
                 "title"
             ],
             "properties": {
-                "api_environment_id": {
+                "catalog_id": {
                     "type": "string"
                 },
-                "api_theme": {
+                "catalog_theme": {
                     "type": "string"
                 },
                 "description": {
@@ -3385,10 +3385,10 @@ const docTemplate = `{
         "competitions.UpdateCompetitionRequest": {
             "type": "object",
             "properties": {
-                "api_environment_id": {
+                "catalog_id": {
                     "type": "string"
                 },
-                "api_theme": {
+                "catalog_theme": {
                     "type": "string"
                 },
                 "description": {
@@ -3479,13 +3479,13 @@ const docTemplate = `{
         "models.Competition": {
             "type": "object",
             "properties": {
-                "api_environment": {
+                "catalog": {
                     "$ref": "#/definitions/models.Catalog"
                 },
-                "api_environment_id": {
+                "catalog_id": {
                     "type": "string"
                 },
-                "api_theme": {
+                "catalog_theme": {
                     "type": "string"
                 },
                 "description": {

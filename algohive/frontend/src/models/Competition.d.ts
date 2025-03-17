@@ -8,9 +8,9 @@ export interface Competition {
   description: string;
   finished: boolean;
   show: boolean;
-  api_theme: string;
-  api_environment_id: string;
-  api_environment?: Catalog;
+  catalog_theme: string;
+  catalog_id: string;
+  catalog?: Catalog;
   groups?: Group[];
   tries: Try[];
 }

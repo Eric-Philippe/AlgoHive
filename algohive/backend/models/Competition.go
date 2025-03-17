@@ -6,9 +6,9 @@ type Competition struct {
 	Description     string    `gorm:"type:text;not null" json:"description"`
 	Finished        bool      `gorm:"not null" json:"finished"`
 	Show            bool      `gorm:"not null" json:"show"`
-	ApiTheme        string    `gorm:"type:varchar(50);not null;column:api_theme" json:"api_theme"`
-	ApiEnvironmentID string    `gorm:"type:uuid;not null;column:api_environment_id" json:"api_environment_id"`
-	ApiEnvironment  *Catalog   `gorm:"foreignKey:ApiEnvironmentID" json:"api_environment,omitempty"`
+	CatalogTheme        string    `gorm:"type:varchar(50);not null;column:catalog_theme" json:"catalog_theme"`
+	CatalogID string    `gorm:"type:uuid;not null;column:catalog_id" json:"catalog_id"`
+	Catalog  *Catalog   `gorm:"foreignKey:CatalogID" json:"catalog,omitempty"`
 	Groups         []*Group   `gorm:"many2many:competition_groups;" json:"groups,omitempty"`
 	Tries          []*Try     `gorm:"foreignKey:CompetitionID" json:"tries,omitempty"`
 }

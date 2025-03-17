@@ -289,7 +289,7 @@
       "form": {
         "title": "Title",
         "description": "Description",
-        "apiTheme": "Catalog Theme",
+        "catalogTheme": "Catalog Theme",
         "apiEnvironment": "Catalog",
         "groups": "Accessible Groups",
         "visible": "Visible to users",
@@ -319,7 +319,7 @@
       "messages": {
         "titleRequired": "Title is required",
         "descriptionRequired": "Description is required",
-        "apiThemeRequired": "API Theme is required",
+        "catalogThemeRequired": "API Theme is required",
         "apiEnvironmentRequired": "API Environment is required",
         "createSuccess": "Competition created successfully",
         "updateSuccess": "Competition updated successfully",

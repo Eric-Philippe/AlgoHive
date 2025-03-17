@@ -36,7 +36,7 @@ func GetAllCatalogs(c *gin.Context) {
 		if err := database.DB.Raw(`
 			SELECT DISTINCT c.*
 			FROM public.catalogs c
-			JOIN public.scope_api_environments sae ON sae.catalog_id = c.id
+			JOIN public.scope_catalogs sae ON sae.catalog_id = c.id
 			JOIN public.role_scopes rs ON rs.scope_id = sae.scope_id
 			JOIN public.user_roles ur ON ur.role_id = rs.role_id
 			WHERE ur.user_id = ?`, user.ID).Scan(&catalogs).Error; err != nil {

@@ -108,7 +108,7 @@ func RemoveGroupFromCompetition(c *gin.Context) {
 	}
 
 	// Reload the competition with its associations
-	database.DB.Preload("ApiEnvironment").Preload("Groups").First(&competition, competition.ID)
+	database.DB.Preload("Catalog").Preload("Groups").First(&competition, competition.ID)
 
 	c.JSON(http.StatusOK, competition)
 }

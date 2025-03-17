@@ -111,9 +111,9 @@ definitions:
     type: object
   competitions.CreateCompetitionRequest:
     properties:
-      api_environment_id:
+      catalog_id:
         type: string
-      api_theme:
+      catalog_theme:
         type: string
       description:
         type: string
@@ -126,8 +126,8 @@ definitions:
       title:
         type: string
     required:
-    - api_environment_id
-    - api_theme
+    - catalog_id
+    - catalog_theme
     - description
     - title
     type: object
@@ -149,9 +149,9 @@ definitions:
     type: object
   competitions.UpdateCompetitionRequest:
     properties:
-      api_environment_id:
+      catalog_id:
         type: string
-      api_theme:
+      catalog_theme:
         type: string
       description:
         type: string
@@ -211,11 +211,11 @@ definitions:
     type: object
   models.Competition:
     properties:
-      api_environment:
+      catalog:
         $ref: '#/definitions/models.Catalog'
-      api_environment_id:
+      catalog_id:
         type: string
-      api_theme:
+      catalog_theme:
         type: string
       description:
         type: string

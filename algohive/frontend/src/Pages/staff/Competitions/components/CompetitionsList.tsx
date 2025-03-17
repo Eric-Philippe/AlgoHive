@@ -107,6 +107,7 @@ export default function CompetitionsList({
         <Column
           field="title"
           header={t("staffTabs.competitions.form.title")}
+          style={{ width: "20rem" }}
           sortable
         />
         <Column
@@ -127,8 +128,8 @@ export default function CompetitionsList({
           )}
         />
         <Column
-          field="api_theme"
-          header={t("staffTabs.competitions.form.apiTheme")}
+          field="catalog_theme"
+          header={t("staffTabs.competitions.form.catalogTheme")}
           sortable
           style={{ width: "15rem" }}
         />

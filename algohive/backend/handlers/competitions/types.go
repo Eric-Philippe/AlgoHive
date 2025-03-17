@@ -32,8 +32,8 @@ const (
 type CreateCompetitionRequest struct {
 	Title           string   `json:"title" binding:"required"`
 	Description     string   `json:"description" binding:"required"`
-	ApiTheme        string   `json:"api_theme" binding:"required"`
-	ApiEnvironmentID string   `json:"api_environment_id" binding:"required"`
+	CatalogTheme    string   `json:"catalog_theme" binding:"required"`
+	CatalogID       string   `json:"catalog_id" binding:"required"`
 	GroupIds        []string `json:"group_ids"`
 	Show            bool     `json:"show"`
 }
@@ -42,8 +42,8 @@ type CreateCompetitionRequest struct {
 type UpdateCompetitionRequest struct {
 	Title           string   `json:"title"`
 	Description     string   `json:"description"`
-	ApiTheme        string   `json:"api_theme"`
-	ApiEnvironmentID string   `json:"api_environment_id"`
+	CatalogTheme    string   `json:"catalog_theme"`
+	CatalogID       string   `json:"catalog_id"`
 	Finished        *bool    `json:"finished"`
 	Show            *bool    `json:"show"`
 }

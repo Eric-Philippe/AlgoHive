@@ -37,7 +37,7 @@ func GetAllCompetitions(c *gin.Context) {
 	}
 
 	var competitions []models.Competition
-	if err := database.DB.Preload("ApiEnvironment").Preload("Groups").Find(&competitions).Error; err != nil {
+	if err := database.DB.Preload("Catalog").Preload("Groups").Find(&competitions).Error; err != nil {
 		respondWithError(c, http.StatusInternalServerError, ErrFailedFetchCompetitions)
 		return
 	}
@@ -82,7 +82,7 @@ func GetUserCompetitions(c *gin.Context) {
 
 	// Preload associations
 	for i := range competitions {
-		database.DB.Preload("ApiEnvironment").Preload("Groups").First(&competitions[i], competitions[i].ID)
+		database.DB.Preload("Catalog").Preload("Groups").First(&competitions[i], competitions[i].ID)
 	}
 
 	c.JSON(http.StatusOK, competitions)
@@ -108,7 +108,7 @@ func GetCompetition(c *gin.Context) {
 	competitionID := c.Param("id")
 	var competition models.Competition
 
-	if err := database.DB.Preload("ApiEnvironment").Preload("Groups").Where("id = ?", competitionID).First(&competition).Error; err != nil {
+	if err := database.DB.Preload("Catalog").Preload("Groups").Where("id = ?", competitionID).First(&competition).Error; err != nil {
 		respondWithError(c, http.StatusNotFound, ErrCompetitionNotFound)
 		return
 	}
@@ -157,7 +157,7 @@ func CreateCompetition(c *gin.Context) {
 
 	// Check that the API environment exists
 	var apiEnv models.Catalog
-	if err := database.DB.First(&apiEnv, "id = ?", req.ApiEnvironmentID).Error; err != nil {
+	if err := database.DB.First(&apiEnv, "id = ?", req.CatalogID).Error; err != nil {
 		respondWithError(c, http.StatusBadRequest, ErrCatalogNotFound)
 		return
 	}
@@ -166,8 +166,8 @@ func CreateCompetition(c *gin.Context) {
 	competition := models.Competition{
 		Title:           req.Title,
 		Description:     req.Description,
-		ApiTheme:        req.ApiTheme,
-		ApiEnvironmentID: req.ApiEnvironmentID,
+		CatalogTheme:        req.CatalogTheme,
+		CatalogID: req.CatalogID,
 		Finished:        false,
 		Show:            req.Show,
 	}
@@ -200,7 +200,7 @@ func CreateCompetition(c *gin.Context) {
 	tx.Commit()
 
 	// Reload the competition with associations
-	database.DB.Preload("ApiEnvironment").Preload("Groups").Where("id = ?", competition.ID).First(&competition)
+	database.DB.Preload("Catalog").Preload("Groups").Where("id = ?", competition.ID).First(&competition)
 
 	c.JSON(http.StatusCreated, competition)
 }
@@ -252,17 +252,17 @@ func UpdateCompetition(c *gin.Context) {
 	if req.Description != "" {
 		updateData["description"] = req.Description
 	}
-	if req.ApiTheme != "" {
-		updateData["api_theme"] = req.ApiTheme
+	if req.CatalogTheme != "" {
+		updateData["catalog_theme"] = req.CatalogTheme
 	}
-	if req.ApiEnvironmentID != "" {
+	if req.CatalogID != "" {
 		// Check that the API environment exists
 		var apiEnv models.Catalog
-		if err := database.DB.First(&apiEnv, "id = ?", req.ApiEnvironmentID).Error; err != nil {
+		if err := database.DB.First(&apiEnv, "id = ?", req.CatalogID).Error; err != nil {
 			respondWithError(c, http.StatusBadRequest, ErrCatalogNotFound)
 			return
 		}
-		updateData["api_environment_id"] = req.ApiEnvironmentID
+		updateData["catalog_id"] = req.CatalogID
 	}
 	if req.Finished != nil {
 		updateData["finished"] = *req.Finished
@@ -277,7 +277,7 @@ func UpdateCompetition(c *gin.Context) {
 	}
 
 	// Reload the competition with associations
-	database.DB.Preload("ApiEnvironment").Preload("Groups").Where("id = ?", competition.ID).First(&competition)
+	database.DB.Preload("Catalog").Preload("Groups").Where("id = ?", competition.ID).First(&competition)
 
 	c.JSON(http.StatusOK, competition)
 }
