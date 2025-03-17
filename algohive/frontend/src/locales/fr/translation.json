@@ -310,7 +310,7 @@
         "highestScore": "Score le plus élevé",
         "participants": "Participants",
         "groups": "Groupes participants",
-        "noParticipants": "Aucun participant trouvé",
+        "noParticipants": "Aucun participant actif trouvé",
         "noGroups": "Aucun groupe assigné à cette compétition",
         "viewTriesFor": "Voir les essais de {{name}}"
       },

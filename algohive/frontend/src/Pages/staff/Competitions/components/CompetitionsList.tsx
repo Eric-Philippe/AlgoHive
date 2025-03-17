@@ -11,14 +11,12 @@ import { Competition } from "../../../../models/Competition";
 interface CompetitionsListProps {
   competitions: Competition[];
   onEdit: (competition: Competition) => void;
-  onDelete: (competition: Competition) => void;
   onViewDetails: (competition: Competition) => void;
 }
 
 export default function CompetitionsList({
   competitions,
   onEdit,
-  onDelete,
   onViewDetails,
 }: CompetitionsListProps) {
   const { t } = useTranslation();
@@ -68,12 +66,6 @@ export default function CompetitionsList({
           className="p-button-rounded p-button-success p-button-sm"
           onClick={() => onEdit(rowData)}
           tooltip={t("common.actions.edit")}
-        />
-        <Button
-          icon="pi pi-trash"
-          className="p-button-rounded p-button-danger p-button-sm"
-          onClick={() => onDelete(rowData)}
-          tooltip={t("common.actions.delete")}
         />
       </div>
     );

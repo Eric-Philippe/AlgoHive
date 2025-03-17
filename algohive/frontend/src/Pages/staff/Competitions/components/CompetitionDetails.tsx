@@ -57,6 +57,7 @@ export default function CompetitionDetails({
     if (visible && competition) {
       loadCompetitionDetails();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, competition]);
 
   const loadCompetitionDetails = async () => {
@@ -110,6 +111,8 @@ export default function CompetitionDetails({
       );
       // Update competition in parent component
       competition.show = !competition.show;
+      // Reload competition details to refresh the view
+      await loadCompetitionDetails();
     } catch (error) {
       console.error("Error toggling visibility:", error);
       showToast(
@@ -125,6 +128,8 @@ export default function CompetitionDetails({
       showToast("success", t("staffTabs.competitions.messages.finishSuccess"));
       // Update competition in parent component
       competition.finished = !competition.finished;
+      // Reload competition details to refresh the view
+      await loadCompetitionDetails();
     } catch (error) {
       console.error("Error finishing competition:", error);
       showToast("error", t("staffTabs.competitions.messages.finishError"));
@@ -363,7 +368,6 @@ export default function CompetitionDetails({
                       rowsPerPageOptions={[5, 10, 25]}
                       tableStyle={{ minWidth: "50rem" }}
                     >
-                      <Column field="id" header="ID" style={{ width: "20%" }} />
                       <Column
                         field="name"
                         header={t("common.fields.name")}

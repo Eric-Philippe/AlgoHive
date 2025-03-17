@@ -4,12 +4,9 @@ import { Toast } from "primereact/toast";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { ConfirmDialog } from "primereact/confirmdialog";
 
-import {
-  fetchCompetitions,
-  deleteCompetition,
-} from "../../../services/competitionsService";
+import { fetchCompetitions } from "../../../services/competitionsService";
 import CompetitionsList from "./components/CompetitionsList";
 import CompetitionForm from "./components/CompetitionForm";
 import CompetitionDetails from "./components/CompetitionDetails";
@@ -26,27 +23,31 @@ export default function CompetitionsPage() {
   const [selectedCompetition, setSelectedCompetition] =
     useState<Competition | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [formDialog, setFormDialog] = useState<boolean>(false);
-  const [detailsDialog, setDetailsDialog] = useState<boolean>(false);
-  const [formMode, setFormMode] = useState<"create" | "edit">("create");
 
-  // Fetch competitions on component mount
-  useEffect(() => {
-    loadCompetitions();
-  }, []);
+  // Dialog visibility states - refactored to match Roles.tsx pattern
+  const [editDialogVisible, setEditDialogVisible] = useState<boolean>(false);
+  const [createDialogVisible, setCreateDialogVisible] =
+    useState<boolean>(false);
+  const [detailsDialogVisible, setDetailsDialogVisible] =
+    useState<boolean>(false);
 
-  const loadCompetitions = async () => {
+  const fetchCompetitionsData = async () => {
     try {
       setLoading(true);
-      const data = await fetchCompetitions();
-      setCompetitions(data);
+      const fetchedCompetitions = await fetchCompetitions();
+      setCompetitions(fetchedCompetitions);
     } catch (error) {
-      console.error("Error loading competitions:", error);
-      showToast("error", t("staffTabs.competitions.errorLoading"));
+      console.error("Error loading data:", error);
+      showToast("error", t("common.states.error"));
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchCompetitionsData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const showToast = (
     severity: "success" | "info" | "warn" | "error",
@@ -60,80 +61,43 @@ export default function CompetitionsPage() {
     });
   };
 
+  // Open dialog handlers - refactored to match Roles.tsx pattern
   const openCreateDialog = () => {
-    setFormMode("create");
     setSelectedCompetition(null);
-    setFormDialog(true);
+    setCreateDialogVisible(true);
   };
 
   const openEditDialog = (competition: Competition) => {
-    setFormMode("edit");
     setSelectedCompetition(competition);
-    setFormDialog(true);
+    setEditDialogVisible(true);
   };
 
-  const confirmDeleteCompetition = (competition: Competition) => {
-    confirmDialog({
-      message: t("staffTabs.competitions.confirmDelete"),
-      header: t("staffTabs.competitions.confirmDeleteHeader"),
-      icon: "pi pi-exclamation-triangle",
-      acceptClassName: "p-button-danger",
-      accept: () => handleDeleteCompetition(competition.id),
-    });
-  };
-
-  const handleDeleteCompetition = async (id: string) => {
-    try {
-      await deleteCompetition(id);
-      showToast("success", t("staffTabs.competitions.messages.deleteSuccess"));
-      loadCompetitions();
-      if (detailsDialog && selectedCompetition?.id === id) {
-        setDetailsDialog(false);
-      }
-    } catch (error) {
-      console.error("Error deleting competition:", error);
-      showToast("error", t("staffTabs.competitions.messages.deleteError"));
-    }
-  };
-
-  const handleViewDetails = (competition: Competition) => {
+  const openDetailsDialog = (competition: Competition) => {
     setSelectedCompetition(competition);
-    setDetailsDialog(true);
+    setDetailsDialogVisible(true);
   };
 
   const handleFormSubmitSuccess = () => {
-    setFormDialog(false);
-    loadCompetitions();
+    // Close all dialog forms
+    setCreateDialogVisible(false);
+    setEditDialogVisible(false);
+    fetchCompetitionsData();
   };
 
-  const handleFormCancel = () => {
-    setFormDialog(false);
-  };
-
-  return (
-    <div className="p-4 min-h-screen mb-28">
-      <Toast ref={toast} />
-      <ConfirmDialog />
-
-      {/* Header with title and create button */}
-      <div className="flex flex-wrap justify-between items-center mb-4">
-        <Button
-          label={t("staffTabs.competitions.create")}
-          icon="pi pi-plus"
-          className="p-button-success"
-          onClick={openCreateDialog}
-        />
-      </div>
-
-      {/* Main content */}
-      {loading ? (
+  const renderContent = () => {
+    if (loading) {
+      return (
         <div className="flex flex-col items-center justify-center p-6">
           <ProgressSpinner style={{ width: "50px", height: "50px" }} />
           <p className="mt-4 text-gray-600">
             {t("staffTabs.competitions.loading")}
           </p>
         </div>
-      ) : competitions.length === 0 ? (
+      );
+    }
+
+    if (competitions.length === 0) {
+      return (
         <Card className="empty-state text-center p-6">
           <div className="flex flex-col items-center">
             <i className="pi pi-flag text-5xl text-gray-300 mb-4"></i>
@@ -151,39 +115,74 @@ export default function CompetitionsPage() {
             />
           </div>
         </Card>
-      ) : (
+      );
+    }
+
+    return (
+      <>
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold text-white">
+            {t("navigation.staff.competitions")}
+          </h1>
+          <Button
+            label={t("staffTabs.competitions.create")}
+            icon="pi pi-plus"
+            className="p-button-outlined"
+            onClick={openCreateDialog}
+          />
+        </div>
         <CompetitionsList
           competitions={competitions}
           onEdit={openEditDialog}
-          onDelete={confirmDeleteCompetition}
-          onViewDetails={handleViewDetails}
+          onViewDetails={openDetailsDialog}
+        />
+      </>
+    );
+  };
+
+  return (
+    <div className="p-4 min-h-screen mb-28">
+      <Toast ref={toast} />
+      <ConfirmDialog />
+
+      {/* Main content */}
+      {renderContent()}
+
+      {/* Competition Create Form Dialog */}
+      {createDialogVisible && (
+        <CompetitionForm
+          visible={createDialogVisible}
+          mode="create"
+          competition={null}
+          onSuccess={handleFormSubmitSuccess}
+          onCancel={() => setCreateDialogVisible(false)}
         />
       )}
 
-      {/* Competition Form Dialog */}
-      {formDialog && (
+      {/* Competition Edit Form Dialog */}
+      {editDialogVisible && selectedCompetition && (
         <CompetitionForm
-          visible={formDialog}
-          mode={formMode}
+          visible={editDialogVisible}
+          mode="edit"
           competition={selectedCompetition}
           onSuccess={handleFormSubmitSuccess}
-          onCancel={handleFormCancel}
+          onCancel={() => setEditDialogVisible(false)}
         />
       )}
 
       {/* Competition Details Dialog */}
-      {detailsDialog && selectedCompetition && (
+      {detailsDialogVisible && selectedCompetition && (
         <CompetitionDetails
-          visible={detailsDialog}
+          visible={detailsDialogVisible}
           competition={selectedCompetition}
-          onClose={() => setDetailsDialog(false)}
+          onClose={() => setDetailsDialogVisible(false)}
           onEdit={() => {
-            setDetailsDialog(false);
+            setDetailsDialogVisible(false);
             openEditDialog(selectedCompetition);
           }}
           onDeleted={() => {
-            setDetailsDialog(false);
-            loadCompetitions();
+            setDetailsDialogVisible(false);
+            fetchCompetitionsData();
           }}
         />
       )}

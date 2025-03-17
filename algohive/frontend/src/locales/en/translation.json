@@ -312,7 +312,7 @@
         "highestScore": "Highest Score",
         "participants": "Participants",
         "groups": "Participating Groups",
-        "noParticipants": "No participants found",
+        "noParticipants": "No active participants found",
         "noGroups": "No groups assigned to this competition",
         "viewTriesFor": "View tries for {{name}}"
       },

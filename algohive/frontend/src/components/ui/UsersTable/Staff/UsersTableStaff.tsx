@@ -287,7 +287,6 @@ export default function UsersTableStaff({
 
   return (
     <>
-      <Toast ref={toast} />
       <ConfirmDialog />
 
       {/* Scope selection dropdown */}

@@ -7,7 +7,6 @@ import (
 	"api/models"
 	"api/utils"
 	"api/utils/permissions"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -166,7 +165,6 @@ func ResetUserPassword(c *gin.Context) {
 	if config.DefaultPassword != "" {
 		password = config.DefaultPassword
 	}
-	log.Println("Default password:", password)
 
 	password, err = utils.HashPassword(password)
 	if err != nil {

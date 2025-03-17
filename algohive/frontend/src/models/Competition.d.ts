@@ -10,7 +10,7 @@ export interface Competition {
   show: boolean;
   api_theme: string;
   api_environment_id: string;
-  api_environment?: Catalog[];
+  api_environment?: Catalog;
   groups?: Group[];
   tries: Try[];
 }

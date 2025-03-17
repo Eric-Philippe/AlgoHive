@@ -269,7 +269,6 @@ export default function UsersTableAdmin({ toast }: UsersTableAdminProps) {
 
   return (
     <div className="card p-4">
-      <Toast ref={toast} />
       <ConfirmDialog />
 
       {/* Header with title and add button */}

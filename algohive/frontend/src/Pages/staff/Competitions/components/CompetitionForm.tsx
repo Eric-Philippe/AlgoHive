@@ -23,9 +23,8 @@ import {
   fetchCompetitionGroups,
 } from "../../../../services/competitionsService";
 import { Competition } from "../../../../models/Competition";
-import { Catalog, Theme } from "../../../../models/Catalogs";
-import { Group } from "../../../../models/Group";
-import { fetchStaffGroups } from "../../../../services/groupsService";
+import { Catalog } from "../../../../models/Catalogs";
+import { fetchScopes } from "../../../../services/scopesService";
 
 interface CompetitionFormProps {
   visible: boolean;
@@ -49,21 +48,46 @@ export default function CompetitionForm({
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [selectedCatalog, setSelectedCatalog] = useState<Catalog | null>(null);
-  const [selectCatalogTheme, setSelectedCatalogTheme] = useState<string>("");
-  const [groups, setGroups] = useState<Group[]>([]);
+  const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+  const [groups, setGroups] = useState<{ id: string; name: string }[]>([]);
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
 
   // Data lists
   const [catalogs, setCatalogs] = useState<Catalog[]>([]);
-  const [themes, setThemes] = useState<Theme[]>([]);
-  const [availableGroups, setAvailableGroups] = useState<Group[]>([]);
-  const [competitionGroups, setCompetitionGroups] = useState<Group[]>([]);
+  const [themes, setThemes] = useState<string[]>([]);
+  const [availableGroups, setAvailableGroups] = useState<
+    { id: string; name: string }[]
+  >([]);
+
+  const loadData = async () => {
+    try {
+      const [scopes, catalogs] = await Promise.all([
+        fetchScopes(),
+        fetchCatalogs(),
+      ]);
+
+      const groups = [];
+      for (const scope of scopes) {
+        if (!scope.groups) continue;
+        for (const group of scope.groups) {
+          groups.push({
+            id: group.id,
+            name: `${scope.name} - ${group.name}`,
+          });
+        }
+      }
+
+      setCatalogs(catalogs);
+      setAvailableGroups(groups);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    }
+  };
 
   useEffect(() => {
-    loadCatalogs();
-    loadGroups();
+    loadData();
 
     // If editing, load competition groups
     if (mode === "edit" && competition) {
@@ -73,22 +97,31 @@ export default function CompetitionForm({
 
   useEffect(() => {
     if (mode === "edit" && competition) {
+      const selectedCatalog = catalogs.find(
+        (catalog) => catalog.id === competition.api_environment_id
+      );
+
+      const selectedGroups = availableGroups.filter((group) =>
+        competition.groups?.some((g) => g.id === group.id)
+      );
+      setGroups(selectedGroups);
       setTitle(competition.title || "");
       setDescription(competition.description || "");
-      setSelectedCatalogTheme(competition.api_theme || "");
+      setSelectedCatalog(selectedCatalog as Catalog);
+      setSelectedTheme(competition.api_theme || "");
       setIsVisible(competition.show);
       setIsFinished(competition.finished);
     } else {
       resetForm();
     }
-  }, [mode, competition, catalogs]);
+  }, [mode, competition, catalogs, availableGroups]);
 
   useEffect(() => {
     // Load themes when a catalog is selected
     const loadThemes = async () => {
       if (selectedCatalog) {
         const data = await fetchCatalogThemes(selectedCatalog.id);
-        setThemes(data);
+        setThemes(data.map((theme) => theme.name));
       }
     };
 
@@ -99,29 +132,15 @@ export default function CompetitionForm({
     }
   }, [selectedCatalog]);
 
-  const loadCatalogs = async () => {
-    try {
-      const data = await fetchCatalogs();
-      setCatalogs(data);
-    } catch (error) {
-      console.error("Error loading catalogs:", error);
-    }
-  };
-
-  const loadGroups = async () => {
-    try {
-      const data = await fetchStaffGroups();
-      setAvailableGroups(data);
-    } catch (error) {
-      console.error("Error loading groups:", error);
-    }
-  };
-
   const loadCompetitionGroups = async (competitionId: string) => {
     try {
       const data = await fetchCompetitionGroups(competitionId);
-      setCompetitionGroups(data);
-      setGroups(data);
+      setGroups(
+        data.map((group) => ({
+          id: group.id,
+          name: group.name,
+        }))
+      );
     } catch (error) {
       console.error("Error loading competition groups:", error);
     }
@@ -130,7 +149,7 @@ export default function CompetitionForm({
   const resetForm = () => {
     setTitle("");
     setDescription("");
-    setSelectedCatalogTheme("");
+    setSelectedTheme("");
     setSelectedCatalog(null);
     setGroups([]);
     setIsVisible(true);
@@ -162,7 +181,7 @@ export default function CompetitionForm({
       );
       return;
     }
-    if (!selectCatalogTheme) {
+    if (!selectedTheme) {
       showToast("error", t("staffTabs.competitions.messages.apiThemeRequired"));
       return;
     }
@@ -180,7 +199,7 @@ export default function CompetitionForm({
       const competitionData = {
         title,
         description,
-        api_theme: selectCatalogTheme,
+        api_theme: selectedTheme,
         api_environment_id: selectedCatalog.id,
         show: isVisible,
         finished: isFinished,
@@ -206,7 +225,7 @@ export default function CompetitionForm({
         );
 
         // Update groups
-        const currentGroupIds = competitionGroups.map((g) => g.id);
+        const currentGroupIds = competition.groups?.map((g) => g.id) || [];
         const newGroupIds = groups.map((g) => g.id);
 
         // Groups to add
@@ -332,17 +351,17 @@ export default function CompetitionForm({
               </label>
               <Dropdown
                 id="apiTheme"
-                value={selectCatalogTheme}
+                value={selectedTheme}
                 onChange={(e) => {
-                  setSelectedCatalogTheme(e.value.name);
+                  setSelectedTheme(e.value);
                 }}
                 options={themes}
                 optionLabel="name"
                 placeholder={t("common.selects.themes")}
-                className={!selectCatalogTheme ? "p-invalid" : ""}
+                className={!selectedTheme ? "p-invalid" : ""}
                 filter
               />
-              {!selectCatalogTheme && (
+              {!selectedTheme && (
                 <small className="p-error">
                   {t("staffTabs.competitions.messages.apiThemeRequired")}
                 </small>
